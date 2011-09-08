@@ -1,7 +1,7 @@
 <!DOCTYPE project>
 <project name="xlreporter" default="nsis">
-	<taskdef name="nsis" classname="net.sf.nsisant.Task">
-		<classpath location="wininstall/nsisant-1.2.jar" />
+	<taskdef name="nsis" classname="com.danielreese.nsisant.Task">
+		<classpath location="wininstall/nsisant-1.3.jar" />
 	</taskdef>
 	<target name="clean">
 		<echo>Cleaning the build and destination directories</echo>

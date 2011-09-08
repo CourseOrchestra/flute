@@ -1,2 +1,2 @@
 !define PRODUCT_VERSION "1"
-!define BUILD_VERSION "exported"
+!define BUILD_VERSION "1699M"
