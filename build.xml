@@ -1,5 +1,5 @@
 <!DOCTYPE project>
-<project name="xlreporter" default="nsis">
+<project name="flute" default="nsis">
 	<taskdef name="nsis" classname="com.danielreese.nsisant.Task">
 		<classpath location="wininstall/nsisant-1.3.jar" />
 	</taskdef>
@@ -14,6 +14,9 @@
 	<target name="compile" depends="init">
 		<echo>Compile the source files</echo>
 		<javac destdir="build" encoding="UTF-8">
+			<classpath>
+				<pathelement path="lib/jython.jar" />
+			</classpath>
 			<src>
 				<pathelement path="src" />
 			</src>
@@ -24,6 +27,7 @@
 		<jar destfile="wininstall/flute.jar" filesetmanifest="merge">
 			<fileset dir="build" />
 			<zipfileset src="lib/sqljdbc4.jar" excludes="META-INF/MSFTSIG.*" />
+			<zipfileset src="lib/jython.jar" />
 			<manifest>
 				<attribute name="Main-Class" value="ru.curs.flute.Main" />
 			</manifest>
@@ -32,7 +36,7 @@
 	<target name="nsis" depends="jar">
 		<echo>Update SVN revision number</echo>
 		<exec executable="wininstall/svnver/svnversion" output="wininstall/buildno.txt">
-		    <arg line="-n" />
+			<arg line="-n" />
 		</exec>
 		<loadfile property="buildno" srcFile="wininstall/buildno.txt" />
 		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "1"${line.separator}!define BUILD_VERSION "${buildno}"</echo>

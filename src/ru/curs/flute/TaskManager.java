@@ -30,12 +30,11 @@ public class TaskManager {
 				mainConn = ConnectionPool.get();
 				selectNextStmt = mainConn
 						.prepareStatement(String
-								.format("SELECT TOP 1 ID, TEMPLATE, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID",
+								.format("SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID",
 										AppSettings.getTableName()));
 				markNextStmt = mainConn.prepareStatement(String.format(
 						"UPDATE %s SET STATUS = 1 WHERE ID = ?",
 						AppSettings.getTableName()));
-
 			}
 		} catch (SQLException e) {
 			throw new EXLReporterCritical(
@@ -66,9 +65,9 @@ public class TaskManager {
 		}
 	}
 
-	private Processor getNextProcessor() {
+	private PythonProcessor getNextProcessor() {
 		if (processCount < AppSettings.getThreadNumber()) {
-			Processor p = new Processor() {
+			PythonProcessor p = new PythonProcessor() {
 				@Override
 				protected void finish() {
 					synchronized (TaskManager.this) {
@@ -90,7 +89,7 @@ public class TaskManager {
 	private synchronized void internalExecute() throws EXLReporterCritical {
 		while (true) {
 			// Вынимаем следующего исполнителя
-			Processor p = getNextProcessor();
+			PythonProcessor p = getNextProcessor();
 			while (p == null) {
 				try {
 					wait();

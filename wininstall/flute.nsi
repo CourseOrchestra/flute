@@ -153,8 +153,8 @@ Section "MainSection" SEC01
   ;Link to website
   WriteIniStr "$INSTDIR\curs.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   
-  ; Note: just calling 'SetOutPath' will create the empty folders for us
   CreateDirectory $INSTDIR\logs
+  CreateDirectory $INSTDIR\lib
   SetOutPath $INSTDIR\bin
   
   StrCpy $R0 $FluteServiceName
@@ -258,6 +258,7 @@ Section Uninstall
   Delete "$INSTDIR\uninst.exe"
   
   RMDir  /r "$INSTDIR\logs"
+  RMDir  /r "$INSTDIR\lib"
   Delete "$INSTDIR\bin\$FluteServiceManagerFileName"
   Delete "$INSTDIR\bin\$FluteServiceFileName"
   RMDir  "$INSTDIR\bin"

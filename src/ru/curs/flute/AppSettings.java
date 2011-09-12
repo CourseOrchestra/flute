@@ -17,14 +17,14 @@ public final class AppSettings {
 	private static AppSettings theSettings;
 
 	private final int threadsNumber;
-	private final File templatesPath;
+	private final File scriptsPath;
 	private final int queryPeriod;
 	private final String dbClassName;
 	private final String databaseConnection;
 	private final String tableName;
 	private final Logger logger;
 	{
-		logger = Logger.getLogger("ru.curs.xlreporter");
+		logger = Logger.getLogger("ru.curs.flute");
 		logger.setLevel(Level.INFO);
 	}
 
@@ -52,10 +52,10 @@ public final class AppSettings {
 		}
 		this.threadsNumber = threadsNumber;
 
-		templatesPath = new File(settings.getProperty("templates.path", ""));
-		if (!templatesPath.isDirectory())
-			sb.append("Invalid path to Excel templates (templates.path): "
-					+ templatesPath + '\n');
+		scriptsPath = new File(settings.getProperty("scripts.path", ""));
+		if (!scriptsPath.isDirectory())
+			sb.append("Invalid path to Python scripts (scripts.path): "
+					+ scriptsPath + '\n');
 
 		int queryPeriod = 0;
 		try {
@@ -111,14 +111,13 @@ public final class AppSettings {
 	/**
 	 * Значение параметра "Путь к папке, в которой лежат xlsx/xlsm-шаблоны".
 	 */
-	public static File getTemplatesPath() {
-		return theSettings.templatesPath;
+	public static File getScriptsPath() {
+		return theSettings.scriptsPath;
 	}
 
 	/**
-	 * Значение параметра
-	 * "Время (в миллисекундах), на которое должен заснуть поток, не получивший ни одного задания на обработку"
-	 * .
+	 * Значение параметра "Время (в миллисекундах), на которое должен заснуть
+	 * поток, не получивший ни одного задания на обработку.
 	 */
 	public static int getQueryPeriod() {
 		return theSettings.queryPeriod;

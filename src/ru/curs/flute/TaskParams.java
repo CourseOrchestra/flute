@@ -10,14 +10,14 @@ import org.w3c.dom.Document;
  */
 public class TaskParams {
 	private final int id;
-	private final String template;
+	private final String scriptName;
 	private final Document params;
 
 	private final ByteArrayOutputStreamHack bos = new ByteArrayOutputStreamHack();
 
-	TaskParams(int id, String template, Document params) {
+	TaskParams(int id, String scriptName, Document params) {
 		this.id = id;
-		this.template = template;
+		this.scriptName = scriptName;
 		this.params = params;
 	}
 
@@ -29,10 +29,10 @@ public class TaskParams {
 	}
 
 	/**
-	 * Шаблон задания.
+	 * Скрипт задания (имя .py-файла).
 	 */
-	public String getTemplate() {
-		return template;
+	public String getScriptName() {
+		return scriptName;
 	}
 
 	/**

@@ -1,10 +1,20 @@
 package ru.curs.flute;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.LinkedHashSet;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
+
+import org.python.util.PythonInterpreter;
 
 /**
  * Запускаемый из консоли или из Apache Commons Service Runner класс приложения.
@@ -61,27 +71,68 @@ public class Main {
 		}
 	}
 
-	private static void startService() {
-		// ДО ЭТОГО МОМЕНТА У НАС НЕТ ЛОГГЕРА
-		// Сперва разбираемся с настроечным файлом: читаем его.
+	private static String getMyPath() {
 		String path = Main.class.getProtectionDomain().getCodeSource()
 				.getLocation().getPath();
 		File f = new File(path.replace("%20", " "));
-
-		if (f.getAbsolutePath().endsWith(".jar"))
-			f = new File(f.getParent() + File.separator
-					+ "flute.properties");
+		if (f.getAbsolutePath().toLowerCase().endsWith(".jar"))
+			return f.getParent() + File.separator;
 		else
-			f = new File(f.getAbsolutePath() + File.separator
-					+ "flute.properties");
+			return f.getAbsolutePath() + File.separator;
+	}
 
+	private static void initCL(File lib) {
+		// Construct the "class path" for this class loader
+		Set<URL> set = new LinkedHashSet<URL>();
+
+		if (lib.isDirectory() && lib.exists() && lib.canRead()) {
+			String filenames[] = lib.list();
+			for (String filename : filenames) {
+				if (!filename.toLowerCase().endsWith(".jar"))
+					continue;
+				File file = new File(lib, filename);
+				URL url;
+				try {
+					url = file.toURI().toURL();
+					set.add(url);
+				} catch (MalformedURLException e) {
+					// This can't happen
+					e.printStackTrace();
+				}
+			}
+		}
+		// Construct the class loader itself
+		final URL[] array = set.toArray(new URL[set.size()]);
+		ClassLoader classLoader = AccessController
+				.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+					@Override
+					public URLClassLoader run() {
+						return new URLClassLoader(array);
+					}
+				});
+
+		Thread.currentThread().setContextClassLoader(classLoader);
+
+		String libfolder = lib.toString();
+		Properties postProperties = new Properties();
+		postProperties.setProperty("python.packages.directories",
+				"java.ext.dirs,flute.lib");
+		postProperties.setProperty("flute.lib", libfolder);
+		PythonInterpreter.initialize(System.getProperties(), postProperties,
+				null);
+
+	}
+
+	private static void startService() {
+		String path = getMyPath();
+		// ДО ЭТОГО МОМЕНТА У НАС НЕТ ЛОГГЕРА
+		// Сперва разбираемся с настроечным файлом: читаем его.
+		File f = new File(path + "flute.properties");
 		System.out.println();
-
 		if (!f.exists()) {
 			System.out.println("File " + f + " cannot be found.");
 			return;
 		}
-
 		try {
 			AppSettings.init(f);
 		} catch (EXLReporterCritical e) {
@@ -91,6 +142,10 @@ public class Main {
 			System.out.print(e.getMessage());
 			return;
 		}
+
+		// Инициализируем класслоадер с библиотеками
+		initCL(new File(path + "lib"));
+
 		// С ЭТОГО МОМЕНТА У НАС ЕСТЬ ЛОГГЕР
 		// Затем готовим драйвер подключения к БД...
 		try {
@@ -100,6 +155,7 @@ public class Main {
 					Level.SEVERE,
 					"Class " + AppSettings.getDbClassName()
 							+ " (JDBC driver) not found.");
+			return;
 		}
 
 		// Затем инициализируем код, призванный высвобождать задания при
