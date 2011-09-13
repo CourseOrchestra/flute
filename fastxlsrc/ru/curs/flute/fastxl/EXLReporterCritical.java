@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.fastxl;
 
 /**
  * Критическое исключение, приводящее к остановке работы приложения.

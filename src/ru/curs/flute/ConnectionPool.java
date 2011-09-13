@@ -15,10 +15,10 @@ public class ConnectionPool {
 	/**
 	 * Извлекает соединение из пула.
 	 * 
-	 * @throws EXLReporterCritical
+	 * @throws EFluteCritical
 	 *             В случае, если новое соединение не удалось создать.
 	 */
-	public static synchronized Connection get() throws EXLReporterCritical {
+	public static synchronized Connection get() throws EFluteCritical {
 		Connection c = POOL.poll();
 		while (c != null) {
 			try {
@@ -33,7 +33,7 @@ public class ConnectionPool {
 			return DriverManager.getConnection(AppSettings
 					.getDatabaseConnection());
 		} catch (SQLException e) {
-			throw new EXLReporterCritical("Could not connect to "
+			throw new EFluteCritical("Could not connect to "
 					+ AppSettings.getDatabaseConnection() + "with error: "
 					+ e.getMessage());
 		}

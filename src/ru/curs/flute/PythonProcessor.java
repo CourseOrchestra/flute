@@ -1,5 +1,6 @@
 package ru.curs.flute;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,21 +33,24 @@ public abstract class PythonProcessor extends Thread {
 		try {
 			initConn();
 			internalRun();
+			// На случай, если коннекшн испортился после прогонки
+			// скрипта
+			initConn();
 			finish(true, "");
-		} catch (EXLReporterRuntime e) {
+		} catch (EFluteRuntime e) {
 			finish(false, e.getMessage());
 		}
 
 	}
 
-	void internalRun() throws EXLReporterRuntime {
+	void internalRun() throws EFluteRuntime {
 		final File f = new File(AppSettings.getScriptsPath() + File.separator
 				+ task.getScriptName());
 		if (!f.exists())
-			throw new EXLReporterRuntime("Report template file " + f
+			throw new EFluteRuntime("Report template file " + f
 					+ " does not exist!");
 		if (!f.canRead())
-			throw new EXLReporterRuntime("Report template file " + f
+			throw new EFluteRuntime("Report template file " + f
 					+ " cannot be read!");
 		FileInputStream fis = null;
 		try {
@@ -64,14 +68,17 @@ public abstract class PythonProcessor extends Thread {
 				tr.transform(new DOMSource(task.getParams()), new StreamResult(
 						sw));
 			} catch (TransformerException e) {
-				throw new EXLReporterRuntime(
+				throw new EFluteRuntime(
 						"Error while processing XML parameters: "
 								+ e.getMessage() + " for task " + task.getId());
 			}
 
 		PythonInterpreter interp = new PythonInterpreter();
+
 		interp.set("taskid", new PyInteger(task.getId()));
 		interp.set("params", new PyString(sw.toString()));
+		interp.set("conn", conn);
+		interp.set("resultstream", task.getOutStream());
 		interp.execfile(fis);
 	}
 
@@ -89,6 +96,7 @@ public abstract class PythonProcessor extends Thread {
 		PreparedStatement finalizeTaskStmt;
 
 		try {
+
 			finalizeTaskStmt = conn
 					.prepareStatement(String
 							.format("UPDATE %s SET STATUS = ?, result = ?, errortext = ? WHERE ID = ?",
@@ -96,7 +104,11 @@ public abstract class PythonProcessor extends Thread {
 
 			finalizeTaskStmt.setInt(1, success ? 2 : 3);
 
-			finalizeTaskStmt.setNull(2, java.sql.Types.BLOB);
+			if (task.getBufferLength() == 0)
+				finalizeTaskStmt.setNull(2, java.sql.Types.BLOB);
+			else
+				finalizeTaskStmt.setBinaryStream(2, new ByteArrayInputStream(
+						task.getBuffer(), 0, task.getBufferLength()));
 
 			finalizeTaskStmt.setString(3, details);
 			finalizeTaskStmt.setInt(4, task.getId());
@@ -144,16 +156,16 @@ public abstract class PythonProcessor extends Thread {
 		return task;
 	}
 
-	private void initConn() throws EXLReporterRuntime {
+	private void initConn() throws EFluteRuntime {
 		try {
 			if (conn == null || conn.isClosed())
 				conn = ConnectionPool.get();
 		} catch (SQLException e) {
-			throw new EXLReporterRuntime("Could not connect to "
+			throw new EFluteRuntime("Could not connect to "
 					+ AppSettings.getDatabaseConnection() + "with error: "
 					+ e.getMessage());
-		} catch (EXLReporterCritical e) {
-			throw new EXLReporterRuntime(e.getMessage());
+		} catch (EFluteCritical e) {
+			throw new EFluteRuntime(e.getMessage());
 		}
 	}
 

@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.fastxl;
 
 import static java.sql.Types.DECIMAL;
 import static java.sql.Types.DOUBLE;
@@ -34,7 +34,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * Обработчик worksheet-xml.
  * 
  */
-public class WorksheetProcessor {
+public final class WorksheetProcessor {
 
 	private final InputStream is;
 	private final Connection conn;

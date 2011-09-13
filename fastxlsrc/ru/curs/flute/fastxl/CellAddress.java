@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.fastxl;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Преобразует адрес ячейки в формате A1 в пару "строка, столбец" и обратно.
  * 
  */
-public class CellAddress {
+public final class CellAddress {
 
 	private static final int RADIX = 'Z' - 'A' + 1;
 	private static final Pattern CELL_ADDRESS = Pattern

@@ -24,7 +24,7 @@ public class TaskManager {
 	private PreparedStatement selectNextStmt;
 	private PreparedStatement markNextStmt;
 
-	private void initMainConn() throws EXLReporterCritical {
+	private void initMainConn() throws EFluteCritical {
 		try {
 			if (mainConn == null || mainConn.isClosed()) {
 				mainConn = ConnectionPool.get();
@@ -37,13 +37,13 @@ public class TaskManager {
 						AppSettings.getTableName()));
 			}
 		} catch (SQLException e) {
-			throw new EXLReporterCritical(
+			throw new EFluteCritical(
 					"Error during main connection initialization: "
 							+ e.getMessage());
 		}
 	}
 
-	private TaskParams getNextTask() throws EXLReporterCritical {
+	private TaskParams getNextTask() throws EFluteCritical {
 		initMainConn();
 		try {
 			ResultSet rs = selectNextStmt.executeQuery();
@@ -59,7 +59,7 @@ public class TaskManager {
 			} else
 				return null;
 		} catch (SQLException e) {
-			throw new EXLReporterCritical(
+			throw new EFluteCritical(
 					"Error during getting the next task data: "
 							+ e.getMessage());
 		}
@@ -86,7 +86,7 @@ public class TaskManager {
 	 * Выполняет в бесконечном цикле опрос заданий и раздачу их
 	 * потокам-исполнителям.
 	 */
-	private synchronized void internalExecute() throws EXLReporterCritical {
+	private synchronized void internalExecute() throws EFluteCritical {
 		while (true) {
 			// Вынимаем следующего исполнителя
 			PythonProcessor p = getNextProcessor();
@@ -125,7 +125,7 @@ public class TaskManager {
 	 * Выполняет в бесконечном цикле опрос заданий и раздачу их
 	 * потокам-исполнителям.
 	 */
-	static void execute() throws EXLReporterCritical {
+	static void execute() throws EFluteCritical {
 		stop = false;
 		THE_MANAGER.internalExecute();
 	}

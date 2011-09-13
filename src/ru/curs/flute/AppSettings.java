@@ -28,13 +28,13 @@ public final class AppSettings {
 		logger.setLevel(Level.INFO);
 	}
 
-	private AppSettings(File f) throws EXLReporterCritical {
+	private AppSettings(File f) throws EFluteCritical {
 		Properties settings = new Properties();
 		try {
 			FileInputStream in = new FileInputStream(f);
 			settings.load(in);
 		} catch (IOException e) {
-			throw new EXLReporterCritical("IOException: " + e.getMessage());
+			throw new EFluteCritical("IOException: " + e.getMessage());
 		}
 
 		StringBuffer sb = new StringBuffer();
@@ -94,10 +94,10 @@ public final class AppSettings {
 			}
 
 		if (sb.length() > 0)
-			throw new EXLReporterCritical(sb.toString());
+			throw new EFluteCritical(sb.toString());
 	}
 
-	static void init(File f) throws EXLReporterCritical {
+	static void init(File f) throws EFluteCritical {
 		theSettings = new AppSettings(f);
 	}
 

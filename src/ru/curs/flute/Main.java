@@ -20,7 +20,7 @@ import org.python.util.PythonInterpreter;
  * Запускаемый из консоли или из Apache Commons Service Runner класс приложения.
  * 
  */
-public class Main {
+public final class Main {
 
 	/**
 	 * Точка запуска приложения из консоли.
@@ -62,7 +62,7 @@ public class Main {
 					"UPDATE %s SET STATUS = 0 WHERE STATUS = 1",
 					AppSettings.getTableName()));
 			stmt.execute();
-		} catch (EXLReporterCritical e) {
+		} catch (EFluteCritical e) {
 			// Ошибка возникла при финализации
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -135,7 +135,7 @@ public class Main {
 		}
 		try {
 			AppSettings.init(f);
-		} catch (EXLReporterCritical e) {
+		} catch (EFluteCritical e) {
 			System.out
 					.println("The following problems occured while reading file "
 							+ f + ":");
@@ -171,7 +171,7 @@ public class Main {
 		// бесконечном цикле опрос и раздачу заданий.
 		try {
 			TaskManager.execute();
-		} catch (EXLReporterCritical e) {
+		} catch (EFluteCritical e) {
 			AppSettings.getLogger().log(
 					Level.SEVERE,
 					"The following critical problem stopped the process:\n"

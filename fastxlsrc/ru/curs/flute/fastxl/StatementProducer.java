@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.fastxl;
 
 import java.io.StringWriter;
 import java.sql.Connection;
