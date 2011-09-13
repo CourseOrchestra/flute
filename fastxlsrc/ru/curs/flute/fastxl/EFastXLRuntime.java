@@ -1,7 +1,7 @@
 package ru.curs.flute.fastxl;
 
 /**
- * Ошибка выполнения процедуры, не приводящая к остановке приложения.
+ * Ошибка выполнения процедуры создания отчёта.
  * 
  */
 public class EFastXLRuntime extends Exception {

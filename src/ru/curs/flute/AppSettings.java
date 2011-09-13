@@ -52,11 +52,16 @@ public final class AppSettings {
 		}
 		this.threadsNumber = threadsNumber;
 
-		scriptsPath = new File(settings.getProperty("scripts.path", ""));
-		if (!scriptsPath.isDirectory())
-			sb.append("Invalid path to Python scripts (scripts.path): "
-					+ scriptsPath + '\n');
-
+		File sp = new File(settings.getProperty("scripts.path", ""));
+		if (!sp.isDirectory())
+			sp = new File(f.getParent() + File.separator + "scripts");
+		if (sp.isDirectory() && sp.exists())
+			scriptsPath = sp;
+		else {
+			scriptsPath = null;
+			sb.append("Invalid path to Python scripts (scripts.path): " + sp
+					+ '\n');
+		}
 		int queryPeriod = 0;
 		try {
 			queryPeriod = Integer.parseInt(settings.getProperty("query.period",

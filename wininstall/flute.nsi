@@ -154,9 +154,14 @@ Section "MainSection" SEC01
   WriteIniStr "$INSTDIR\curs.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   
   CreateDirectory $INSTDIR\logs
-  CreateDirectory $INSTDIR\lib
-  SetOutPath $INSTDIR\bin
   
+  SetOutPath $INSTDIR\lib
+  File fastxl.jar
+  
+  SetOutPath $INSTDIR\scripts
+  File fastxl.py
+  
+  SetOutPath $INSTDIR\bin
   StrCpy $R0 $FluteServiceName
   StrCpy $FluteServiceFileName $R0.exe
   StrCpy $FluteServiceManagerFileName $R0w.exe
@@ -209,7 +214,7 @@ Section -Post
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\flute.jar"
 
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
-  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" -ServiceName=$\"$FluteServiceName$\""
+  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$\"$INSTDIR\uninst.exe$\" -ServiceName=$\"$FluteServiceName$\""
  ; WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\FormsServer.ico"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
@@ -257,8 +262,16 @@ Section Uninstall
   Delete "$INSTDIR\install.log"
   Delete "$INSTDIR\uninst.exe"
   
+  ;Безоглядно удаляем логи, библиотеки и кэшированную директорию
   RMDir  /r "$INSTDIR\logs"
   RMDir  /r "$INSTDIR\lib"
+  RMDir  /r "$INSTDIR\cachedir"
+  
+  ;Удаляем стандартный скрипт, но если там понаписали своих скриптов --- их оставляем.
+  Delete "$INSTDIR\scripts\fastxl.py"
+  RMDir  "$INSTDIR\scripts"
+  
+  ;Удаляем директорию bin с сервисраннером
   Delete "$INSTDIR\bin\$FluteServiceManagerFileName"
   Delete "$INSTDIR\bin\$FluteServiceFileName"
   RMDir  "$INSTDIR\bin"
@@ -274,7 +287,7 @@ Section Uninstall
   Delete "$DESKTOP\Configure Flute.lnk"
   RMDir "$SMPROGRAMS\$StartMenuFolder"
 
- ;Подчищаем реестр
+  ;Подчищаем реестр
  
   ; Don't know if 32-bit or 64-bit registry was used so, for now, remove both
   SetRegView 32

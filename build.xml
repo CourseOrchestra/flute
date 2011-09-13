@@ -6,10 +6,12 @@
 	<target name="clean">
 		<echo>Cleaning the build and destination directories</echo>
 		<delete dir="build" />
+		<delete dir="fastxl" />
 	</target>
 	<target name="init" depends="clean">
 		<echo>Creating the required directories</echo>
 		<mkdir dir="build" />
+		<mkdir dir="fastxl" />
 	</target>
 	<target name="compile" depends="init">
 		<echo>Compile the source files</echo>
@@ -21,9 +23,14 @@
 				<pathelement path="src" />
 			</src>
 		</javac>
+		<javac destdir="fastxl" encoding="UTF-8">
+			<src>
+				<pathelement path="fastxlsrc" />
+			</src>
+		</javac>
 	</target>
 	<target name="jar" depends="compile">
-		<echo>Building the jar file</echo>
+		<echo>Building the jar files</echo>
 		<jar destfile="wininstall/flute.jar" filesetmanifest="merge">
 			<fileset dir="build" />
 			<zipfileset src="lib/sqljdbc4.jar" excludes="META-INF/MSFTSIG.*" />
@@ -31,6 +38,9 @@
 			<manifest>
 				<attribute name="Main-Class" value="ru.curs.flute.Main" />
 			</manifest>
+		</jar>
+		<jar destfile="wininstall/fastxl.jar">
+			<fileset dir="fastxl" />
 		</jar>
 	</target>
 	<target name="nsis" depends="jar">

@@ -15,6 +15,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.python.core.PyException;
 import org.python.core.PyInteger;
 import org.python.core.PyString;
 import org.python.util.PythonInterpreter;
@@ -79,7 +80,12 @@ public abstract class PythonProcessor extends Thread {
 		interp.set("params", new PyString(sw.toString()));
 		interp.set("conn", conn);
 		interp.set("resultstream", task.getOutStream());
-		interp.execfile(fis);
+		try {
+			interp.execfile(fis);
+		} catch (PyException e) {
+			throw new EFluteRuntime(String.format("Python error: %s:%s",
+					e.type, e.value));
+		}
 	}
 
 	/**

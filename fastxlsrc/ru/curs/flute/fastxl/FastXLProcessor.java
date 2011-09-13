@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
  * Класс обработчика заданий. Одновременно запускается несколько обработчиков.
  * 
  */
-public class Processor {
+public final class FastXLProcessor {
 
 	private static final Pattern SHEET_NAME = Pattern.compile(
 			"xl/worksheets/sheet[0-9]+.xml", Pattern.CASE_INSENSITIVE);
@@ -43,7 +43,7 @@ public class Processor {
 
 	private final byte buffer[] = new byte[2048];
 
-	public Processor(Connection conn, String templatePath, Document xmlParams,
+	public FastXLProcessor(Connection conn, String templatePath, Document xmlParams,
 			OutputStream resultStream) {
 		this.conn = conn;
 		this.templatePath = templatePath;

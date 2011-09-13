@@ -34,7 +34,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * Обработчик worksheet-xml.
  * 
  */
-public final class WorksheetProcessor {
+final class WorksheetProcessor {
 
 	private final InputStream is;
 	private final Connection conn;

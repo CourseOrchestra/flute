@@ -20,7 +20,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * Класс, работающий с файлом sharedStrings.xml.
  * 
  */
-public class XLSharedStrings {
+class XLSharedStrings {
 
 	private ArrayList<String> array = new ArrayList<String>();
 	private HashMap<String, Integer> reversed = new HashMap<String, Integer>();
