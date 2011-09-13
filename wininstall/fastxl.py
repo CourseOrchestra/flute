@@ -7,7 +7,7 @@
 import ru.curs.flute.fastxl as fastxl
 
 #	put the path to your own Excel template here
-template='c:\temp\blah.xlsx'
+template='c:/temp/blah.xlsx'
 
 #	write any Python stuff you want here, using the variables described above
 

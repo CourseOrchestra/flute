@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -15,9 +16,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * Класс обработчика заданий. Одновременно запускается несколько обработчиков.
@@ -43,11 +47,24 @@ public final class FastXLProcessor {
 
 	private final byte buffer[] = new byte[2048];
 
-	public FastXLProcessor(Connection conn, String templatePath, Document xmlParams,
-			OutputStream resultStream) {
+	public FastXLProcessor(Connection conn, String templatePath,
+			String xmlParams, OutputStream resultStream) throws EFastXLRuntime {
 		this.conn = conn;
 		this.templatePath = templatePath;
-		this.xmlParams = xmlParams;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+		Document doc = null;
+		if (null != xmlParams && !"".equals(xmlParams))
+			try {
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				InputSource is = new InputSource();
+				is.setCharacterStream(new StringReader(xmlParams));
+				doc = db.parse(is);
+			} catch (Exception e) {
+				throw new EFastXLRuntime("Error parsing XML parameter: "
+						+ e.toString());
+			}
+		this.xmlParams = doc;
 		this.resultStream = resultStream;
 	}
 
@@ -103,9 +120,8 @@ public final class FastXLProcessor {
 					}
 				}
 			} catch (IOException e) {
-				throw new EFastXLRuntime(
-						"I/O Exception while decompressing " + f + ": "
-								+ e.getMessage());
+				throw new EFastXLRuntime("I/O Exception while decompressing "
+						+ f + ": " + e.getMessage());
 			}
 		} finally {
 			try {
@@ -163,8 +179,8 @@ public final class FastXLProcessor {
 				}
 				zos.finish();
 			} catch (IOException e) {
-				throw new EFastXLRuntime("I/O Exception while repacking "
-						+ f + ": " + e.getMessage());
+				throw new EFastXLRuntime("I/O Exception while repacking " + f
+						+ ": " + e.getMessage());
 			}
 		} finally {
 			try {
