@@ -25,7 +25,7 @@ public class XLSharedStrings {
 	private ArrayList<String> array = new ArrayList<String>();
 	private HashMap<String, Integer> reversed = new HashMap<String, Integer>();
 
-	XLSharedStrings(InputStream is) throws EXLReporterRuntime {
+	XLSharedStrings(InputStream is) throws EFastXLRuntime {
 		SharedStringsParser p = new SharedStringsParser();
 		try {
 			TransformerFactory.newInstance().newTransformer()
@@ -34,7 +34,7 @@ public class XLSharedStrings {
 			if (p.getError() != null)
 				throw p.getError();
 			else
-				throw new EXLReporterRuntime(
+				throw new EFastXLRuntime(
 						"Could not parse sharedStrings.xml: " + e.getMessage());
 		}
 	}
@@ -87,10 +87,10 @@ public class XLSharedStrings {
 	 * 
 	 * @param os
 	 *            Поток, в который сохраняется xml.
-	 * @throws EXLReporterRuntime
+	 * @throws EFastXLRuntime
 	 *             Если что-то не получилось.
 	 */
-	public void saveXML(OutputStream os) throws EXLReporterRuntime {
+	public void saveXML(OutputStream os) throws EFastXLRuntime {
 		try {
 			XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance()
 					.createXMLStreamWriter(new OutputStreamWriter(os, "UTF-8"));
@@ -116,7 +116,7 @@ public class XLSharedStrings {
 			xmlWriter.writeEndDocument();
 			xmlWriter.flush();
 		} catch (final Exception e) {
-			throw new EXLReporterRuntime(String.format(
+			throw new EFastXLRuntime(String.format(
 					"Не удаётся сохранить sharedStrings.\n%s", e.getMessage()));
 		}
 	}
@@ -129,9 +129,9 @@ public class XLSharedStrings {
 
 		private ParserState state = ParserState.INITIAL;
 		private StringBuilder text = new StringBuilder();
-		private EXLReporterRuntime e = null;
+		private EFastXLRuntime e = null;
 
-		public EXLReporterRuntime getError() {
+		public EFastXLRuntime getError() {
 			return e;
 		}
 
@@ -184,7 +184,7 @@ public class XLSharedStrings {
 					reversed.put(buf, array.size() - 1);
 					try {
 						validateAddedString(array.size() - 1, buf);
-					} catch (EXLReporterRuntime e2) {
+					} catch (EFastXLRuntime e2) {
 						e = e2;
 					}
 					state = ParserState.SI;
@@ -206,12 +206,12 @@ public class XLSharedStrings {
 	 *            индекс строки.
 	 * @param value
 	 *            значение строки.
-	 * @throws EXLReporterRuntime
+	 * @throws EFastXLRuntime
 	 *             Если строка ошибочна (т. е. явно содержит плейсхолдер, но у
 	 *             плейсхолдера неверный синтаксис).
 	 */
 	protected void validateAddedString(int index, String value)
-			throws EXLReporterRuntime {
+			throws EFastXLRuntime {
 
 	}
 }

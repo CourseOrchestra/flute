@@ -56,13 +56,13 @@ public final class WorksheetProcessor {
 	 * @param placeholders
 	 *            мэппинг между номерами строк и плейсхолдерами
 	 * 
-	 * @throws EXLReporterRuntime
+	 * @throws EFastXLRuntime
 	 *             Если что-то пошло не так...
 	 * 
 	 */
 	public void transform(OutputStream os, XLSharedStrings sharedStrings,
 			Map<Integer, StatementProducer> placeholders)
-			throws EXLReporterRuntime {
+			throws EFastXLRuntime {
 
 		WorksheetParser p = null;
 		try {
@@ -76,7 +76,7 @@ public final class WorksheetProcessor {
 			if (p != null && p.getError() != null)
 				throw p.getError();
 			else
-				throw new EXLReporterRuntime(
+				throw new EFastXLRuntime(
 						"Error while transforming worksheet: " + e.getClass()
 								+ " - " + e.getMessage());
 		}
@@ -88,7 +88,7 @@ public final class WorksheetProcessor {
 
 	private class WorksheetParser extends DefaultHandler {
 
-		private EXLReporterRuntime e = null;
+		private EFastXLRuntime e = null;
 
 		private final XMLStreamWriter xmlWriter;
 		private final XLSharedStrings sharedStrings;
@@ -113,12 +113,12 @@ public final class WorksheetProcessor {
 			this.placeholders = placeholders;
 		}
 
-		public EXLReporterRuntime getError() {
+		public EFastXLRuntime getError() {
 			return e;
 		}
 
 		private void error(Exception e) throws SAXException {
-			this.e = new EXLReporterRuntime(e.getMessage());
+			this.e = new EFastXLRuntime(e.getMessage());
 			throw new SAXException(e);
 		}
 
@@ -187,13 +187,13 @@ public final class WorksheetProcessor {
 				} else if (state != ParserState.AFTER_PLACEHOLDER)
 					xmlWriter.writeCharacters(chars);
 			} catch (XMLStreamException e) {
-				this.e = new EXLReporterRuntime(e.getMessage());
+				this.e = new EFastXLRuntime(e.getMessage());
 				throw new SAXException(e);
-			} catch (EXLReporterRuntime e) {
+			} catch (EFastXLRuntime e) {
 				this.e = e;
 				throw new SAXException(e);
 			} catch (SQLException e) {
-				this.e = new EXLReporterRuntime(String.format(
+				this.e = new EFastXLRuntime(String.format(
 						"SQL error while running %s with message: %s\n",
 						p.getProcCall(), e.getMessage()));
 				throw new SAXException(e);

@@ -181,11 +181,11 @@ public final class StatementProducer {
 	 * 
 	 * @param conn
 	 *            Подключение
-	 * @throws EXLReporterRuntime
+	 * @throws EFastXLRuntime
 	 *             в случае, если не удалось подлючиться.
 	 */
 	public PreparedStatement produceStatement(Connection conn)
-			throws EXLReporterRuntime {
+			throws EFastXLRuntime {
 
 		PreparedStatement result;
 		try {
@@ -196,7 +196,7 @@ public final class StatementProducer {
 				p.apply(i, result);
 			}
 		} catch (SQLException e) {
-			throw new EXLReporterRuntime(
+			throw new EFastXLRuntime(
 					"Processor's thread failed to create prepared statement on the database: "
 							+ e.getMessage());
 		}

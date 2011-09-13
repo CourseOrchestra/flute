@@ -54,13 +54,13 @@ public class Processor {
 	/**
 	 * Выполняет обработку задания по формирования xlsx-файла.
 	 * 
-	 * @throws EXLReporterRuntime
+	 * @throws EFastXLRuntime
 	 *             В случае, если что-то пошло не так.
 	 */
-	public void execute() throws EXLReporterRuntime {
+	public void execute() throws EFastXLRuntime {
 		final File f = new File(templatePath);
 		if (!f.exists())
-			throw new EXLReporterRuntime("Report template file " + f
+			throw new EFastXLRuntime("Report template file " + f
 					+ " does not exist!");
 
 		// ФАЗА 1: Чтение шита.
@@ -81,13 +81,13 @@ public class Processor {
 										bos.size())) {
 							@Override
 							protected void validateAddedString(int index,
-									String value) throws EXLReporterRuntime {
+									String value) throws EFastXLRuntime {
 								StatementProducer sp;
 								try {
 									sp = StatementProducer.validate(value,
 											xmlParams);
 								} catch (XPathExpressionException e) {
-									throw new EXLReporterRuntime(
+									throw new EFastXLRuntime(
 											"Wrong XPath expression in " + f
 													+ ": " + e.getMessage());
 								}
@@ -103,7 +103,7 @@ public class Processor {
 					}
 				}
 			} catch (IOException e) {
-				throw new EXLReporterRuntime(
+				throw new EFastXLRuntime(
 						"I/O Exception while decompressing " + f + ": "
 								+ e.getMessage());
 			}
@@ -111,17 +111,17 @@ public class Processor {
 			try {
 				fis.close();
 			} catch (IOException e) {
-				throw new EXLReporterRuntime("Failed to close template: "
+				throw new EFastXLRuntime("Failed to close template: "
 						+ e.getMessage());
 			}
 		}
 
 		// ФАЗА 2: Трансформация, в ходе которой мутирует SharedStrings
 		if (wsProcs.isEmpty())
-			new EXLReporterRuntime("Template " + f
+			new EFastXLRuntime("Template " + f
 					+ "has wrong format: no worksheet found.");
 		if (sharedStrings == null)
-			throw new EXLReporterRuntime("Template " + f
+			throw new EFastXLRuntime("Template " + f
 					+ "has wrong format: no shared strings found.");
 
 		final HashMap<String, ByteArrayOutputStreamHack> resultSheets = new HashMap<String, ByteArrayOutputStreamHack>(
@@ -163,14 +163,14 @@ public class Processor {
 				}
 				zos.finish();
 			} catch (IOException e) {
-				throw new EXLReporterRuntime("I/O Exception while repacking "
+				throw new EFastXLRuntime("I/O Exception while repacking "
 						+ f + ": " + e.getMessage());
 			}
 		} finally {
 			try {
 				fis.close();
 			} catch (IOException e) {
-				throw new EXLReporterRuntime("Failed to close template: "
+				throw new EFastXLRuntime("Failed to close template: "
 						+ e.getMessage());
 			}
 		}
@@ -187,12 +187,12 @@ public class Processor {
 	}
 
 	private FileInputStream getTemplateInputStream(File f)
-			throws EXLReporterRuntime {
+			throws EFastXLRuntime {
 		FileInputStream fis;
 		try {
 			fis = new FileInputStream(f);
 		} catch (FileNotFoundException e) {
-			throw new EXLReporterRuntime(e.getMessage());
+			throw new EFastXLRuntime(e.getMessage());
 		}
 		return fis;
 	}
