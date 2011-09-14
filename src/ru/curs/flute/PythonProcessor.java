@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
@@ -66,6 +67,8 @@ public abstract class PythonProcessor extends Thread {
 			try {
 				Transformer tr = javax.xml.transform.TransformerFactory
 						.newInstance().newTransformer();
+				tr.setOutputProperty(OutputKeys.ENCODING, "UTF-16");
+
 				tr.transform(new DOMSource(task.getParams()), new StreamResult(
 						sw));
 			} catch (TransformerException e) {
