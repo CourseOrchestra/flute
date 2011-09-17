@@ -69,7 +69,7 @@ public final class Main {
 			return f.getAbsolutePath() + File.separator;
 	}
 
-	private static void initCL(File lib) {
+	private static void initCL(File lib, File pylib) {
 		// Construct the "class path" for this class loader
 		Set<URL> set = new LinkedHashSet<URL>();
 
@@ -106,6 +106,7 @@ public final class Main {
 		postProperties.setProperty("python.packages.directories",
 				"java.ext.dirs,flute.lib");
 		postProperties.setProperty("flute.lib", libfolder);
+		postProperties.setProperty("python.path", pylib.toString());
 		PythonInterpreter.initialize(System.getProperties(), postProperties,
 				null);
 
@@ -132,7 +133,7 @@ public final class Main {
 		}
 
 		// Инициализируем класслоадер с библиотеками
-		initCL(new File(path + "lib"));
+		initCL(new File(path + "lib"), new File(path + "pylib"));
 
 		// С ЭТОГО МОМЕНТА У НАС ЕСТЬ ЛОГГЕР
 		// Затем готовим драйвер подключения к БД...

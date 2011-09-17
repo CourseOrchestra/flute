@@ -158,6 +158,9 @@ Section "MainSection" SEC01
   SetOutPath $INSTDIR\lib
   File fastxl.jar
   
+  SetOutPath $INSTDIR
+  File /r pylib
+  
   SetOutPath $INSTDIR\scripts
   File fastxl.py
   
@@ -265,6 +268,7 @@ Section Uninstall
   ;Безоглядно удаляем логи, библиотеки и кэшированную директорию
   RMDir  /r "$INSTDIR\logs"
   RMDir  /r "$INSTDIR\lib"
+  RMDir  /r "$INSTDIR\pylib"
   RMDir  /r "$INSTDIR\cachedir"
   
   ;Удаляем стандартный скрипт, но если там понаписали своих скриптов --- их оставляем.
