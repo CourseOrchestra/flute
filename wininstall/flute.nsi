@@ -159,7 +159,7 @@ Section "MainSection" SEC01
   File fastxl.jar
   
   SetOutPath $INSTDIR
-  File /r pylib
+  File /r /x .svn pylib 
   
   SetOutPath $INSTDIR\scripts
   File fastxl.py
