@@ -29,18 +29,6 @@ public final class Main {
 	 *            аргументы.
 	 */
 	public static void main(String[] args) {
-		startService();
-	}
-
-	/**
-	 * Точка запуска приложения из Apache Commons Service Starter. Аргумент
-	 * "start" (или отсутствие аргументов) запускает сервис, аргумент "stop"
-	 * (или любой другой) --- останавливает.
-	 * 
-	 * @param args
-	 *            Команды, передаваемые prunsrv в статический метод.
-	 */
-	public static void windowsService(String args[]) {
 		String cmd = "start";
 		if (args.length > 0)
 			cmd = args[0];
@@ -131,7 +119,7 @@ public final class Main {
 		System.out.println();
 		if (!f.exists()) {
 			System.out.println("File " + f + " cannot be found.");
-			return;
+			System.exit(1);
 		}
 		try {
 			AppSettings.init(f);
@@ -140,7 +128,7 @@ public final class Main {
 					.println("The following problems occured while reading file "
 							+ f + ":");
 			System.out.print(e.getMessage());
-			return;
+			System.exit(1);
 		}
 
 		// Инициализируем класслоадер с библиотеками
@@ -155,7 +143,7 @@ public final class Main {
 					Level.SEVERE,
 					"Class " + AppSettings.getDbClassName()
 							+ " (JDBC driver) not found.");
-			return;
+			System.exit(1);
 		}
 
 		// Затем инициализируем код, призванный высвобождать задания при
@@ -176,7 +164,7 @@ public final class Main {
 					Level.SEVERE,
 					"The following critical problem stopped the process:\n"
 							+ e.getMessage());
-			return;
+			System.exit(1);
 		}
 	}
 

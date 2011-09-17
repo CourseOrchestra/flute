@@ -180,7 +180,7 @@ Section "MainSection" SEC01
   
   InstallRetry:
   DetailPrint "Installing $FluteServiceName service"
-  nsExec::ExecToStack '"$INSTDIR\bin\$FluteServiceFileName" //IS//$FluteServiceName --DisplayName "$FluteServiceName" --Description "${PRODUCT_PUBLISHER}: ${PRODUCT_NAME} ${PRODUCT_VERSION} build ${BUILD_VERSION}, http://www.curs.ru/" --LogPath "$INSTDIR\logs" --Install "$INSTDIR\bin\$FluteServiceFileName" --Jvm "$JvmDll" --StartMode=jvm --StartClass=ru.curs.flute.Main --StartMethod=windowsService --StartParams=start --StopMode=jvm --StopClass=ru.curs.flute.Main --StopMethod=windowsService --StopParams=stop --Classpath="$INSTDIR\flute.jar"  --StdOutput=auto --StdError=auto'
+  nsExec::ExecToStack '"$INSTDIR\bin\$FluteServiceFileName" //IS//$FluteServiceName --DisplayName "$FluteServiceName" --Description "${PRODUCT_PUBLISHER}: ${PRODUCT_NAME} ${PRODUCT_VERSION} build ${BUILD_VERSION}, http://www.curs.ru/" --LogPath "$INSTDIR\logs" --Install "$INSTDIR\bin\$FluteServiceFileName" --Jvm "$JvmDll" --StartMode=jvm --StartClass=ru.curs.flute.Main --StartParams=start --StopMode=jvm --StopClass=ru.curs.flute.Main --StopParams=stop --Classpath="$INSTDIR\flute.jar"  --StdOutput=auto --StdError=auto'
   Pop $0
   Pop $1
   StrCmp $0 "0" InstallOk
