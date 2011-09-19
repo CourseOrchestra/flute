@@ -35,9 +35,6 @@ public abstract class PythonProcessor extends Thread {
 		try {
 			initConn();
 			internalRun();
-			// На случай, если коннекшн испортился после прогонки
-			// скрипта
-			initConn();
 			finish(true, "");
 		} catch (EFluteRuntime e) {
 			finish(false, e.getMessage());
@@ -101,10 +98,13 @@ public abstract class PythonProcessor extends Thread {
 	 *            произошедшей ошибки.
 	 */
 	private void finish(boolean success, String details) {
-
+		
 		PreparedStatement finalizeTaskStmt;
 
 		try {
+			// На случай, если коннекшн испортился после прогонки
+			// скрипта
+			initConn();
 
 			finalizeTaskStmt = conn
 					.prepareStatement(String
@@ -122,6 +122,8 @@ public abstract class PythonProcessor extends Thread {
 			finalizeTaskStmt.setString(3, details);
 			finalizeTaskStmt.setInt(4, task.getId());
 			finalizeTaskStmt.execute();
+			if (!conn.getAutoCommit())
+				conn.commit();
 
 			if (!success)
 				AppSettings
@@ -132,6 +134,12 @@ public abstract class PythonProcessor extends Thread {
 										task.getId(), task.getScriptName(),
 										details));
 		} catch (SQLException e) {
+			// Перевыбросить эксепшн в этом контексте сделать нельзя...
+			AppSettings.getLogger()
+					.log(Level.SEVERE,
+							"Could not finalize task with exception: "
+									+ e.getMessage());
+		} catch (EFluteRuntime e) {
 			// Перевыбросить эксепшн в этом контексте сделать нельзя...
 			AppSettings.getLogger()
 					.log(Level.SEVERE,

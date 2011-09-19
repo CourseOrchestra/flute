@@ -55,6 +55,8 @@ public class TaskManager {
 						DOMSource.class).getNode();
 				markNextStmt.setInt(1, id);
 				markNextStmt.execute();
+				if (!mainConn.getAutoCommit())
+					mainConn.commit();
 				return new TaskParams(id, template, doc);
 			} else
 				return null;
