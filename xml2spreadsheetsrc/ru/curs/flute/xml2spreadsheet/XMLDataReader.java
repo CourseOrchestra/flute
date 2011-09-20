@@ -91,17 +91,18 @@ abstract class XMLDataReader {
 						buf = atts.getValue("name");
 						DescriptorElement currElement = new DescriptorElement(
 								buf);
-						// Добываем контекст текущей итерации...
-						List<DescriptorSubelement> subelements = elementsStack
-								.peek().getSubelements();
-						DescriptorIteration iter = (DescriptorIteration) subelements
-								.get(subelements.size() - 1);
-						iter.getElements().add(currElement);
-						elementsStack.push(currElement);
 
 						if (root == null)
 							root = currElement;
-
+						else {
+							// Добываем контекст текущей итерации...
+							List<DescriptorSubelement> subelements = elementsStack
+									.peek().getSubelements();
+							DescriptorIteration iter = (DescriptorIteration) subelements
+									.get(subelements.size() - 1);
+							iter.getElements().add(currElement);
+						}
+						elementsStack.push(currElement);
 						parserState = ParserState.ELEMENT;
 					}
 					break;
