@@ -2,7 +2,6 @@ package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Random;
 
 /**
  * Класс, ответственный за формирование результирующего вывода в табличный
@@ -20,8 +19,8 @@ abstract class ReportWriter {
 	 * @param output
 	 *            Поток для вывода результата
 	 */
-	static ReportWriter createWriter(InputStream template,
-			OutputType type, OutputStream output) {
+	static ReportWriter createWriter(InputStream template, OutputType type,
+			OutputStream output) {
 		// TODO implement
 		return null;
 	}
@@ -61,7 +60,7 @@ abstract class ReportWriter {
 	 * диапазоне ячеек шаблона. Позиция новой секции определяется режимом
 	 * вывода, заданном вызовом startSequence.
 	 */
-	public void section(XMLContext context, Random range) {
+	public void section(XMLContext context, RangeAddress range) {
 		// TODO implement
 	}
 
