@@ -2,20 +2,24 @@ package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
 
-class SAXDataReader extends XMLDataReader {
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
-	// TODO implement
+final class SAXDataReader extends XMLDataReader {
+
+	private final Source xmlData;
+
 	SAXDataReader(InputStream xmlData, DescriptorElement xmlDescriptor,
 			ReportWriter writer) {
 		super(writer, xmlDescriptor);
-		// TODO implement
+		this.xmlData = new StreamSource(xmlData);
 
 	}
 
 	@Override
 	void process() throws XML2SpreadSheetError {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

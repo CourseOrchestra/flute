@@ -49,6 +49,10 @@ abstract class XMLDataReader {
 	static XMLDataReader createReader(InputStream xmlData,
 			InputStream xmlDescriptor, boolean useSAX, ReportWriter writer)
 			throws XML2SpreadSheetError {
+		if (xmlData == null)
+			throw new XML2SpreadSheetError("XML Data is null.");
+		if (xmlDescriptor == null)
+			throw new XML2SpreadSheetError("XML descriptor is null.");
 
 		final class DescriptorParser extends DefaultHandler {
 
@@ -165,7 +169,7 @@ abstract class XMLDataReader {
 		return descriptor;
 	}
 
-	static class DescriptorElement {
+	static final class DescriptorElement {
 		private final String elementName;
 		private final List<DescriptorSubelement> subelements = new LinkedList<DescriptorSubelement>();
 
@@ -185,7 +189,7 @@ abstract class XMLDataReader {
 	abstract static class DescriptorSubelement {
 	}
 
-	static class DescriptorIteration extends DescriptorSubelement {
+	static final class DescriptorIteration extends DescriptorSubelement {
 		private final int index;
 		private final boolean horizontal;
 		private final List<DescriptorElement> elements = new LinkedList<DescriptorElement>();
@@ -208,7 +212,7 @@ abstract class XMLDataReader {
 		}
 	}
 
-	static class DescriptorOutput extends DescriptorSubelement {
+	static final class DescriptorOutput extends DescriptorSubelement {
 		private final String worksheet;
 		private final RangeAddress range;
 

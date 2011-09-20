@@ -6,10 +6,10 @@ package ru.curs.flute.xml2spreadsheet;
  */
 abstract class XMLContext {
 	// TODO implement
-	static class DOMContext extends XMLContext {
+	static final class DOMContext extends XMLContext {
 	}
 
-	static class SAXContext extends XMLContext {
+	static final class SAXContext extends XMLContext {
 	}
 
 	public String getValue(String xpath) {
