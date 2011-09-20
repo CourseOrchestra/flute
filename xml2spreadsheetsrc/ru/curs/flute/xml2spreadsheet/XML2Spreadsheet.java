@@ -25,7 +25,7 @@ public final class XML2Spreadsheet {
 	 *            Шаблон отчёта.
 	 * @param outputType
 	 *            Тип шаблона отчёта (OpenOffice, XLS, XLSX).
-	 * @param processingMode
+	 * @param useSAX
 	 *            Режим процессинга (DOM или SAX).
 	 * @param output
 	 *            Поток, в который записывается результирующий отчёт.
@@ -33,13 +33,12 @@ public final class XML2Spreadsheet {
 	 *             в случае возникновения ошибок
 	 */
 	public static void process(InputStream xmlData, InputStream xmlDescriptor,
-			InputStream template, OutputType outputType,
-			ProcessingMode processingMode, OutputStream output)
-			throws XML2SpreadSheetError {
+			InputStream template, OutputType outputType, boolean useSAX,
+			OutputStream output) throws XML2SpreadSheetError {
 		ReportWriter writer = ReportWriter.createWriter(template, outputType,
 				output);
 		XMLDataReader reader = XMLDataReader.createReader(xmlData,
-				xmlDescriptor, processingMode, writer);
+				xmlDescriptor, useSAX, writer);
 		reader.process();
 	}
 
@@ -54,8 +53,8 @@ public final class XML2Spreadsheet {
 	 *            Дескриптор, описывающий порядок итерации по исходным данным.
 	 * @param template
 	 *            Шаблон отчёта. Тип шаблона отчёта определяется по расширению.
-	 * @param processingMode
-	 *            Режим процессинга (DOM или SAX).
+	 * @param useSAX
+	 *            Режим процессинга (false, если DOM, или true, если SAX).
 	 * @param output
 	 *            Поток, в который записывается результирующий отчёт.
 	 * @throws FileNotFoundException
@@ -64,7 +63,7 @@ public final class XML2Spreadsheet {
 	 *             в случае иных ошибок
 	 */
 	public static void process(InputStream xmlData, File xmlDescriptor,
-			File template, ProcessingMode processingMode, OutputStream output)
+			File template, boolean useSAX, OutputStream output)
 			throws FileNotFoundException, XML2SpreadSheetError {
 		InputStream descr = new FileInputStream(xmlDescriptor);
 		InputStream templ = new FileInputStream(template);
@@ -82,6 +81,6 @@ public final class XML2Spreadsheet {
 		else
 			throw new XML2SpreadSheetError(
 					"Cannot define output format, template has non-standard extention.");
-		process(xmlData, descr, templ, outputType, processingMode, output);
+		process(xmlData, descr, templ, outputType, useSAX, output);
 	}
 }

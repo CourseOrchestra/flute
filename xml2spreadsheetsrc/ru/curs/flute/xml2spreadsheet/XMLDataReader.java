@@ -26,25 +26,21 @@ abstract class XMLDataReader {
 	 *            Поток с исходными данными.
 	 * @param xmlDescriptor
 	 *            Дескриптор отчёта.
-	 * @param processingMode
+	 * @param useSAX
 	 *            Режим обработки (DOM или SAX).
 	 * @param writer
 	 *            Объект, осуществляющий вывод.
 	 */
 	static XMLDataReader createReader(InputStream xmlData,
-			InputStream xmlDescriptor, ProcessingMode processingMode,
+			InputStream xmlDescriptor, boolean useSAX,
 			ReportWriter writer) {
 		// Сначала парсится дескриптор и строится его объектное представление.
 		// TODO
 		// Затем инстанцируется конкретная реализация (DOM или SAX) ридера
-		switch (processingMode) {
-		case DOM:
-			return new DOMDataReader(xmlData, xmlDescriptor, writer);
-		case SAX:
+		if (useSAX)
 			return new SAXDataReader(xmlData, xmlDescriptor, writer);
-		}
-		// Это никогда не произойдёт.
-		return null;
+		else
+			return new DOMDataReader(xmlData, xmlDescriptor, writer);
 	}
 
 	/**
