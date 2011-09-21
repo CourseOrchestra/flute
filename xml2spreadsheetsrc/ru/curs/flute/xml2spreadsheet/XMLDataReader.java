@@ -161,6 +161,22 @@ abstract class XMLDataReader {
 	 */
 	abstract void process() throws XML2SpreadSheetError;
 
+	/**
+	 * Общий для DOM и SAX реализации метод обработки вывода.
+	 * 
+	 * @param c
+	 *            Контекст.
+	 * @param o
+	 *            Дескриптор секции.
+	 */
+	void processOutput(XMLContext c, DescriptorOutput o) {
+		if (o.getWorksheet() != null && !"".equals(o.getWorksheet())) {
+			String wsName = c.calc(o.getWorksheet());
+			getWriter().sheet(wsName);
+		}
+		getWriter().section(c, o.getRange());
+	}
+
 	final ReportWriter getWriter() {
 		return writer;
 	}

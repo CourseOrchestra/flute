@@ -39,7 +39,7 @@
 					<!-- Заголовок строки -->
 					<output range="A12" />
 					<!-- И за ним слева направо строку с данными -->
-					<iteration mode="left-to-right">
+					<iteration mode="horizontal">
 						<element name="cell">
 							<output range="B12" />
 						</element>

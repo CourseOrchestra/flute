@@ -49,28 +49,23 @@ final class DOMDataReader extends XMLDataReader {
 		getWriter().startSequence(i.isHorizontal());
 		Node n = parent.getFirstChild();
 		int elementIndex = -1;
-		while (n != null) {
+		iteration: while (n != null) {
 			// Нас интересуют только элементы
 			if (n.getNodeType() == Node.ELEMENT_NODE) {
 				elementIndex++;
-				if (i.getIndex() < 0 || i.getIndex() == elementIndex)
+				if (i.getIndex() < 0 || i.getIndex() == elementIndex) {
 					for (DescriptorElement e : i.getElements())
 						if ("*".equals(e.getElementName())
 								|| e.getElementName().equals(n.getNodeName()))
 							processElement(e, (Element) n);
+					// Если явно задан индекс, то на этом заканчиваем итерацию
+					if (i.getIndex() >= 0)
+						break iteration;
+				}
 			}
 			n = n.getNextSibling();
 		}
 		getWriter().endSequence();
-	}
-
-	// Обработка вывода
-	private void processOutput(XMLContext c, DescriptorOutput o) {
-		if (o.getWorksheet() != null && !"".equals(o.getWorksheet())) {
-			String wsName = c.calc(o.getWorksheet());
-			getWriter().sheet(wsName);
-		}
-		getWriter().section(c, o.getRange());
 	}
 
 	@Override

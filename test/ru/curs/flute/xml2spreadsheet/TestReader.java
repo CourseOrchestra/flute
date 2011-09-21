@@ -44,8 +44,8 @@ public class TestReader {
 	@Test
 	public void testParseDescriptor() throws XML2SpreadSheetError, IOException {
 
-		XMLDataReader reader = XMLDataReader.createReader(dataStream, descrStream,
-				false, null);
+		XMLDataReader reader = XMLDataReader.createReader(dataStream,
+				descrStream, false, null);
 		DescriptorElement d = reader.getDescriptor();
 
 		assertEquals(2, d.getSubelements().size());
@@ -70,4 +70,52 @@ public class TestReader {
 		assertTrue(i.isHorizontal());
 
 	}
+
+	@Test
+	public void testDOMReader() throws XML2SpreadSheetError {
+		DummyWriter w = new DummyWriter();
+		// Проверяем последовательность генерируемых ридером команд
+		XMLDataReader reader = XMLDataReader.createReader(dataStream,
+				descrStream, false, w);
+		reader.process();
+		assertEquals(
+				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCCQh{}Q{}}",
+				w.getLog().toString());
+	}
+}
+
+class DummyWriter extends ReportWriter {
+
+	private final StringBuilder log = new StringBuilder();
+
+	@Override
+	public void sheet(String sheetName) {
+		// sheeT
+		log.append("T");
+	}
+
+	@Override
+	public void startSequence(boolean horizontal) {
+		// seQuence
+		if (horizontal)
+			log.append("Qh{");
+		else
+			log.append("Q{");
+	}
+
+	@Override
+	public void endSequence() {
+		log.append("}");
+	}
+
+	@Override
+	public void section(XMLContext context, RangeAddress range) {
+		// seCtion
+		log.append("C");
+	}
+
+	StringBuilder getLog() {
+		return log;
+	}
+
 }
