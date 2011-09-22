@@ -1,5 +1,14 @@
 package ru.curs.flute.xml2spreadsheet;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 
@@ -9,6 +18,8 @@ import org.xml.sax.Attributes;
  */
 abstract class XMLContext {
 
+	private static final Pattern P = Pattern.compile("~\\{([^}]+)\\}");
+
 	/**
 	 * Вычисляет значение строки, содержащей, возможно, xpath-выражение.
 	 * 
@@ -16,14 +27,19 @@ abstract class XMLContext {
 	 *            строка, содержащая, возможно, xpath-выражения.
 	 */
 	final String calc(String formatString) {
-		return null;
-		// TODO implement using regexp search and getXPathValue(..)
+		Matcher m = P.matcher(formatString);
+		StringBuffer sb = new StringBuffer();
+		while (m.find())
+			m.appendReplacement(sb, getXPathValue(m.group(1)));
+		m.appendTail(sb);
+		return sb.toString();
 	}
 
 	abstract String getXPathValue(String xpath);
 
 	static final class DOMContext extends XMLContext {
 		private final Node n;
+		private XPath evaluator;
 
 		DOMContext(Node n) {
 			this.n = n;
@@ -31,8 +47,14 @@ abstract class XMLContext {
 
 		@Override
 		String getXPathValue(String xpath) {
-			// TODO Auto-generated method stub
-			return null;
+			if (xpath == null)
+				evaluator = XPathFactory.newInstance().newXPath();
+			try {
+				XPathExpression expr = evaluator.compile(xpath);
+				return (String) expr.evaluate(n, XPathConstants.STRING);
+			} catch (XPathExpressionException e) {
+				return "{" + e.getMessage() + "}";
+			}
 		}
 	}
 
@@ -46,8 +68,10 @@ abstract class XMLContext {
 
 		@Override
 		String getXPathValue(String xpath) {
-			// TODO Auto-generated method stub
-			return null;
+			if (xpath.startsWith("@"))
+				return attr.getValue(xpath.substring(1));
+			else
+				return "{Only references to attributes in SAX mode are allowed}";
 		}
 	}
 
