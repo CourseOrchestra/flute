@@ -168,13 +168,26 @@ abstract class XMLDataReader {
 	 *            Контекст.
 	 * @param o
 	 *            Дескриптор секции.
+	 * @throws XML2SpreadSheetError
+	 *             В случае возникновения ошибок ввода-вывода или при
+	 *             интерпретации шаблона.
 	 */
-	void processOutput(XMLContext c, DescriptorOutput o) {
+	final void processOutput(XMLContext c, DescriptorOutput o)
+			throws XML2SpreadSheetError {
 		if (o.getWorksheet() != null && !"".equals(o.getWorksheet())) {
 			String wsName = c.calc(o.getWorksheet());
 			getWriter().sheet(wsName);
 		}
 		getWriter().section(c, o.getRange());
+	}
+
+	final boolean compareIndices(int expected, int actual) {
+		return (expected < 0) || (actual == expected);
+	}
+
+	final boolean compareNames(String expected, String actual) {
+		return "*".equals(expected)
+				|| (expected != null && expected.equals(actual));
 	}
 
 	final ReportWriter getWriter() {

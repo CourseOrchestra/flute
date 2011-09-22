@@ -1,6 +1,7 @@
 package ru.curs.flute.xml2spreadsheet;
 
 import org.w3c.dom.Node;
+import org.xml.sax.Attributes;
 
 /**
  * Указывает на контекст XML файла, в котором могут быть вычислены
@@ -36,6 +37,12 @@ abstract class XMLContext {
 	}
 
 	static final class SAXContext extends XMLContext {
+
+		private final Attributes attr;
+
+		SAXContext(Attributes attr) {
+			this.attr = attr;
+		}
 
 		@Override
 		String getXPathValue(String xpath) {

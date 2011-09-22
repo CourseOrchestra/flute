@@ -28,7 +28,8 @@ final class DOMDataReader extends XMLDataReader {
 	}
 
 	// В режиме итерации нашёлся подходящий элемент
-	private void processElement(DescriptorElement de, Element xe) {
+	private void processElement(DescriptorElement de, Element xe)
+			throws XML2SpreadSheetError {
 		XMLContext context = null;
 		for (DescriptorSubelement se : de.getSubelements()) {
 			if (se instanceof DescriptorIteration) {
@@ -45,7 +46,8 @@ final class DOMDataReader extends XMLDataReader {
 	}
 
 	// По субэлементам текущего элемента надо провести итерацию
-	private void processIteration(Element parent, DescriptorIteration i) {
+	private void processIteration(Element parent, DescriptorIteration i)
+			throws XML2SpreadSheetError {
 		getWriter().startSequence(i.isHorizontal());
 		Node n = parent.getFirstChild();
 		int elementIndex = -1;
@@ -53,10 +55,9 @@ final class DOMDataReader extends XMLDataReader {
 			// Нас интересуют только элементы
 			if (n.getNodeType() == Node.ELEMENT_NODE) {
 				elementIndex++;
-				if (i.getIndex() < 0 || i.getIndex() == elementIndex) {
+				if (compareIndices(i.getIndex(), elementIndex)) {
 					for (DescriptorElement e : i.getElements())
-						if ("*".equals(e.getElementName())
-								|| e.getElementName().equals(n.getNodeName()))
+						if (compareNames(e.getElementName(), n.getNodeName()))
 							processElement(e, (Element) n);
 					// Если явно задан индекс, то на этом заканчиваем итерацию
 					if (i.getIndex() >= 0)

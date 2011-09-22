@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import ru.curs.flute.xml2spreadsheet.XMLDataReader.DescriptorElement;
@@ -19,13 +18,6 @@ import ru.curs.flute.xml2spreadsheet.XMLDataReader.DescriptorOutput;
 public class TestReader {
 	private InputStream descrStream;
 	private InputStream dataStream;
-
-	@Before
-	public void setUp() {
-		descrStream = TestReader.class
-				.getResourceAsStream("testdescriptor.xml");
-		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
-	}
 
 	@After
 	public void TearDown() {
@@ -43,6 +35,9 @@ public class TestReader {
 
 	@Test
 	public void testParseDescriptor() throws XML2SpreadSheetError, IOException {
+		descrStream = TestReader.class
+				.getResourceAsStream("testdescriptor.xml");
+		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
 
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, null);
@@ -72,7 +67,11 @@ public class TestReader {
 	}
 
 	@Test
-	public void testDOMReader() throws XML2SpreadSheetError {
+	public void testDOMReader1() throws XML2SpreadSheetError {
+		descrStream = TestReader.class
+				.getResourceAsStream("testdescriptor.xml");
+		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
+
 		DummyWriter w = new DummyWriter();
 		// Проверяем последовательность генерируемых ридером команд
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
@@ -81,6 +80,77 @@ public class TestReader {
 		assertEquals(
 				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCCQh{}Q{}}",
 				w.getLog().toString());
+	}
+
+	@Test
+	public void testDOMReader2() throws XML2SpreadSheetError {
+		descrStream = TestReader.class
+				.getResourceAsStream("testdescriptor2.xml");
+		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
+
+		DummyWriter w = new DummyWriter();
+		// Проверяем последовательность генерируемых ридером команд
+		XMLDataReader reader = XMLDataReader.createReader(dataStream,
+				descrStream, false, w);
+		reader.process();
+		assertEquals(
+				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}}TCCQh{}Q{}}",
+				w.getLog().toString());
+	}
+
+	
+	@Test
+	public void testSAXReader1() throws XML2SpreadSheetError {
+		descrStream = TestReader.class
+				.getResourceAsStream("testdescriptor.xml");
+		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
+
+		DummyWriter w = new DummyWriter();
+
+		XMLDataReader reader = XMLDataReader.createReader(dataStream,
+				descrStream, true, w);
+		// Проверяем, что на некорректных данных выскакивает корректное
+		// сообщение об ошибке
+		boolean itHappened = false;
+		try {
+			reader.process();
+		} catch (XML2SpreadSheetError e) {
+			itHappened = true;
+			assertTrue(e.getMessage().contains(
+					"only one iteration element is allowed"));
+		}
+		assertTrue(itHappened);
+
+	}
+
+	@Test
+	public void testSAXReader2() throws XML2SpreadSheetError {
+		descrStream = TestReader.class
+				.getResourceAsStream("testsaxdescriptor.xml");
+		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
+
+		DummyWriter w = new DummyWriter();
+		// Проверяем последовательность генерируемых ридером команд
+		XMLDataReader reader = XMLDataReader.createReader(dataStream,
+				descrStream, false, w);
+		reader.process();
+		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}CQh{CCC}CQh{CCC}}TCQ{}}", w
+				.getLog().toString());
+	}
+
+	@Test
+	public void testSAXReader3() throws XML2SpreadSheetError {
+		descrStream = TestReader.class
+				.getResourceAsStream("testsaxdescriptor2.xml");
+		dataStream = TestReader.class.getResourceAsStream("testdata.xml");
+
+		DummyWriter w = new DummyWriter();
+		// Проверяем последовательность генерируемых ридером команд
+		XMLDataReader reader = XMLDataReader.createReader(dataStream,
+				descrStream, false, w);
+		reader.process();
+		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}}TCQ{}}", w.getLog()
+				.toString());
 	}
 }
 
