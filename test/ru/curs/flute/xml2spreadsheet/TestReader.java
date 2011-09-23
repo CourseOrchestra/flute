@@ -57,7 +57,7 @@ public class TestReader {
 		assertEquals("sheet", d.getElementName());
 		assertEquals(4, d.getSubelements().size());
 		DescriptorOutput o = (DescriptorOutput) d.getSubelements().get(0);
-		assertEquals("~[@name]", o.getWorksheet());
+		assertEquals("~{@name}", o.getWorksheet());
 		o = (DescriptorOutput) d.getSubelements().get(1);
 		assertNull(o.getWorksheet());
 		i = (DescriptorIteration) d.getSubelements().get(2);
@@ -93,12 +93,10 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals(
-				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}}TCCQh{}Q{}}",
-				w.getLog().toString());
+		assertEquals("Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}}TCCQh{}Q{}}", w
+				.getLog().toString());
 	}
 
-	
 	@Test
 	public void testSAXReader1() throws XML2SpreadSheetError {
 		descrStream = TestReader.class
@@ -156,12 +154,16 @@ public class TestReader {
 
 class DummyWriter extends ReportWriter {
 
+	private final String[] sheetNames = { "Титульный", "Раздел А", "Раздел Б" };
+	private int i;
 	private final StringBuilder log = new StringBuilder();
 
 	@Override
 	public void sheet(String sheetName) {
 		// sheeT
 		log.append("T");
+		assertEquals(sheetNames[i], sheetName);
+		i++;
 	}
 
 	@Override

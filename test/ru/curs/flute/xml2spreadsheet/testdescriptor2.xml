@@ -24,7 +24,7 @@
 	<iteration>
 		<element name="sheet">
 			<!-- Динамическое название листа -->
-			<output worksheet="~[@name]" />
+			<output worksheet="~{@name}" />
 			<!-- Выводим пустую ячейку в ЛВУ сводной таблицы -->
 			<output range="A11" />
 			<!-- И за ним слева направо заголовки столбцов -->

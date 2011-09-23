@@ -47,7 +47,7 @@ abstract class XMLContext {
 
 		@Override
 		String getXPathValue(String xpath) {
-			if (xpath == null)
+			if (evaluator == null)
 				evaluator = XPathFactory.newInstance().newXPath();
 			try {
 				XPathExpression expr = evaluator.compile(xpath);

@@ -21,7 +21,7 @@
 		</element>
 		<element name="sheet">
 			<!-- Динамическое название листа -->
-			<output worksheet="~[@name]" />
+			<output worksheet="~{@name}" />
 			<!-- Для вывода заголовков надо перестроить структуру XML <output range="A11" 
 				/> <iteration mode="horizontal"> <element name="column"> <output range="B11" 
 				/> </element> </iteration> -->
