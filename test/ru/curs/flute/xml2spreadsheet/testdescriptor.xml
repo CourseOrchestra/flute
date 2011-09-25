@@ -7,13 +7,13 @@
 			<output worksheet="Титульный" range="A3:B4" />
 			<iteration>
 				<element name="line">
-					<output range="5:5" />
+					<output range="A5:Z5" />
 				</element>
 				<element name="group">
-					<output range="6:6" />
+					<output range="A6:Z6" />
 					<iteration>
 						<element name="line">
-							<output range="7:7" />
+							<output range="A7:Z7" />
 						</element>
 					</iteration>
 				</element>

@@ -79,14 +79,21 @@ abstract class XMLDataReader {
 						parserState = ParserState.ITERATION;
 					} else if ("output".equals(localName)) {
 						buf = atts.getValue("range");
-						RangeAddress range = (buf == null || "".equals(buf)) ? null
-								: new RangeAddress(buf);
-						buf = atts.getValue("worksheet");
-						String worksheet = (buf == null || "".equals(buf)) ? null
-								: buf;
-						DescriptorOutput output = new DescriptorOutput(
-								worksheet, range);
-						elementsStack.peek().getSubelements().add(output);
+						RangeAddress range;
+						try {
+							range = (buf == null || "".equals(buf)) ? null
+									: new RangeAddress(buf);
+
+							buf = atts.getValue("worksheet");
+							String worksheet = (buf == null || "".equals(buf)) ? null
+									: buf;
+							DescriptorOutput output = new DescriptorOutput(
+									worksheet, range);
+							elementsStack.peek().getSubelements().add(output);
+
+						} catch (XML2SpreadSheetError e) {
+							throw new SAXException(e.getMessage());
+						}
 						parserState = ParserState.OUTPUT;
 					}
 					break;
