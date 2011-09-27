@@ -34,15 +34,15 @@ public abstract class PythonProcessor extends Thread {
 	public void run() {
 		try {
 			initConn();
-			internalRun();
-			finish(true, "");
+			String message = internalRun();
+			finish(true, message == null ? "" : message);
 		} catch (EFluteRuntime e) {
 			finish(false, e.getMessage());
 		}
 
 	}
 
-	void internalRun() throws EFluteRuntime {
+	String internalRun() throws EFluteRuntime {
 		final File f = new File(AppSettings.getScriptsPath() + File.separator
 				+ task.getScriptName());
 		if (!f.exists())
@@ -82,6 +82,7 @@ public abstract class PythonProcessor extends Thread {
 		interp.set("resultstream", task.getOutStream());
 		try {
 			interp.execfile(fis);
+			return interp.get("message").asString();
 		} catch (PyException e) {
 			throw new EFluteRuntime(String.format("Python error: %s:%s",
 					e.type, e.value));
@@ -98,7 +99,7 @@ public abstract class PythonProcessor extends Thread {
 	 *            произошедшей ошибки.
 	 */
 	private void finish(boolean success, String details) {
-		
+
 		PreparedStatement finalizeTaskStmt;
 
 		try {
