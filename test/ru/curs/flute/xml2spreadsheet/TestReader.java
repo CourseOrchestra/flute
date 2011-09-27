@@ -78,7 +78,7 @@ public class TestReader {
 				descrStream, false, w);
 		reader.process();
 		assertEquals(
-				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCCQh{}Q{}}F",
+				"Q{TCQ{CCQ{CC}C}}Q{TCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCQh{}Q{}}F",
 				w.getLog().toString());
 	}
 
@@ -93,7 +93,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}}TCCQh{}Q{}}F", w
+		assertEquals("Q{TCQ{CCQ{CC}C}}Q{TCQh{CCC}Q{CQh{CCC}}TCQh{}Q{}}F", w
 				.getLog().toString());
 	}
 
@@ -132,7 +132,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}CQh{CCC}CQh{CCC}}TCQ{}}F", w
+		assertEquals("Q{TCQ{CCQ{CC}C}TQ{CQh{CCC}CQh{CCC}CQh{CCC}}TQ{}}F", w
 				.getLog().toString());
 	}
 
@@ -147,7 +147,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}}TCQ{}}F", w.getLog()
+		assertEquals("Q{TCQ{CCQ{CC}C}TQ{CQh{CCC}}TQ{}}F", w.getLog()
 				.toString());
 	}
 }

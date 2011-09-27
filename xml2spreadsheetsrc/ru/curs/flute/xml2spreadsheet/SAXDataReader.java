@@ -40,6 +40,8 @@ final class SAXDataReader extends XMLDataReader {
 		private final List<DescriptorOutput> preOutputs = new LinkedList<DescriptorOutput>();
 		private final List<DescriptorElement> expectedElements = new LinkedList<DescriptorElement>();
 		private final List<DescriptorOutput> postOutputs = new LinkedList<DescriptorOutput>();
+		private final List<DescriptorOutput> headerOutputs = new LinkedList<DescriptorOutput>();
+		private final List<DescriptorOutput> footerOutputs = new LinkedList<DescriptorOutput>();
 
 		SAXElementDescriptor() {
 			context = null;
@@ -61,11 +63,26 @@ final class SAXDataReader extends XMLDataReader {
 						preOutputs.add((DescriptorOutput) se);
 					else if (se instanceof DescriptorIteration) {
 						for (DescriptorElement de : ((DescriptorIteration) se)
-								.getElements())
-							expectedElements.add(de);
+								.getElements()) {
+							if ("(before)".equals(de.getElementName())) {
+								for (DescriptorSubelement se2 : de
+										.getSubelements())
+									if (se2 instanceof DescriptorOutput)
+										headerOutputs
+												.add((DescriptorOutput) se2);
+							} else if ("(after)".equals(de.getElementName())) {
+								for (DescriptorSubelement se2 : de
+										.getSubelements())
+									if (se2 instanceof DescriptorOutput)
+										footerOutputs
+												.add((DescriptorOutput) se2);
+							} else
+								expectedElements.add(de);
+						}
 						desiredIndex = ((DescriptorIteration) se).getIndex();
 						iterate = true;
 						horizontal = ((DescriptorIteration) se).isHorizontal();
+
 					}
 				} else {
 					// После тэга iteration
@@ -115,8 +132,11 @@ final class SAXDataReader extends XMLDataReader {
 								}
 							// Начинаем обрамление итерации
 							try {
-								if (sed.iterate)
+								if (sed.iterate) {
 									getWriter().startSequence(sed.horizontal);
+									for (DescriptorOutput deo : sed.headerOutputs)
+										processOutput(sed.context, deo);
+								}
 							} catch (XML2SpreadSheetError e1) {
 								throw new SAXException(e1.getMessage());
 							}
@@ -134,16 +154,19 @@ final class SAXDataReader extends XMLDataReader {
 			public void endElement(String uri, String localName, String name)
 					throws SAXException {
 				SAXElementDescriptor sed = elementsStack.pop();
-				// Завершаем обрамление итерации
-				if (sed.iterate)
-					getWriter().endSequence();
-				// По пост-выводам выполняем вывод
-				for (DescriptorOutput o : sed.postOutputs)
-					try {
-						processOutput(sed.context, o);
-					} catch (XML2SpreadSheetError e1) {
-						throw new SAXException(e1.getMessage());
+				try {
+					// Завершаем обрамление итерации
+					if (sed.iterate) {
+						for (DescriptorOutput deo : sed.footerOutputs)
+							processOutput(sed.context, deo);
+						getWriter().endSequence();
 					}
+					// По пост-выводам выполняем вывод
+					for (DescriptorOutput o : sed.postOutputs)
+						processOutput(sed.context, o);
+				} catch (XML2SpreadSheetError e1) {
+					throw new SAXException(e1.getMessage());
+				}
 			}
 		}
 

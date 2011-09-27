@@ -49,6 +49,11 @@ final class DOMDataReader extends XMLDataReader {
 	private void processIteration(Element parent, DescriptorIteration i)
 			throws XML2SpreadSheetError {
 		getWriter().startSequence(i.isHorizontal());
+
+		for (DescriptorElement de : i.getElements())
+			if ("(before)".equals(de.getElementName()))
+				processElement(de, parent);
+
 		Node n = parent.getFirstChild();
 		int elementIndex = -1;
 		iteration: while (n != null) {
@@ -66,6 +71,11 @@ final class DOMDataReader extends XMLDataReader {
 			}
 			n = n.getNextSibling();
 		}
+
+		for (DescriptorElement de : i.getElements())
+			if ("(after)".equals(de.getElementName()))
+				processElement(de, parent);
+
 		getWriter().endSequence();
 	}
 

@@ -23,4 +23,20 @@ public class TestOverall {
 		XML2Spreadsheet.process(dataStream, descrStream, templateStream,
 				OutputType.XLS, false, fos);
 	}
+	
+	@Test
+	public void test2() throws FileNotFoundException, XML2SpreadSheetError {
+		InputStream descrStream = TestReader.class
+				.getResourceAsStream("testsaxdescriptor3.xml");
+		InputStream dataStream = TestReader.class
+				.getResourceAsStream("testdata.xml");
+		InputStream templateStream = TestReader.class
+				.getResourceAsStream("template.xls");
+
+		File f = new File("c:/temp/resultSAX.xls");
+		FileOutputStream fos = new FileOutputStream(f);
+
+		XML2Spreadsheet.process(dataStream, descrStream, templateStream,
+				OutputType.XLS, true, fos);
+	}
 }
