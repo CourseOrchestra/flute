@@ -42,6 +42,8 @@ abstract class XMLContext {
 		private XPath evaluator;
 
 		DOMContext(Node n) {
+			if (n == null)
+				throw new NullPointerException();
 			this.n = n;
 		}
 

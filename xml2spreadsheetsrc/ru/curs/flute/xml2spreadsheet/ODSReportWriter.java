@@ -7,7 +7,7 @@ import java.io.InputStream;
  */
 final class ODSReportWriter extends ReportWriter {
 
-	ODSReportWriter(InputStream template) {
+	ODSReportWriter(InputStream template) throws XML2SpreadSheetError {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -22,5 +22,11 @@ final class ODSReportWriter extends ReportWriter {
 			String sourceSheet, RangeAddress range) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void flush() throws XML2SpreadSheetError {
+		// TODO Auto-generated method stub
+		
 	}
 }

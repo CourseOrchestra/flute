@@ -114,8 +114,12 @@ final class SAXDataReader extends XMLDataReader {
 									throw new SAXException(e1.getMessage());
 								}
 							// Начинаем обрамление итерации
-							if (sed.iterate)
-								getWriter().startSequence(sed.horizontal);
+							try {
+								if (sed.iterate)
+									getWriter().startSequence(sed.horizontal);
+							} catch (XML2SpreadSheetError e1) {
+								throw new SAXException(e1.getMessage());
+							}
 							found = true;
 							break searchElements;
 						}
@@ -156,5 +160,6 @@ final class SAXDataReader extends XMLDataReader {
 					+ e.getMessage());
 
 		}
+		getWriter().flush();
 	}
 }

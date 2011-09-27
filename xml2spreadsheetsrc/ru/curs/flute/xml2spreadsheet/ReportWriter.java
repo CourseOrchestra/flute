@@ -43,9 +43,11 @@ abstract class ReportWriter {
 	 *            Тип форматировщика
 	 * @param output
 	 *            Поток для вывода результата
+	 * @throws XML2SpreadSheetError
+	 *             В случае, если шаблон имеет неверный формат
 	 */
 	static ReportWriter createWriter(InputStream template, OutputType type,
-			OutputStream output) {
+			OutputStream output) throws XML2SpreadSheetError {
 
 		ReportWriter result;
 		switch (type) {
@@ -75,8 +77,11 @@ abstract class ReportWriter {
 	 * @param sourceSheet
 	 *            Имя листа шаблона, с которого будут копироваться ширины
 	 *            столбцов
+	 * @throws XML2SpreadSheetError
+	 *             В случае ошибок операции
 	 */
-	public void sheet(String sheetName, String sourceSheet) {
+	public void sheet(String sheetName, String sourceSheet)
+			throws XML2SpreadSheetError {
 		newSheet(sheetName, sourceSheet);
 
 		blocks.clear();
@@ -92,11 +97,11 @@ abstract class ReportWriter {
 	 * @param horizontal
 	 *            true для режима слева направо, false для режима сверху вниз.
 	 */
-	public void startSequence(boolean horizontal) {
+	public void startSequence(boolean horizontal) throws XML2SpreadSheetError {
 		// На вершине стека должен находиться как минимум диапазон листа. Если
 		// пользователь не создал листа, делаем это за него.
-		if (blocks.isEmpty())
-			sheet("Sheet1", null);
+//		if (blocks.isEmpty())
+//			sheet("Sheet1", null);
 
 		LayoutBlock b = new LayoutBlock();
 		b.horizontal = horizontal;
@@ -198,8 +203,17 @@ abstract class ReportWriter {
 		return output;
 	}
 
-	abstract void newSheet(String sheetName, String sourceSheet);
+	abstract void newSheet(String sheetName, String sourceSheet)
+			throws XML2SpreadSheetError;
 
 	abstract void putSection(XMLContext context, CellAddress growthPoint2,
-			String sourceSheet, RangeAddress range);
+			String sourceSheet, RangeAddress range) throws XML2SpreadSheetError;
+
+	/**
+	 * Сбрасывает результат создания документа в поток.
+	 * 
+	 * @throws XML2SpreadSheetError
+	 *             при возникновении ошибки сохранения
+	 */
+	public abstract void flush() throws XML2SpreadSheetError;
 }

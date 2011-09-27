@@ -75,5 +75,6 @@ final class DOMDataReader extends XMLDataReader {
 		if (getDescriptor().getElementName().equals(
 				xmlData.getDocumentElement().getNodeName()))
 			processElement(getDescriptor(), xmlData.getDocumentElement());
+		getWriter().flush();
 	}
 }

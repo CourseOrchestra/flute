@@ -23,6 +23,19 @@ public class TestCellRangeAddress {
 	}
 
 	@Test
+	public void testCellAddress2() {
+		CellAddress ca = new CellAddress("Z1");
+		assertEquals(26, ca.getCol());
+		assertEquals("Z1", ca.getAddress());
+		ca = new CellAddress("AZ21");
+		assertEquals(52, ca.getCol());
+		assertEquals("AZ21", ca.getAddress());
+		ca = new CellAddress("BX21");
+		assertEquals(76, ca.getCol());
+		assertEquals("BX21", ca.getAddress());
+	}
+
+	@Test
 	public void testRangeAddress1() throws XML2SpreadSheetError {
 		RangeAddress ra = new RangeAddress("D11:G36");
 		assertEquals(new CellAddress("D11"), ra.topLeft());

@@ -78,7 +78,7 @@ public class TestReader {
 				descrStream, false, w);
 		reader.process();
 		assertEquals(
-				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCCQh{}Q{}}",
+				"Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCCQh{}Q{}}F",
 				w.getLog().toString());
 	}
 
@@ -93,7 +93,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}}TCCQh{}Q{}}", w
+		assertEquals("Q{TCQ{CCQ{CC}C}}Q{TCCQh{CCC}Q{CQh{CCC}}TCCQh{}Q{}}F", w
 				.getLog().toString());
 	}
 
@@ -132,7 +132,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}CQh{CCC}CQh{CCC}}TCQ{}}", w
+		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}CQh{CCC}CQh{CCC}}TCQ{}}F", w
 				.getLog().toString());
 	}
 
@@ -147,7 +147,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}}TCQ{}}", w.getLog()
+		assertEquals("Q{TCQ{CCQ{CC}C}TCQ{CQh{CCC}}TCQ{}}F", w.getLog()
 				.toString());
 	}
 }
@@ -198,6 +198,12 @@ class DummyWriter extends ReportWriter {
 	@Override
 	void putSection(XMLContext context, CellAddress growthPoint2,
 			String sourceSheet, RangeAddress range) {
+	}
+
+	@Override
+	public void flush() throws XML2SpreadSheetError {
+		// Также проверяем, что последним всегда вызывается метод flush.
+		log.append("F");
 	}
 
 }

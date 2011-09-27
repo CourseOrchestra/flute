@@ -237,7 +237,8 @@ abstract class XMLDataReader {
 			String wsName = c.calc(o.getWorksheet());
 			getWriter().sheet(wsName, o.getSourceSheet());
 		}
-		getWriter().section(c, o.getSourceSheet(), o.getRange());
+		if (o.getRange() != null)
+			getWriter().section(c, o.getSourceSheet(), o.getRange());
 	}
 
 	final boolean compareIndices(int expected, int actual) {

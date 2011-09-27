@@ -7,7 +7,7 @@ import java.io.InputStream;
  */
 final class XLSXReportWriter extends ReportWriter {
 
-	XLSXReportWriter(InputStream template) {
+	XLSXReportWriter(InputStream template) throws XML2SpreadSheetError {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -20,6 +20,12 @@ final class XLSXReportWriter extends ReportWriter {
 	@Override
 	void putSection(XMLContext context, CellAddress growthPoint2,
 			String sourceSheet, RangeAddress range) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void flush() throws XML2SpreadSheetError {
 		// TODO Auto-generated method stub
 
 	}
