@@ -159,7 +159,7 @@ class DummyWriter extends ReportWriter {
 	private final StringBuilder log = new StringBuilder();
 
 	@Override
-	public void sheet(String sheetName) {
+	public void sheet(String sheetName, String sourceSheet) {
 		// sheeT
 		log.append("T");
 		assertEquals(sheetNames[i], sheetName);
@@ -181,13 +181,23 @@ class DummyWriter extends ReportWriter {
 	}
 
 	@Override
-	public void section(XMLContext context, RangeAddress range) {
+	public void section(XMLContext context, String sourceSheet,
+			RangeAddress range) {
 		// seCtion
 		log.append("C");
 	}
 
 	StringBuilder getLog() {
 		return log;
+	}
+
+	@Override
+	void newSheet(String sheetName, String sourceSheet) {
+	}
+
+	@Override
+	void putSection(XMLContext context, CellAddress growthPoint2,
+			String sourceSheet, RangeAddress range) {
 	}
 
 }

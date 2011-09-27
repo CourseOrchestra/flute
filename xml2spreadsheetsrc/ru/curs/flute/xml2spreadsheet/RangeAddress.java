@@ -50,4 +50,13 @@ final class RangeAddress {
 	public int bottom() {
 		return bottomRight.getRow();
 	}
+
+	public void setRight(int max) {
+		bottomRight.setCol(max);
+	}
+
+	public void setBottom(int max) {
+		bottomRight.setRow(max);
+
+	}
 }
