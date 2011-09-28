@@ -67,6 +67,10 @@ Var CtlFluteServiceName
 ;ВЫБОР JAVA-виртуальной машины
 Page custom pageChooseJVM pageChooseJVMLeave "$(TEXT_JVM_PAGETITLE)"
 
+;ВЫБОР КОМПОНЕНТ ДЛЯ УСТАНОВКИ
+!insertmacro MUI_PAGE_COMPONENTS
+
+
 ;ВЫБОР ДИРЕКТОРИИ ДЛЯ УСТАНОВКИ
 !insertmacro MUI_PAGE_DIRECTORY
 
@@ -131,7 +135,30 @@ Function .onInit
   StrCpy $FluteServiceName $FluteServiceDefaultName
   StrCpy $FluteServiceFileName "${PRODUCT_NAME}${PRODUCT_VERSION}.exe"
   StrCpy $FluteServiceManagerFileName "${PRODUCT_NAME}${PRODUCT_VERSION}w.exe"
+
 FunctionEnd
+
+Function .onMouseOverSection
+    FindWindow $R0 "#32770" "" $HWNDPARENT
+    GetDlgItem $R0 $R0 1043 ; description item (must be added to the UI)
+
+    StrCmp $0 0 "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Система Flute."
+
+    StrCmp $0 1 "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Компонента быстрого построения больших отчётов в формате XLSX на основе результатов выполнения хранимых процедур."
+
+    StrCmp $0 2 "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Компонента гибкого построения отчётов в различных форматах."
+    
+    StrCmp $0 3 "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотека Apache POI для формирования MS Office файлов."
+    
+    StrCmp $0 4 "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Стандартная библиотека Python."
+
+FunctionEnd
+
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "flute-setup-${PRODUCT_VERSION}.${BUILD_VERSION}.exe"
@@ -140,7 +167,10 @@ InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
-Section "MainSection" SEC01
+Section "Flute" SEC01
+
+  SectionIn RO
+
   DetailPrint "-----------------------------"
   DetailPrint "JVM Path: $JvmDll."
   DetailPrint "Architecture: $Arch."
@@ -154,15 +184,9 @@ Section "MainSection" SEC01
   WriteIniStr "$INSTDIR\curs.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   
   CreateDirectory $INSTDIR\logs
-  
-  SetOutPath $INSTDIR\lib
-  File fastxl.jar
-  
-  SetOutPath $INSTDIR
-  File /r /x .svn pylib 
-  
-  SetOutPath $INSTDIR\scripts
-  File fastxl.py
+  CreateDirectory $INSTDIR\lib
+  CreateDirectory $INSTDIR\pylib
+  CreateDirectory $INSTDIR\scripts
   
   SetOutPath $INSTDIR\bin
   StrCpy $R0 $FluteServiceName
@@ -208,6 +232,36 @@ Section "MainSection" SEC01
   
   ${dumpLog} "$INSTDIR\install.log"
 SectionEnd
+
+Section "FastXL" SEC02
+  SetOutPath $INSTDIR\lib
+  File fastxl.jar
+  SetOutPath $INSTDIR\scripts
+  File fastxl.py
+SectionEnd
+
+Section "XML2Spreadsheet" SEC03
+  SetOutPath $INSTDIR\lib
+  File xml2spreadsheet.jar
+  SetOutPath $INSTDIR\scripts
+  File xml2spreadsheet.py
+SectionEnd
+
+Section "Python library" SEC04
+  SetOutPath $INSTDIR
+  File /r /x .svn pylib 
+SectionEnd
+
+Section "Apache POI files" SEC05
+  SetOutPath $INSTDIR\lib
+  File "..\lib\poi-3.7-20101029.jar"
+  File "..\lib\poi-ooxml-3.7-20101029.jar" 
+  File "..\lib\poi-ooxml-schemas-3.7-20101029.jar" 
+  File "..\lib\geronimo-stax-api_1.0_spec-1.0.jar"
+  File "..\lib\xmlbeans-2.3.0.jar" 
+  File "..\lib\dom4j-1.6.1.jar"
+SectionEnd
+
 
 Section -AdditionalIcons
 SectionEnd
@@ -273,6 +327,7 @@ Section Uninstall
   
   ;Удаляем стандартный скрипт, но если там понаписали своих скриптов --- их оставляем.
   Delete "$INSTDIR\scripts\fastxl.py"
+  Delete "$INSTDIR\scripts\xml2spreadsheet.py"
   RMDir  "$INSTDIR\scripts"
   
   ;Удаляем директорию bin с сервисраннером

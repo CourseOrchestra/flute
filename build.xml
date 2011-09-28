@@ -6,16 +6,17 @@
 	<target name="clean">
 		<echo>Cleaning the build and destination directories</echo>
 		<delete dir="build" />
-		<delete dir="fastxl" />
+
 	</target>
 	<target name="init" depends="clean">
 		<echo>Creating the required directories</echo>
-		<mkdir dir="build" />
-		<mkdir dir="fastxl" />
+		<mkdir dir="build/flute" />
+		<mkdir dir="build/fastxl" />
+		<mkdir dir="build/xml2spreadsheet" />
 	</target>
 	<target name="compile" depends="init">
 		<echo>Compile the source files</echo>
-		<javac destdir="build" encoding="UTF-8">
+		<javac destdir="build/flute" encoding="UTF-8">
 			<classpath>
 				<pathelement path="lib/jython.jar" />
 			</classpath>
@@ -23,16 +24,29 @@
 				<pathelement path="src" />
 			</src>
 		</javac>
-		<javac destdir="fastxl" encoding="UTF-8">
+		<javac destdir="build/fastxl" encoding="UTF-8">
 			<src>
 				<pathelement path="fastxlsrc" />
+			</src>
+		</javac>
+		<javac destdir="build/xml2spreadsheet" encoding="UTF-8">
+			<classpath>
+				<pathelement path="lib/poi-3.7-20101029.jar" />
+				<pathelement path="lib/poi-ooxml-3.7-20101029.jar" />
+				<pathelement path="lib/poi-ooxml-schemas-3.7-20101029.jar" />
+				<pathelement path="lib/geronimo-stax-api_1.0_spec-1.0.jar" />
+				<pathelement path="lib/xmlbeans-2.3.0.jar" />
+				<pathelement path="lib/dom4j-1.6.1.jar" />
+			</classpath>
+			<src>
+				<pathelement path="xml2spreadsheetsrc" />
 			</src>
 		</javac>
 	</target>
 	<target name="jar" depends="compile">
 		<echo>Building the jar files</echo>
 		<jar destfile="wininstall/flute.jar" filesetmanifest="merge">
-			<fileset dir="build" />
+			<fileset dir="build/flute" />
 			<zipfileset src="lib/sqljdbc4.jar" excludes="META-INF/MSFTSIG.*" />
 			<zipfileset src="lib/jython.jar" />
 			<manifest>
@@ -40,7 +54,10 @@
 			</manifest>
 		</jar>
 		<jar destfile="wininstall/fastxl.jar">
-			<fileset dir="fastxl" />
+			<fileset dir="build/fastxl" />
+		</jar>
+		<jar destfile="wininstall/xml2spreadsheet.jar">
+			<fileset dir="build/xml2spreadsheet" />
 		</jar>
 	</target>
 	<target name="nsis" depends="jar">

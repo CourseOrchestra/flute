@@ -67,9 +67,18 @@ public final class CellAddress {
 		int c = col;
 		String sc = "";
 		do {
-			char d = (char) (c % RADIX + 'A' - 1);
+			int digit = c % RADIX;
+			char d;
+			if (digit == 0) {
+				c -= RADIX;
+				d = 'Z';
+			} else
+				d = (char) (digit + 'A' - 1);
+
 			sc = d + sc;
-			c = c / RADIX;
+
+			c /= RADIX;
+
 		} while (c > 0);
 		return sc + String.valueOf(row);
 	}

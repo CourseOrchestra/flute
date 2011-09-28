@@ -21,6 +21,10 @@ public class TestCellAddress {
 		
 		assertEquals("AB11", ca.getAddress());
 
+		
+		ca = new CellAddress("Z1");
+		assertEquals(26, ca.getCol());
+		assertEquals("Z1", ca.getAddress());
 	}
 
 }

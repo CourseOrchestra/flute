@@ -18,6 +18,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.python.core.PyException;
 import org.python.core.PyInteger;
+import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.util.PythonInterpreter;
 
@@ -82,7 +83,8 @@ public abstract class PythonProcessor extends Thread {
 		interp.set("resultstream", task.getOutStream());
 		try {
 			interp.execfile(fis);
-			return interp.get("message").asString();
+			PyObject message = interp.get("message");
+			return message == null ? null : message.asString();
 		} catch (PyException e) {
 			throw new EFluteRuntime(String.format("Python error: %s:%s",
 					e.type, e.value));
