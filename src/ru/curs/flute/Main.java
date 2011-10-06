@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.python.core.codecs;
 import org.python.util.PythonInterpreter;
 
 /**
@@ -107,9 +108,10 @@ public final class Main {
 				"java.ext.dirs,flute.lib");
 		postProperties.setProperty("flute.lib", libfolder);
 		postProperties.setProperty("python.path", pylib.toString());
+		
 		PythonInterpreter.initialize(System.getProperties(), postProperties,
 				null);
-
+		codecs.setDefaultEncoding("UTF-8");
 	}
 
 	private static void startService() {

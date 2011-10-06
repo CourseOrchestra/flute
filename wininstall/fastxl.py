@@ -1,8 +1,11 @@
-#Any sript can use the following variables:
+#   coding=utf-8
+#
+# Any sript can use the following variables:
 #	taskid	Flute's task id
 #	params  XML parameters passed as string
 #	conn	JDBC connection from the connecton pool (you should not close it, it will be reused!)
 #	resultstream	OutputStream to write the result
+#   message Script's message to log
 
 import ru.curs.flute.fastxl as fastxl
 
