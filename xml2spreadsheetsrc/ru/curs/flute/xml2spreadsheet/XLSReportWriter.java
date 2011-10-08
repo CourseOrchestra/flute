@@ -8,6 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -43,6 +44,7 @@ final class XLSReportWriter extends ReportWriter {
 			csResult.cloneStyleFrom(csSource);
 			stylesMap.put(csSource, csResult);
 		}
+
 	}
 
 	private void updateActiveTemplateSheet(String sourceSheet)
@@ -77,6 +79,28 @@ final class XLSReportWriter extends ReportWriter {
 		for (int i = 0; i < maxCol; i++)
 			activeResultSheet.setColumnWidth(i,
 					activeTemplateSheet.getColumnWidth(i));
+
+		// Копируем все настройки печати
+		PrintSetup sourcePS = activeTemplateSheet.getPrintSetup();
+		PrintSetup resultPS = activeResultSheet.getPrintSetup();
+		resultPS.setCopies(sourcePS.getCopies());
+		resultPS.setDraft(sourcePS.getDraft());
+		resultPS.setFitHeight(sourcePS.getFitHeight());
+		resultPS.setFitWidth(sourcePS.getFitWidth());
+		resultPS.setFooterMargin(sourcePS.getFooterMargin());
+		resultPS.setHeaderMargin(sourcePS.getHeaderMargin());
+		resultPS.setHResolution(sourcePS.getHResolution());
+		resultPS.setLandscape(sourcePS.getLandscape());
+		resultPS.setLeftToRight(sourcePS.getLeftToRight());
+		resultPS.setNoColor(sourcePS.getNoColor());
+		resultPS.setNoOrientation(sourcePS.getNoOrientation());
+		resultPS.setNotes(sourcePS.getNotes());
+		resultPS.setPageStart(sourcePS.getPageStart());
+		resultPS.setPaperSize(sourcePS.getPaperSize());
+		resultPS.setScale(sourcePS.getScale());
+		resultPS.setUsePage(sourcePS.getUsePage());
+		resultPS.setValidSettings(sourcePS.getValidSettings());
+		resultPS.setVResolution(sourcePS.getVResolution());
 	}
 
 	@Override
