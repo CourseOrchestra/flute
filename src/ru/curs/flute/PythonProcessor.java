@@ -47,11 +47,9 @@ public abstract class PythonProcessor extends Thread {
 		final File f = new File(AppSettings.getScriptsPath() + File.separator
 				+ task.getScriptName());
 		if (!f.exists())
-			throw new EFluteRuntime("Report template file " + f
-					+ " does not exist!");
+			throw new EFluteRuntime("Script file " + f + " does not exist!");
 		if (!f.canRead())
-			throw new EFluteRuntime("Report template file " + f
-					+ " cannot be read!");
+			throw new EFluteRuntime("Script file " + f + " cannot be read!");
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(f);

@@ -58,6 +58,7 @@
 		</jar>
 		<jar destfile="wininstall/xml2spreadsheet.jar">
 			<fileset dir="build/xml2spreadsheet" />
+			<zipfileset src="lib/saxon9he.jar" />
 		</jar>
 	</target>
 	<target name="nsis" depends="jar">

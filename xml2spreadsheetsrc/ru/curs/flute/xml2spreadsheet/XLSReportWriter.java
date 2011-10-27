@@ -3,6 +3,7 @@ package ru.curs.flute.xml2spreadsheet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -18,6 +19,13 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  * Реализация ReportWriter для вывода в формат MSOffice 97-2003 (XLS).
  */
 final class XLSReportWriter extends ReportWriter {
+
+	/**
+	 * Регексп для числа (в общем случае, с плавающей точкой --- целые числа
+	 * также должны попадать под этот регексп.
+	 */
+	public static final Pattern NUMBER = Pattern
+			.compile("[+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?");
 
 	private final Workbook template;
 	private final Workbook result;
@@ -44,7 +52,6 @@ final class XLSReportWriter extends ReportWriter {
 			csResult.cloneStyleFrom(csSource);
 			stylesMap.put(csSource, csResult);
 		}
-
 	}
 
 	private void updateActiveTemplateSheet(String sourceSheet)
@@ -137,10 +144,16 @@ final class XLSReportWriter extends ReportWriter {
 				case Cell.CELL_TYPE_NUMERIC:
 					resultCell.setCellValue(sourceCell.getNumericCellValue());
 					break;
-				case Cell.CELL_TYPE_STRING:
+				case Cell.CELL_TYPE_STRING: 
+				case Cell.CELL_TYPE_FORMULA:
 					// ДЛЯ СТРОКОВЫХ ЯЧЕЕК ВЫЧИСЛЯЕМ ПОДСТАНОВКИ!!
-					resultCell.setCellValue(context.calc(sourceCell
-							.getStringCellValue()));
+					String buf = context.calc(sourceCell.getStringCellValue());
+					// Если ячейка содержит строковое представление числа ---
+					// меняем его на число.
+					if (NUMBER.matcher(buf.trim()).matches())
+						resultCell.setCellValue(Double.parseDouble(buf));
+					else
+						resultCell.setCellValue(buf);
 					break;
 				// Остальные типы ячеек пока игнорируем
 				}
