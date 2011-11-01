@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -337,35 +339,45 @@ public final class StatementProducer {
 		private final String value;
 
 		XPathParameter(String value) throws XPathExpressionException {
-			XPath xpath = XPathFactory.newInstance().newXPath();
-
 			// Cнимаем X{}!
 			Matcher m = StatementProducer.XPATH.matcher(value);
 			m.matches();
-			XPathExpression expr = xpath.compile(m.group(1));
-			NodeList nodes = (NodeList) expr.evaluate(xmlParams,
-					XPathConstants.NODESET);
-
-			if (nodes.getLength() > 0) {
-
-				StringWriter writer = new StringWriter();
-
-				try {
-					Transformer transformer = TransformerFactory.newInstance()
-							.newTransformer();
-					transformer
-							.setOutputProperty(OutputKeys.ENCODING, "UTF-16");
-					transformer.transform(new DOMSource(nodes.item(0)),
+			StringWriter writer = new StringWriter();
+			try {
+				if ("/".equals(m.group(1))) {
+					// В случае, если XPath-выражение тривиально, мы не
+					// занимаемся его компиляцией и интерпретацией для экономии
+					// ресурсов.
+					getTransformer().transform(new DOMSource(xmlParams),
 							new StreamResult(writer));
-
-				} catch (Exception e) {
-					// Ну и фиг
+				} else {
+					XPath xpath = XPathFactory.newInstance().newXPath();
+					XPathExpression expr = xpath.compile(m.group(1));
+					NodeList nodes = (NodeList) expr.evaluate(xmlParams,
+							XPathConstants.NODESET);
+					if (nodes.getLength() > 0)
+						getTransformer().transform(
+								new DOMSource(nodes.item(0)),
+								new StreamResult(writer));
 				}
-
-				this.value = writer.toString();
-			} else
+			} catch (TransformerException e) {
 				this.value = null;
+				return;
+			}
+			String buf = writer.toString();
+			this.value = "".equals(buf) ? null : buf;
+		}
 
+		private Transformer getTransformer() {
+			Transformer transformer;
+			try {
+				transformer = TransformerFactory.newInstance().newTransformer();
+				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-16");
+			} catch (TransformerConfigurationException e) {
+				e.printStackTrace();
+				transformer = null;
+			}
+			return transformer;
 		}
 
 		@Override
