@@ -117,6 +117,9 @@ abstract class ReportWriter {
 	 * самого высокого элемента в группе.
 	 */
 	public void endSequence() {
+		if (blocks.isEmpty()) 
+			return;
+		
 		LayoutBlock b2 = blocks.pop();
 		// Если в группе так ничего и не было выведено или лист кончился ---
 		// ничего и не делаем
