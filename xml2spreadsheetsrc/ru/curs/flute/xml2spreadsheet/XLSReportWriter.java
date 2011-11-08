@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 /**
  * Реализация ReportWriter для вывода в формат MSOffice 97-2003 (XLS).
@@ -84,8 +85,8 @@ final class XLSReportWriter extends ReportWriter {
 		// Копируем ширины колонок (знак <, а не <= здесь не случайно, т. к.
 		// getLastCellNum возвращает ширину строки ПЛЮС ЕДИНИЦА)
 		for (int i = 0; i < maxCol; i++)
-			activeResultSheet.setColumnWidth(i,
-					activeTemplateSheet.getColumnWidth(i));
+			activeResultSheet.setColumnWidth(i, activeTemplateSheet
+					.getColumnWidth(i));
 
 		// Копируем все настройки печати
 		PrintSetup sourcePS = activeTemplateSheet.getPrintSetup();
@@ -125,8 +126,8 @@ final class XLSReportWriter extends ReportWriter {
 				resultRow = activeResultSheet.createRow(growthPoint.getRow()
 						+ i - range.top() - 1);
 
-			for (int j = range.left(); j < Math.min(range.right(),
-					sourceRow.getLastCellNum()) + 1; j++) {
+			for (int j = range.left(); j < Math.min(range.right(), sourceRow
+					.getLastCellNum()) + 1; j++) {
 				Cell sourceCell = sourceRow.getCell(j - 1);
 				Cell resultCell = resultRow.createCell(growthPoint.getCol() + j
 						- range.left() - 1);
@@ -144,7 +145,7 @@ final class XLSReportWriter extends ReportWriter {
 				case Cell.CELL_TYPE_NUMERIC:
 					resultCell.setCellValue(sourceCell.getNumericCellValue());
 					break;
-				case Cell.CELL_TYPE_STRING: 
+				case Cell.CELL_TYPE_STRING:
 				case Cell.CELL_TYPE_FORMULA:
 					// ДЛЯ СТРОКОВЫХ ЯЧЕЕК ВЫЧИСЛЯЕМ ПОДСТАНОВКИ!!
 					String buf = context.calc(sourceCell.getStringCellValue());
@@ -158,6 +159,30 @@ final class XLSReportWriter extends ReportWriter {
 				// Остальные типы ячеек пока игнорируем
 				}
 			}
+		}
+
+		// Разбираемся с merged-ячейками
+		int mr = activeTemplateSheet.getNumMergedRegions();
+		for (int i = 0; i < mr; i++) {
+			// Диапазон смёрдженных ячеек на листе шаблона
+			RangeAddress ra = new RangeAddress(activeTemplateSheet
+					.getMergedRegion(i).formatAsString());
+
+			if (!(ra.top() >= range.top() && ra.bottom() <= range.bottom()
+					&& ra.left() >= range.left() && ra.right() <= range.right()))
+				continue;
+
+			int ydiff = -range.top() + growthPoint.getRow() - 1;
+			int firstRow = ra.top() + ydiff;
+			int lastRow = ra.bottom() + ydiff;
+
+			int xdiff = -range.left() + growthPoint.getCol() - 1;
+			int firstCol = ra.left() + xdiff;
+			int lastCol = ra.right() + xdiff;
+			CellRangeAddress res = new CellRangeAddress(firstRow, lastRow,
+					firstCol, lastCol);
+
+			activeResultSheet.addMergedRegion(res);
 		}
 	}
 
