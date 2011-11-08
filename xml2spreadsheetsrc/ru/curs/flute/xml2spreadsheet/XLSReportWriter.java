@@ -9,6 +9,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -46,11 +48,55 @@ final class XLSReportWriter extends ReportWriter {
 		// Создаём новую книгу
 		result = new HSSFWorkbook();
 
-		// Копируем стили ячеек
+		final HashMap<Short, Font> fontMap = new HashMap<Short, Font>();
+		
+		// Копируем шрифты
+		for (short i = 0; i < this.template.getNumberOfFonts(); i++) {
+			Font fSource = this.template.getFontAt(i);
+			Font fResult = result.createFont();
+			fResult.setBoldweight(fSource.getBoldweight());
+			fResult.setCharSet(fSource.getCharSet());
+			fResult.setColor(fSource.getColor());
+			fResult.setFontHeight(fSource.getFontHeight());
+			fResult.setFontName(fSource.getFontName());
+			fResult.setItalic(fSource.getItalic());
+			fResult.setStrikeout(fSource.getStrikeout());
+			fResult.setTypeOffset(fSource.getTypeOffset());
+			fResult.setUnderline(fSource.getUnderline());
+			fontMap.put(fSource.getIndex(), fResult);
+		}
+		
+		DataFormat  df = result.createDataFormat();
+		
+		// Копируем стили ячеек (cloneStyleFrom не работает для нас)
 		for (short i = 0; i < this.template.getNumCellStyles(); i++) {
+
 			CellStyle csSource = this.template.getCellStyleAt(i);
 			CellStyle csResult = result.createCellStyle();
-			csResult.cloneStyleFrom(csSource);
+
+			csResult.setAlignment(csSource.getAlignment());
+			csResult.setBorderBottom(csSource.getBorderBottom());
+			csResult.setBorderLeft(csSource.getBorderLeft());
+			csResult.setBorderRight(csSource.getBorderRight());
+			csResult.setBorderTop(csSource.getBorderTop());
+			csResult.setBottomBorderColor(csSource.getBottomBorderColor());
+			csResult.setDataFormat(df.getFormat(csSource.getDataFormatString()));
+			csResult.setFillBackgroundColor(csSource.getFillBackgroundColor());
+			csResult.setFillForegroundColor(csSource.getFillForegroundColor());
+			csResult.setFillPattern(csSource.getFillPattern());
+			Font f = fontMap.get(csSource.getFontIndex());
+			if (f != null)
+				csResult.setFont(f);
+			csResult.setHidden(csSource.getHidden());
+			csResult.setIndention(csSource.getIndention());
+			csResult.setLeftBorderColor(csSource.getLeftBorderColor());
+			csResult.setLocked(csSource.getLocked());
+			csResult.setRightBorderColor(csSource.getRightBorderColor());
+			csResult.setRotation(csSource.getRotation());
+			csResult.setTopBorderColor(csSource.getTopBorderColor());
+			csResult.setVerticalAlignment(csSource.getVerticalAlignment());
+			csResult.setWrapText(csSource.getWrapText());
+
 			stylesMap.put(csSource, csResult);
 		}
 	}
