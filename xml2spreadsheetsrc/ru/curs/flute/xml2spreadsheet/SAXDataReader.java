@@ -37,11 +37,11 @@ final class SAXDataReader extends XMLDataReader {
 		private final XMLContext context;
 		private final boolean iterate;
 		private final boolean horizontal;
-		private final List<DescriptorOutput> preOutputs = new LinkedList<DescriptorOutput>();
-		private final List<DescriptorElement> expectedElements = new LinkedList<DescriptorElement>();
-		private final List<DescriptorOutput> postOutputs = new LinkedList<DescriptorOutput>();
-		private final List<DescriptorOutput> headerOutputs = new LinkedList<DescriptorOutput>();
-		private final List<DescriptorOutput> footerOutputs = new LinkedList<DescriptorOutput>();
+		private final List<DescriptorOutput> preOutputs = new LinkedList<>();
+		private final List<DescriptorElement> expectedElements = new LinkedList<>();
+		private final List<DescriptorOutput> postOutputs = new LinkedList<>();
+		private final List<DescriptorOutput> headerOutputs = new LinkedList<>();
+		private final List<DescriptorOutput> footerOutputs = new LinkedList<>();
 
 		SAXElementDescriptor() {
 			context = null;

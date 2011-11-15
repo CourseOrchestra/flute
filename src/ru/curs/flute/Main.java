@@ -51,13 +51,10 @@ public final class Main {
 					"UPDATE %s SET STATUS = 0 WHERE STATUS = 1",
 					AppSettings.getTableName()));
 			stmt.execute();
-		} catch (EFluteCritical e) {
+		} catch (SQLException | EFluteCritical e) {
 			// Ошибка возникла при финализации
 			e.printStackTrace();
-		} catch (SQLException e) {
-			// Ошибка возникла при финализации
-			e.printStackTrace();
-		}
+		} 
 	}
 
 	private static String getMyPath() {

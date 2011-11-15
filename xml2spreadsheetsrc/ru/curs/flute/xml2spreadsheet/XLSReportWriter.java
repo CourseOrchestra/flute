@@ -3,6 +3,7 @@ package ru.curs.flute.xml2spreadsheet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -34,7 +35,7 @@ final class XLSReportWriter extends ReportWriter {
 	private final Workbook result;
 	private Sheet activeTemplateSheet;
 	private Sheet activeResultSheet;
-	private final HashMap<CellStyle, CellStyle> stylesMap = new HashMap<CellStyle, CellStyle>();
+	private final Map<CellStyle, CellStyle> stylesMap = new HashMap<>();
 
 	XLSReportWriter(InputStream template) throws XML2SpreadSheetError {
 		try {
@@ -48,7 +49,7 @@ final class XLSReportWriter extends ReportWriter {
 		// Создаём новую книгу
 		result = new HSSFWorkbook();
 
-		final HashMap<Short, Font> fontMap = new HashMap<Short, Font>();
+		final Map<Short, Font> fontMap = new HashMap<>();
 
 		// Копируем шрифты
 		for (short i = 0; i < this.template.getNumberOfFonts(); i++) {
@@ -218,6 +219,11 @@ final class XLSReportWriter extends ReportWriter {
 		}
 
 		// Разбираемся с merged-ячейками
+		arrangeMergedCells(growthPoint, range);
+	}
+
+	private void arrangeMergedCells(CellAddress growthPoint, RangeAddress range)
+			throws XML2SpreadSheetError {
 		int mr = activeTemplateSheet.getNumMergedRegions();
 		for (int i = 0; i < mr; i++) {
 			// Диапазон смёрдженных ячеек на листе шаблона

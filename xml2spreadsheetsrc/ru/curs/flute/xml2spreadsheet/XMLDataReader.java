@@ -33,7 +33,7 @@ abstract class XMLDataReader {
 
 	private static final class DescriptorParser extends DefaultHandler {
 
-		private final Deque<DescriptorElement> elementsStack = new LinkedList<DescriptorElement>();
+		private final Deque<DescriptorElement> elementsStack = new LinkedList<>();
 		private DescriptorElement root;
 		private ParserState parserState = ParserState.ITERATION;
 
@@ -281,7 +281,7 @@ abstract class XMLDataReader {
 	static final class DescriptorIteration extends DescriptorSubelement {
 		private final int index;
 		private final boolean horizontal;
-		private final List<DescriptorElement> elements = new LinkedList<DescriptorElement>();
+		private final List<DescriptorElement> elements = new LinkedList<>();
 
 		public DescriptorIteration(int index, boolean horizontal) {
 			this.index = index;

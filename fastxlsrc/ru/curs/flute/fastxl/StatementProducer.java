@@ -90,7 +90,7 @@ public final class StatementProducer {
 	private String rangeName;
 	private String procedureName;
 	private Document xmlParams;
-	private final List<ProcedureParameter> parameters = new LinkedList<ProcedureParameter>();
+	private final List<ProcedureParameter> parameters = new LinkedList<>();
 
 	/**
 	 * Проверка строки на соответствие ожидаемому выражению.

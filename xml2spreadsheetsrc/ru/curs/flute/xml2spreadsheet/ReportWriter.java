@@ -32,7 +32,7 @@ abstract class ReportWriter {
 
 	}
 
-	private final Deque<LayoutBlock> blocks = new LinkedList<LayoutBlock>();
+	private final Deque<LayoutBlock> blocks = new LinkedList<>();
 
 	/**
 	 * Создаёт форматировщик на основе шаблона и типа форматировщика.

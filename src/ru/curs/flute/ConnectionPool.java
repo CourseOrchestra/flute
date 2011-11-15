@@ -4,13 +4,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Пул соединений с базой данных.
  * 
  */
 public class ConnectionPool {
-	private static final LinkedList<Connection> POOL = new LinkedList<Connection>();
+	private static final Queue<Connection> POOL = new LinkedList<>();
 
 	/**
 	 * Извлекает соединение из пула.

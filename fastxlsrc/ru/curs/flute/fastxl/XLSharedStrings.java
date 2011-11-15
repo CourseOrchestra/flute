@@ -22,8 +22,8 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 class XLSharedStrings {
 
-	private ArrayList<String> array = new ArrayList<String>();
-	private HashMap<String, Integer> reversed = new HashMap<String, Integer>();
+	private ArrayList<String> array = new ArrayList<>();
+	private HashMap<String, Integer> reversed = new HashMap<>();
 
 	XLSharedStrings(InputStream is) throws EFastXLRuntime {
 		SharedStringsParser p = new SharedStringsParser();

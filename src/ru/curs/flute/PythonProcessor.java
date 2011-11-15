@@ -134,13 +134,7 @@ public abstract class PythonProcessor extends Thread {
 										"Task %d for template '%s' failed with message: %s\n",
 										task.getId(), task.getScriptName(),
 										details));
-		} catch (SQLException e) {
-			// Перевыбросить эксепшн в этом контексте сделать нельзя...
-			AppSettings.getLogger()
-					.log(Level.SEVERE,
-							"Could not finalize task with exception: "
-									+ e.getMessage());
-		} catch (EFluteRuntime e) {
+		} catch (SQLException | EFluteRuntime e) {
 			// Перевыбросить эксепшн в этом контексте сделать нельзя...
 			AppSettings.getLogger()
 					.log(Level.SEVERE,
