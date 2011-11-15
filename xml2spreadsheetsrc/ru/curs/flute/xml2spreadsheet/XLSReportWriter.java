@@ -49,7 +49,7 @@ final class XLSReportWriter extends ReportWriter {
 		result = new HSSFWorkbook();
 
 		final HashMap<Short, Font> fontMap = new HashMap<Short, Font>();
-		
+
 		// Копируем шрифты
 		for (short i = 0; i < this.template.getNumberOfFonts(); i++) {
 			Font fSource = this.template.getFontAt(i);
@@ -65,9 +65,9 @@ final class XLSReportWriter extends ReportWriter {
 			fResult.setUnderline(fSource.getUnderline());
 			fontMap.put(fSource.getIndex(), fResult);
 		}
-		
-		DataFormat  df = result.createDataFormat();
-		
+
+		DataFormat df = result.createDataFormat();
+
 		// Копируем стили ячеек (cloneStyleFrom не работает для нас)
 		for (short i = 0; i < this.template.getNumCellStyles(); i++) {
 
@@ -131,8 +131,12 @@ final class XLSReportWriter extends ReportWriter {
 		// Копируем ширины колонок (знак <, а не <= здесь не случайно, т. к.
 		// getLastCellNum возвращает ширину строки ПЛЮС ЕДИНИЦА)
 		for (int i = 0; i < maxCol; i++)
-			activeResultSheet.setColumnWidth(i, activeTemplateSheet
-					.getColumnWidth(i));
+			activeResultSheet.setColumnWidth(i,
+					activeTemplateSheet.getColumnWidth(i));
+
+		// Переносим дефолтную высоту
+		activeResultSheet.setDefaultRowHeight(activeTemplateSheet
+				.getDefaultRowHeight());
 
 		// Копируем все настройки печати
 		PrintSetup sourcePS = activeTemplateSheet.getPrintSetup();
@@ -172,8 +176,12 @@ final class XLSReportWriter extends ReportWriter {
 				resultRow = activeResultSheet.createRow(growthPoint.getRow()
 						+ i - range.top() - 1);
 
-			for (int j = range.left(); j < Math.min(range.right(), sourceRow
-					.getLastCellNum()) + 1; j++) {
+			if (sourceRow.getHeight() != activeTemplateSheet
+					.getDefaultRowHeight())
+				resultRow.setHeight(sourceRow.getHeight());
+
+			for (int j = range.left(); j < Math.min(range.right(),
+					sourceRow.getLastCellNum()) + 1; j++) {
 				Cell sourceCell = sourceRow.getCell(j - 1);
 				Cell resultCell = resultRow.createCell(growthPoint.getCol() + j
 						- range.left() - 1);
@@ -194,10 +202,12 @@ final class XLSReportWriter extends ReportWriter {
 				case Cell.CELL_TYPE_STRING:
 				case Cell.CELL_TYPE_FORMULA:
 					// ДЛЯ СТРОКОВЫХ ЯЧЕЕК ВЫЧИСЛЯЕМ ПОДСТАНОВКИ!!
-					String buf = context.calc(sourceCell.getStringCellValue());
-					// Если ячейка содержит строковое представление числа ---
-					// меняем его на число.
-					if (NUMBER.matcher(buf.trim()).matches())
+					String val = sourceCell.getStringCellValue();
+					String buf = context.calc(val);
+					// Если ячейка содержит строковое представление числа и при
+					// этом содержит плейсхолдер --- меняем его на число.
+					if (NUMBER.matcher(buf.trim()).matches()
+							&& context.containsPlaceholder(val))
 						resultCell.setCellValue(Double.parseDouble(buf));
 					else
 						resultCell.setCellValue(buf);

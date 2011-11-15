@@ -20,6 +20,10 @@ abstract class XMLContext {
 
 	private static final Pattern P = Pattern.compile("~\\{([^}]+)\\}");
 
+	boolean containsPlaceholder(String formatString) {
+		return P.matcher(formatString).find();
+	}
+
 	/**
 	 * Вычисляет значение строки, содержащей, возможно, xpath-выражение.
 	 * 
