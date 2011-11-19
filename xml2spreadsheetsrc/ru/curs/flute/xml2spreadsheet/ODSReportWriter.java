@@ -9,6 +9,7 @@ final class ODSReportWriter extends ReportWriter {
 
 	ODSReportWriter(InputStream template) throws XML2SpreadSheetError {
 		// TODO Auto-generated constructor stub
+		throw new XML2SpreadSheetError("ODS is not implemented yet!..");
 	}
 
 	@Override

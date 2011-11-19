@@ -2,31 +2,20 @@ package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
 
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 /**
  * Реализация ReportWriter для вывода в формат MSOffice (XLSX).
  */
-final class XLSXReportWriter extends ReportWriter {
+final class XLSXReportWriter extends POIReportWriter {
 
 	XLSXReportWriter(InputStream template) throws XML2SpreadSheetError {
-		// TODO Auto-generated constructor stub
+		super(template);
 	}
 
 	@Override
-	void newSheet(String sheetName, String sourceSheet) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	void putSection(XMLContext context, CellAddress growthPoint2,
-			String sourceSheet, RangeAddress range) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void flush() throws XML2SpreadSheetError {
-		// TODO Auto-generated method stub
-
+	Workbook createResultWb() {
+		return new XSSFWorkbook();
 	}
 }
