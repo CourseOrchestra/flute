@@ -24,13 +24,13 @@ abstract class POIReportWriter extends ReportWriter {
 	 * Регексп для числа (в общем случае, с плавающей точкой --- целые числа
 	 * также должны попадать под этот регексп.
 	 */
-	public static final Pattern NUMBER = Pattern
+	private static final Pattern NUMBER = Pattern
 			.compile("[+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?");
-	protected final Workbook template;
-	protected final Workbook result;
+	private final Workbook template;
+	private final Workbook result;
 	private Sheet activeTemplateSheet;
 	private Sheet activeResultSheet;
-	protected final Map<CellStyle, CellStyle> stylesMap = new HashMap<>();
+	private final Map<CellStyle, CellStyle> stylesMap = new HashMap<>();
 
 	public POIReportWriter(InputStream template) throws XML2SpreadSheetError {
 		try {
