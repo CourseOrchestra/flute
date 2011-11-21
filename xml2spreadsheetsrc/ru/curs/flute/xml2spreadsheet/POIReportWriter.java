@@ -35,9 +35,7 @@ abstract class POIReportWriter extends ReportWriter {
 	public POIReportWriter(InputStream template) throws XML2SpreadSheetError {
 		try {
 			this.template = WorkbookFactory.create(template);
-		} catch (InvalidFormatException e) {
-			throw new XML2SpreadSheetError(e.getMessage());
-		} catch (IOException e) {
+		} catch (InvalidFormatException | IOException e) {
 			throw new XML2SpreadSheetError(e.getMessage());
 		}
 
@@ -51,7 +49,7 @@ abstract class POIReportWriter extends ReportWriter {
 			Font fSource = this.template.getFontAt(i);
 			Font fResult = result.createFont();
 			fResult.setBoldweight(fSource.getBoldweight());
-			//Для XLSX, похоже, не работает...
+			// Для XLSX, похоже, не работает...
 			if (this instanceof XLSReportWriter)
 				fResult.setCharSet(fSource.getCharSet());
 			fResult.setColor(fSource.getColor());

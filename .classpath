@@ -8,6 +8,7 @@
 	<classpathentry kind="lib" path="lib/jython.jar" sourcepath="C:/jython2.5.2/src"/>
 	<classpathentry kind="lib" path="lib/sqljdbc4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/odfdom-java-0.8.7.jar" sourcepath="lib/odfdom-java-0.8.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-stax-api_1.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.7-20101029.jar"/>
