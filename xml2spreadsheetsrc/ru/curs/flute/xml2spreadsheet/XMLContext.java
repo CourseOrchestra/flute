@@ -33,8 +33,10 @@ abstract class XMLContext {
 	final String calc(String formatString) {
 		Matcher m = P.matcher(formatString);
 		StringBuffer sb = new StringBuffer();
-		while (m.find())
-			m.appendReplacement(sb, getXPathValue(m.group(1)));
+		while (m.find()) {
+			String val = getXPathValue(m.group(1));
+			m.appendReplacement(sb, val == null ? "" : val);
+		}
 		m.appendTail(sb);
 		return sb.toString();
 	}

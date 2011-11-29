@@ -128,10 +128,16 @@ abstract class POIReportWriter extends ReportWriter {
 		}
 		// Копируем ширины колонок (знак <, а не <= здесь не случайно, т. к.
 		// getLastCellNum возвращает ширину строки ПЛЮС ЕДИНИЦА)
-		for (int i = 0; i < maxCol; i++)
+		for (int i = 0; i < maxCol; i++) {
 			activeResultSheet.setColumnWidth(i,
 					activeTemplateSheet.getColumnWidth(i));
-
+			// Скрытые столбцы
+			activeResultSheet.setColumnHidden(i,
+					activeTemplateSheet.isColumnHidden(i));
+			// Столбцы с разрывом страницы
+			if (activeTemplateSheet.isColumnBroken(i))
+				activeResultSheet.setColumnBreak(i);
+		}
 		// Переносим дефолтную высоту
 		activeResultSheet.setDefaultRowHeight(activeTemplateSheet
 				.getDefaultRowHeight());
@@ -174,13 +180,18 @@ abstract class POIReportWriter extends ReportWriter {
 				resultRow = activeResultSheet.createRow(growthPoint.getRow()
 						+ i - range.top() - 1);
 
+			// Высоты строк (если отличаются от дефолтной высоты)
 			if (sourceRow.getHeight() != activeTemplateSheet
 					.getDefaultRowHeight())
 				resultRow.setHeight(sourceRow.getHeight());
+			// Скрытые строки
+			resultRow.setZeroHeight(sourceRow.getZeroHeight());
 
 			for (int j = range.left(); j < Math.min(range.right(),
 					sourceRow.getLastCellNum()) + 1; j++) {
 				Cell sourceCell = sourceRow.getCell(j - 1);
+				if (sourceCell == null)
+					continue;
 				Cell resultCell = resultRow.createCell(growthPoint.getCol() + j
 						- range.left() - 1);
 
