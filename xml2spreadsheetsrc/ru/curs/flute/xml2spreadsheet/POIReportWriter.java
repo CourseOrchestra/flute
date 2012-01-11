@@ -45,7 +45,9 @@ abstract class POIReportWriter extends ReportWriter {
 		final Map<Short, Font> fontMap = new HashMap<>();
 
 		// Копируем шрифты
-		for (short i = 0; i < this.template.getNumberOfFonts(); i++) {
+		// Внимание: в цикле --- <=, а не < из-за ошибки то ли в названии, 
+		// то ли в реализации метода getNumberOfFonts ;-)
+		for (short i = 0; i <= this.template.getNumberOfFonts(); i++) {
 			Font fSource = this.template.getFontAt(i);
 			Font fResult = result.createFont();
 			fResult.setBoldweight(fSource.getBoldweight());
@@ -83,6 +85,7 @@ abstract class POIReportWriter extends ReportWriter {
 			Font f = fontMap.get(csSource.getFontIndex());
 			if (f != null)
 				csResult.setFont(f);
+			
 			csResult.setHidden(csSource.getHidden());
 			csResult.setIndention(csSource.getIndention());
 			csResult.setLeftBorderColor(csSource.getLeftBorderColor());
@@ -163,6 +166,9 @@ abstract class POIReportWriter extends ReportWriter {
 		resultPS.setUsePage(sourcePS.getUsePage());
 		resultPS.setValidSettings(sourcePS.getValidSettings());
 		resultPS.setVResolution(sourcePS.getVResolution());
+		resultPS.setHResolution(sourcePS.getHResolution());
+
+		activeResultSheet.setFitToPage(activeTemplateSheet.getFitToPage());
 	}
 
 	@Override
@@ -199,7 +205,7 @@ abstract class POIReportWriter extends ReportWriter {
 				CellStyle csResult = stylesMap.get(sourceCell.getCellStyle());
 				if (csResult != null)
 					resultCell.setCellStyle(csResult);
-
+				
 				// Копируем значение...
 				switch (sourceCell.getCellType()) {
 				case Cell.CELL_TYPE_BOOLEAN:
@@ -215,7 +221,8 @@ abstract class POIReportWriter extends ReportWriter {
 					String buf = context.calc(val);
 					// Если ячейка содержит строковое представление числа и при
 					// этом содержит плейсхолдер --- меняем его на число.
-					if (NUMBER.matcher(buf.trim()).matches()
+					if (!"@".equals(csResult.getDataFormatString())
+							&& NUMBER.matcher(buf.trim()).matches()
 							&& context.containsPlaceholder(val))
 						resultCell.setCellValue(Double.parseDouble(buf));
 					else
