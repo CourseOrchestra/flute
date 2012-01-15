@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -61,8 +62,7 @@ final class WorksheetProcessor {
 	 * 
 	 */
 	public void transform(OutputStream os, XLSharedStrings sharedStrings,
-			Map<Integer, StatementProducer> placeholders)
-			throws EFastXLRuntime {
+			Map<Integer, StatementProducer> placeholders) throws EFastXLRuntime {
 
 		WorksheetParser p = null;
 		try {
@@ -76,9 +76,8 @@ final class WorksheetProcessor {
 			if (p != null && p.getError() != null)
 				throw p.getError();
 			else
-				throw new EFastXLRuntime(
-						"Error while transforming worksheet: " + e.getClass()
-								+ " - " + e.getMessage());
+				throw new EFastXLRuntime("Error while transforming worksheet: "
+						+ e.getClass() + " - " + e.getMessage());
 		}
 	}
 
@@ -105,6 +104,8 @@ final class WorksheetProcessor {
 
 		private int rowOffset = 0;
 
+		private LinkedHashMap<String, String> prefixes = new LinkedHashMap<>();
+
 		public WorksheetParser(XMLStreamWriter xmlWriter,
 				XLSharedStrings sharedStrings,
 				Map<Integer, StatementProducer> placeholders) {
@@ -125,6 +126,8 @@ final class WorksheetProcessor {
 		@Override
 		public void startPrefixMapping(String prefix, String uri)
 				throws SAXException {
+			prefixes.put(prefix, uri);
+
 			try {
 				if ("".equals(prefix))
 					xmlWriter.setDefaultNamespace(uri);
@@ -286,6 +289,10 @@ final class WorksheetProcessor {
 					return;
 				}
 				xmlWriter.writeStartElement(uri, localName);
+				for (String prefix : prefixes.keySet())
+					xmlWriter.writeAttribute("".equals(prefix) ? "xmlns"
+							: "xmlns:" + prefix, prefixes.get(prefix));
+				prefixes.clear();
 				copyAttrs(atts, atts.getValue("r"));
 
 			} catch (XMLStreamException e) {
@@ -324,7 +331,7 @@ final class WorksheetProcessor {
 					if ("row".equals(localName)) {
 						// Вылезли из строки с плейсхолдером
 						state = ParserState.SHEET_DATA;
-						xmlWriter.writeEndElement(); 
+						xmlWriter.writeEndElement();
 						// Самое главное: пишем строки данных
 						ResultSetMetaData md = activeResultSet.getMetaData();
 						CellAddress ca = new CellAddress(
