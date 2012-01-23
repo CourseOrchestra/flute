@@ -72,6 +72,8 @@ public abstract class PythonProcessor extends Thread {
 						"Error while processing XML parameters: "
 								+ e.getMessage() + " for task " + task.getId());
 			}
+		else if (task.getStrParams() != null)
+			sw.append(task.getStrParams());
 
 		PythonInterpreter interp = new PythonInterpreter();
 

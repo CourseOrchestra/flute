@@ -12,13 +12,15 @@ public class TaskParams {
 	private final int id;
 	private final String scriptName;
 	private final Document params;
+	private final String strParams;
 
 	private final ByteArrayOutputStreamHack bos = new ByteArrayOutputStreamHack();
 
-	TaskParams(int id, String scriptName, Document params) {
+	TaskParams(int id, String scriptName, Document params, String str) {
 		this.id = id;
 		this.scriptName = scriptName;
 		this.params = params;
+		this.strParams = str;
 	}
 
 	/**
@@ -40,6 +42,13 @@ public class TaskParams {
 	 */
 	public Document getParams() {
 		return params;
+	}
+
+	/**
+	 * Параметры задания (в строковом формате).
+	 */
+	public String getStrParams() {
+		return strParams;
 	}
 
 	/**

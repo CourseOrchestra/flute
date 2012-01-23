@@ -50,14 +50,21 @@ public class TaskManager {
 			if (rs.next()) {
 				int id = rs.getInt(1);
 				String template = rs.getString(2);
-				SQLXML xml = rs.getSQLXML(3);
-				Document doc = xml == null ? null : (Document) xml.getSource(
-						DOMSource.class).getNode();
+				Document doc = null;
+				String str = null;
+				try {
+					SQLXML xml = rs.getSQLXML(3);
+					doc = xml == null ? null : (Document) xml.getSource(
+							DOMSource.class).getNode();
+				} catch (SQLException e) {
+					str = rs.getString(3);
+				}
+
 				markNextStmt.setInt(1, id);
 				markNextStmt.execute();
 				if (!mainConn.getAutoCommit())
 					mainConn.commit();
-				return new TaskParams(id, template, doc);
+				return new TaskParams(id, template, doc, str);
 			} else
 				return null;
 		} catch (SQLException e) {
