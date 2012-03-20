@@ -45,11 +45,12 @@ abstract class POIReportWriter extends ReportWriter {
 		final Map<Short, Font> fontMap = new HashMap<>();
 
 		// Копируем шрифты
-		// Внимание: в цикле --- <=, а не < из-за ошибки то ли в названии, 
+		// Внимание: в цикле --- <=, а не < из-за ошибки то ли в названии,
 		// то ли в реализации метода getNumberOfFonts ;-)
 		for (short i = 0; i <= this.template.getNumberOfFonts(); i++) {
 			Font fSource = this.template.getFontAt(i);
-			Font fResult = result.createFont();
+			Font fResult = (i == 0) ? result.getFontAt((short) 0) : result
+					.createFont();
 			fResult.setBoldweight(fSource.getBoldweight());
 			// Для XLSX, похоже, не работает...
 			if (this instanceof XLSReportWriter)
@@ -85,7 +86,7 @@ abstract class POIReportWriter extends ReportWriter {
 			Font f = fontMap.get(csSource.getFontIndex());
 			if (f != null)
 				csResult.setFont(f);
-			
+
 			csResult.setHidden(csSource.getHidden());
 			csResult.setIndention(csSource.getIndention());
 			csResult.setLeftBorderColor(csSource.getLeftBorderColor());
@@ -169,6 +170,8 @@ abstract class POIReportWriter extends ReportWriter {
 		resultPS.setHResolution(sourcePS.getHResolution());
 
 		activeResultSheet.setFitToPage(activeTemplateSheet.getFitToPage());
+		for (short i = 0; i < 4; i++)
+			activeResultSheet.setMargin(i, activeTemplateSheet.getMargin(i));
 	}
 
 	@Override
@@ -205,8 +208,10 @@ abstract class POIReportWriter extends ReportWriter {
 				CellStyle csResult = stylesMap.get(sourceCell.getCellStyle());
 				if (csResult != null)
 					resultCell.setCellStyle(csResult);
-				
+
 				// Копируем значение...
+				String val;
+				String buf;
 				switch (sourceCell.getCellType()) {
 				case Cell.CELL_TYPE_BOOLEAN:
 					resultCell.setCellValue(sourceCell.getBooleanCellValue());
@@ -215,18 +220,30 @@ abstract class POIReportWriter extends ReportWriter {
 					resultCell.setCellValue(sourceCell.getNumericCellValue());
 					break;
 				case Cell.CELL_TYPE_STRING:
-				case Cell.CELL_TYPE_FORMULA:
 					// ДЛЯ СТРОКОВЫХ ЯЧЕЕК ВЫЧИСЛЯЕМ ПОДСТАНОВКИ!!
-					String val = sourceCell.getStringCellValue();
-					String buf = context.calc(val);
+					val = sourceCell.getStringCellValue();
+					buf = context.calc(val);
 					// Если ячейка содержит строковое представление числа и при
 					// этом содержит плейсхолдер --- меняем его на число.
-					if (!"@".equals(csResult.getDataFormatString())
-							&& NUMBER.matcher(buf.trim()).matches()
-							&& context.containsPlaceholder(val))
-						resultCell.setCellValue(Double.parseDouble(buf));
-					else
-						resultCell.setCellValue(buf);
+					writeTextOrNumber(resultCell, buf,
+							context.containsPlaceholder(val));
+					break;
+				case Cell.CELL_TYPE_FORMULA:
+					val = sourceCell.getStringCellValue();
+					if (context.containsPlaceholder(val)) {
+						buf = context.calc(val);
+						writeTextOrNumber(resultCell, buf, true);
+					} else {
+						// Обрабатываем формулу
+						val = sourceCell.getCellFormula();
+						val = FormulaModifier.modifyFormula(
+								val,
+								resultCell.getColumnIndex()
+										- sourceCell.getColumnIndex(),
+								resultCell.getRowIndex()
+										- sourceCell.getRowIndex());
+						resultCell.setCellFormula(val);
+					}
 					break;
 				// Остальные типы ячеек пока игнорируем
 				}
@@ -235,6 +252,14 @@ abstract class POIReportWriter extends ReportWriter {
 
 		// Разбираемся с merged-ячейками
 		arrangeMergedCells(growthPoint, range);
+	}
+
+	private void writeTextOrNumber(Cell resultCell, String buf, boolean decide) {
+		if (!"@".equals(resultCell.getCellStyle().getDataFormatString())
+				&& NUMBER.matcher(buf.trim()).matches() && decide)
+			resultCell.setCellValue(Double.parseDouble(buf));
+		else
+			resultCell.setCellValue(buf);
 	}
 
 	private void arrangeMergedCells(CellAddress growthPoint, RangeAddress range)
