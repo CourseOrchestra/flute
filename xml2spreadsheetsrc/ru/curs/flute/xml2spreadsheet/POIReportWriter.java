@@ -255,8 +255,9 @@ abstract class POIReportWriter extends ReportWriter {
 	}
 
 	private void writeTextOrNumber(Cell resultCell, String buf, boolean decide) {
-		if (!"@".equals(resultCell.getCellStyle().getDataFormatString())
-				&& NUMBER.matcher(buf.trim()).matches() && decide)
+		if (decide
+				&& !"@".equals(resultCell.getCellStyle().getDataFormatString())
+				&& NUMBER.matcher(buf.trim()).matches())
 			resultCell.setCellValue(Double.parseDouble(buf));
 		else
 			resultCell.setCellValue(buf);
