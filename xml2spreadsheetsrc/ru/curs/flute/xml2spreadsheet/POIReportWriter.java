@@ -30,6 +30,7 @@ abstract class POIReportWriter extends ReportWriter {
 	private final Workbook result;
 	private Sheet activeTemplateSheet;
 	private Sheet activeResultSheet;
+	private boolean needEval = false;
 	private final Map<CellStyle, CellStyle> stylesMap = new HashMap<>();
 
 	public POIReportWriter(InputStream template) throws XML2SpreadSheetError {
@@ -243,6 +244,7 @@ abstract class POIReportWriter extends ReportWriter {
 								resultCell.getRowIndex()
 										- sourceCell.getRowIndex());
 						resultCell.setCellFormula(val);
+						needEval = true;
 					}
 					break;
 				// Остальные типы ячеек пока игнорируем
@@ -289,8 +291,12 @@ abstract class POIReportWriter extends ReportWriter {
 		}
 	}
 
+	abstract void evaluate();
+
 	@Override
 	public void flush() throws XML2SpreadSheetError {
+		if (needEval)
+			evaluate();
 		try {
 			result.write(getOutput());
 		} catch (IOException e) {
