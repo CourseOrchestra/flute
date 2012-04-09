@@ -230,22 +230,17 @@ abstract class POIReportWriter extends ReportWriter {
 							context.containsPlaceholder(val));
 					break;
 				case Cell.CELL_TYPE_FORMULA:
-					val = sourceCell.getStringCellValue();
-					if (context.containsPlaceholder(val)) {
-						buf = context.calc(val);
-						writeTextOrNumber(resultCell, buf, true);
-					} else {
-						// Обрабатываем формулу
-						val = sourceCell.getCellFormula();
-						val = FormulaModifier.modifyFormula(
-								val,
-								resultCell.getColumnIndex()
-										- sourceCell.getColumnIndex(),
-								resultCell.getRowIndex()
-										- sourceCell.getRowIndex());
-						resultCell.setCellFormula(val);
-						needEval = true;
-					}
+					// Обрабатываем формулу
+					val = sourceCell.getCellFormula();
+					val = FormulaModifier
+							.modifyFormula(
+									val,
+									resultCell.getColumnIndex()
+											- sourceCell.getColumnIndex(),
+									resultCell.getRowIndex()
+											- sourceCell.getRowIndex());
+					resultCell.setCellFormula(val);
+					needEval = true;
 					break;
 				// Остальные типы ячеек пока игнорируем
 				}
