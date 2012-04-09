@@ -146,7 +146,6 @@ abstract class POIReportWriter extends ReportWriter {
 		// Переносим дефолтную высоту
 		activeResultSheet.setDefaultRowHeight(activeTemplateSheet
 				.getDefaultRowHeight());
-
 		// Копируем все настройки печати
 		PrintSetup sourcePS = activeTemplateSheet.getPrintSetup();
 		PrintSetup resultPS = activeResultSheet.getPrintSetup();
@@ -173,6 +172,8 @@ abstract class POIReportWriter extends ReportWriter {
 		activeResultSheet.setFitToPage(activeTemplateSheet.getFitToPage());
 		for (short i = 0; i < 4; i++)
 			activeResultSheet.setMargin(i, activeTemplateSheet.getMargin(i));
+		activeResultSheet.setDisplayZeros(activeTemplateSheet.isDisplayZeros());
+
 	}
 
 	@Override
