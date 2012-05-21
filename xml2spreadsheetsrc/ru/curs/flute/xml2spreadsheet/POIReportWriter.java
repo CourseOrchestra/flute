@@ -11,6 +11,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Footer;
+import org.apache.poi.ss.usermodel.Header;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -100,6 +102,7 @@ abstract class POIReportWriter extends ReportWriter {
 
 			stylesMap.put(csSource, csResult);
 		}
+
 	}
 
 	abstract Workbook createResultWb();
@@ -116,7 +119,9 @@ abstract class POIReportWriter extends ReportWriter {
 	}
 
 	@Override
-	protected void newSheet(String sheetName, String sourceSheet)
+	protected void newSheet(String sheetName, String sourceSheet,
+			int startRepeatingColumn, int endRepeatingColumn,
+			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError {
 		activeResultSheet = result.createSheet(sheetName);
 		updateActiveTemplateSheet(sourceSheet);
@@ -174,6 +179,24 @@ abstract class POIReportWriter extends ReportWriter {
 			activeResultSheet.setMargin(i, activeTemplateSheet.getMargin(i));
 		activeResultSheet.setDisplayZeros(activeTemplateSheet.isDisplayZeros());
 
+		// Копируем колонтитулы
+		Header resultH = activeResultSheet.getHeader();
+		Header sourceH = activeTemplateSheet.getHeader();
+		resultH.setCenter(sourceH.getCenter());
+		resultH.setRight(sourceH.getRight());
+		resultH.setLeft(sourceH.getLeft());
+
+		Footer resultF = activeResultSheet.getFooter();
+		Footer sourceF = activeTemplateSheet.getFooter();
+		resultF.setCenter(sourceF.getCenter());
+		resultF.setLeft(sourceF.getLeft());
+		resultF.setRight(sourceF.getRight());
+
+		// Копируем сквозные ячейки
+		result.setRepeatingRowsAndColumns(
+				result.getSheetIndex(activeResultSheet), startRepeatingColumn,
+				endRepeatingColumn, startRepeatingRow, endRepeatingRow);
+
 	}
 
 	@Override
@@ -197,7 +220,7 @@ abstract class POIReportWriter extends ReportWriter {
 				resultRow.setHeight(sourceRow.getHeight());
 			// Скрытые строки
 			resultRow.setZeroHeight(sourceRow.getZeroHeight());
-
+			
 			for (int j = range.left(); j < Math.min(range.right(),
 					sourceRow.getLastCellNum()) + 1; j++) {
 				Cell sourceCell = sourceRow.getCell(j - 1);

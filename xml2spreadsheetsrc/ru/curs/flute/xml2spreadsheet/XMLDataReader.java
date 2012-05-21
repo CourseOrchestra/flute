@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
@@ -18,6 +20,9 @@ import org.xml.sax.helpers.DefaultHandler;
  * в объект ReportWriter.
  */
 abstract class XMLDataReader {
+
+	private static final Pattern RANGE = Pattern
+			.compile("(-?[0-9]+):(-?[0-9]+)");
 
 	private final ReportWriter writer;
 	private final DescriptorElement descriptor;
@@ -117,7 +122,9 @@ abstract class XMLDataReader {
 						StringAttrReader sar = new StringAttrReader();
 						DescriptorOutput output = new DescriptorOutput(
 								sar.getValue("worksheet"), range,
-								sar.getValue("sourcesheet"));
+								sar.getValue("sourcesheet"),
+								sar.getValue("repeatingcols"),
+								sar.getValue("repeatingrows"));
 						elementsStack.peek().getSubelements().add(output);
 
 						parserState = ParserState.OUTPUT;
@@ -235,7 +242,9 @@ abstract class XMLDataReader {
 			throws XML2SpreadSheetError {
 		if (o.getWorksheet() != null) {
 			String wsName = c.calc(o.getWorksheet());
-			getWriter().sheet(wsName, o.getSourceSheet());
+			getWriter().sheet(wsName, o.getSourceSheet(),
+					o.getStartRepeatingColumn(), o.getEndRepeatingColumn(),
+					o.getStartRepeatingRow(), o.getEndRepeatingRow());
 		}
 		if (o.getRange() != null)
 			getWriter().section(c, o.getSourceSheet(), o.getRange());
@@ -305,12 +314,32 @@ abstract class XMLDataReader {
 		private final String worksheet;
 		private final RangeAddress range;
 		private final String sourceSheet;
+		private final int startRepeatingColumn;
+		private final int endRepeatingColumn;
+		private final int startRepeatingRow;
+		private final int endRepeatingRow;
 
 		public DescriptorOutput(String worksheet, RangeAddress range,
-				String sourceSheet) {
+				String sourceSheet, String repeatingCols, String repeatingRows)
+				throws XML2SpreadSheetError {
 			this.worksheet = worksheet;
 			this.range = range;
 			this.sourceSheet = sourceSheet;
+
+			Matcher m1 = RANGE.matcher(repeatingCols == null ? "-1:-1"
+					: repeatingCols);
+			Matcher m2 = RANGE.matcher(repeatingRows == null ? "-1:-1"
+					: repeatingRows);
+			if (m1.matches() && m2.matches()) {
+				this.startRepeatingColumn = Integer.parseInt(m1.group(1));
+				this.endRepeatingColumn = Integer.parseInt(m1.group(2));
+				this.startRepeatingRow = Integer.parseInt(m2.group(1));
+				this.endRepeatingRow = Integer.parseInt(m2.group(2));
+			} else
+				throw new XML2SpreadSheetError(String.format(
+						"Invalid col/row range %s %s", repeatingCols,
+						repeatingRows));
+
 		}
 
 		String getWorksheet() {
@@ -323,6 +352,22 @@ abstract class XMLDataReader {
 
 		RangeAddress getRange() {
 			return range;
+		}
+
+		public int getStartRepeatingColumn() {
+			return startRepeatingColumn;
+		}
+
+		public int getEndRepeatingColumn() {
+			return endRepeatingColumn;
+		}
+
+		public int getStartRepeatingRow() {
+			return startRepeatingRow;
+		}
+
+		public int getEndRepeatingRow() {
+			return endRepeatingRow;
 		}
 
 	}

@@ -147,8 +147,7 @@ public class TestReader {
 		XMLDataReader reader = XMLDataReader.createReader(dataStream,
 				descrStream, false, w);
 		reader.process();
-		assertEquals("Q{TCQ{CCQ{CC}C}TQ{CQh{CCC}}TQ{}}F", w.getLog()
-				.toString());
+		assertEquals("Q{TCQ{CCQ{CC}C}TQ{CQh{CCC}}TQ{}}F", w.getLog().toString());
 	}
 }
 
@@ -159,11 +158,18 @@ class DummyWriter extends ReportWriter {
 	private final StringBuilder log = new StringBuilder();
 
 	@Override
-	public void sheet(String sheetName, String sourceSheet) {
+	public void sheet(String sheetName, String sourceSheet,
+			int startRepeatingColumn, int endRepeatingColumn,
+			int startRepeatingRow, int endRepeatingRow) {
 		// sheeT
 		log.append("T");
 		assertEquals(sheetNames[i], sheetName);
 		i++;
+
+		assertEquals(-1, startRepeatingColumn);
+		assertEquals(-1, endRepeatingColumn);
+		assertEquals(-1, startRepeatingRow);
+		assertEquals(-1, endRepeatingColumn);
 	}
 
 	@Override
@@ -192,7 +198,9 @@ class DummyWriter extends ReportWriter {
 	}
 
 	@Override
-	void newSheet(String sheetName, String sourceSheet) {
+	void newSheet(String sheetName, String sourceSheetint,
+			int startRepeatingColumn, int endRepeatingColumn,
+			int startRepeatingRow, int endRepeatingRow) {
 	}
 
 	@Override

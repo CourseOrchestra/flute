@@ -77,12 +77,23 @@ abstract class ReportWriter {
 	 * @param sourceSheet
 	 *            Имя листа шаблона, с которого будут копироваться ширины
 	 *            столбцов
+	 * @param startRepeatingColumn
+	 *            Стартовая колонка сквозных колонок
+	 * @param endRepeatingColumn
+	 *            Конечная колонка сквозных колонок
+	 * @param startRepeatingRow
+	 *            Стартовая колонка сквозных строк
+	 * @param endRepeatingRow
+	 *            Конечная колонка сквозных строк
 	 * @throws XML2SpreadSheetError
 	 *             В случае ошибок операции
 	 */
-	public void sheet(String sheetName, String sourceSheet)
+	public void sheet(String sheetName, String sourceSheet,
+			int startRepeatingColumn, int endRepeatingColumn,
+			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError {
-		newSheet(sheetName, sourceSheet);
+		newSheet(sheetName, sourceSheet, startRepeatingColumn,
+				endRepeatingColumn, startRepeatingRow, endRepeatingRow);
 
 		blocks.clear();
 		blocks.push(new LayoutBlock());
@@ -100,8 +111,8 @@ abstract class ReportWriter {
 	public void startSequence(boolean horizontal) throws XML2SpreadSheetError {
 		// На вершине стека должен находиться как минимум диапазон листа. Если
 		// пользователь не создал листа, делаем это за него.
-//		if (blocks.isEmpty())
-//			sheet("Sheet1", null);
+		// if (blocks.isEmpty())
+		// sheet("Sheet1", null);
 
 		LayoutBlock b = new LayoutBlock();
 		b.horizontal = horizontal;
@@ -117,9 +128,9 @@ abstract class ReportWriter {
 	 * самого высокого элемента в группе.
 	 */
 	public void endSequence() {
-		if (blocks.isEmpty()) 
+		if (blocks.isEmpty())
 			return;
-		
+
 		LayoutBlock b2 = blocks.pop();
 		// Если в группе так ничего и не было выведено или лист кончился ---
 		// ничего и не делаем
@@ -164,7 +175,7 @@ abstract class ReportWriter {
 		// На вершине стека должен находиться как минимум диапазон листа. Если
 		// пользователь не создал листа, делаем это за него.
 		if (blocks.isEmpty())
-			sheet("Sheet1", null);
+			sheet("Sheet1", null, -1, -1, -1, -1);
 
 		// Укладываем секцию на лист
 		putSection(context, growthPoint, sourceSheet, range);
@@ -206,7 +217,9 @@ abstract class ReportWriter {
 		return output;
 	}
 
-	abstract void newSheet(String sheetName, String sourceSheet)
+	abstract void newSheet(String sheetName, String sourceSheet,
+			int startRepeatingColumn, int endRepeatingColumn,
+			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError;
 
 	abstract void putSection(XMLContext context, CellAddress growthPoint2,
@@ -219,4 +232,5 @@ abstract class ReportWriter {
 	 *             при возникновении ошибки сохранения
 	 */
 	public abstract void flush() throws XML2SpreadSheetError;
+
 }

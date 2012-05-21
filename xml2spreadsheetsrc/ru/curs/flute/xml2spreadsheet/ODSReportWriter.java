@@ -13,7 +13,9 @@ final class ODSReportWriter extends ReportWriter {
 	}
 
 	@Override
-	void newSheet(String sheetName, String sourceSheet) {
+	void newSheet(String sheetName, String sourceSheet,
+			int startRepeatingColumn, int endRepeatingColumn,
+			int startRepeatingRow, int endRepeatingRow) {
 		// TODO Auto-generated method stub
 
 	}
@@ -28,6 +30,6 @@ final class ODSReportWriter extends ReportWriter {
 	@Override
 	public void flush() throws XML2SpreadSheetError {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
