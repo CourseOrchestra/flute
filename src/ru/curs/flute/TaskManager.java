@@ -136,6 +136,7 @@ public class TaskManager {
 	 */
 	static void execute() throws EFluteCritical {
 		stop = false;
+		THE_MANAGER.mainConn = null;
 		THE_MANAGER.internalExecute();
 	}
 

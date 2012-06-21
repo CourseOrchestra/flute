@@ -23,6 +23,7 @@ public final class AppSettings {
 	private final String databaseConnection;
 	private final String tableName;
 	private final Logger logger;
+	private final boolean neverStop;
 	{
 		logger = Logger.getLogger("ru.curs.flute");
 		logger.setLevel(Level.INFO);
@@ -100,6 +101,9 @@ public final class AppSettings {
 
 		if (sb.length() > 0)
 			throw new EFluteCritical(sb.toString());
+
+		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop",
+				"false"));
 	}
 
 	static void init(File f) throws EFluteCritical {
@@ -154,5 +158,12 @@ public final class AppSettings {
 	 */
 	public static Logger getLogger() {
 		return theSettings.logger;
+	}
+
+	/**
+	 * Значение параметра "не останавливаться на критических ошибках".
+	 */
+	public static boolean neverStop() {
+		return theSettings.neverStop;
 	}
 }

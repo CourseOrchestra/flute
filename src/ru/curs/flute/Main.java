@@ -54,7 +54,7 @@ public final class Main {
 		} catch (SQLException | EFluteCritical e) {
 			// Ошибка возникла при финализации
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	private static String getMyPath() {
@@ -105,7 +105,7 @@ public final class Main {
 				"java.ext.dirs,flute.lib");
 		postProperties.setProperty("flute.lib", libfolder);
 		postProperties.setProperty("python.path", pylib.toString());
-		
+
 		PythonInterpreter.initialize(System.getProperties(), postProperties,
 				null);
 		codecs.setDefaultEncoding("UTF-8");
@@ -155,17 +155,32 @@ public final class Main {
 			}
 		});
 
-		// Если до сих пор ничего критического не произошло, запускаем в
-		// бесконечном цикле опрос и раздачу заданий.
-		try {
-			TaskManager.execute();
-		} catch (EFluteCritical e) {
-			AppSettings.getLogger().log(
-					Level.SEVERE,
-					"The following critical problem stopped the process:\n"
-							+ e.getMessage());
-			System.exit(1);
-		}
+		while (true)
+			try {
+				// Если до сих пор ничего критического не произошло, запускаем в
+				// бесконечном цикле опрос и раздачу заданий.
+				TaskManager.execute();
+				// Если выполнение завершилось штатно -- выходим
+				break;
+			} catch (EFluteCritical e) {
+				AppSettings.getLogger().log(
+						Level.SEVERE,
+						"The following critical problem stopped the process:\n"
+								+ e.getMessage());
+				if (!AppSettings.neverStop())
+					System.exit(1);
+				else {
+					// Выдерживаем хорошую паузу
+					try {
+						Thread.sleep(10 * AppSettings.getQueryPeriod());
+					} catch (InterruptedException e1) {
+						// Do nothing
+					}
+					AppSettings.getLogger().log(Level.INFO,
+							"Trying to revive the service...");
+				}
+
+			}
 	}
 
 	private static void stopService() {
