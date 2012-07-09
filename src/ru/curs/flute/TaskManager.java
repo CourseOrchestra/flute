@@ -25,13 +25,25 @@ public class TaskManager {
 	private PreparedStatement markNextStmt;
 
 	private void initMainConn() throws EFluteCritical {
+		String sql;
+		switch (AppSettings.getDBType()) {
+		case MSSQL:
+			sql = "SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID";
+			break;
+		case POSTGRES:
+			sql = "SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID LIMIT 1";
+			break;
+		default:
+			throw new EFluteCritical(
+					"Cannot recognize database type from JDBC connection string.");
+		}
+
 		try {
 			if (mainConn == null || mainConn.isClosed()) {
 				mainConn = ConnectionPool.get();
-				selectNextStmt = mainConn
-						.prepareStatement(String
-								.format("SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID",
-										AppSettings.getTableName()));
+
+				selectNextStmt = mainConn.prepareStatement(String.format(sql,
+						AppSettings.getTableName()));
 				markNextStmt = mainConn.prepareStatement(String.format(
 						"UPDATE %s SET STATUS = 1 WHERE ID = ?",
 						AppSettings.getTableName()));

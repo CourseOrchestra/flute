@@ -117,7 +117,18 @@ public abstract class PythonProcessor extends Thread {
 			finalizeTaskStmt.setInt(1, success ? 2 : 3);
 
 			if (task.getBufferLength() == 0)
-				finalizeTaskStmt.setNull(2, java.sql.Types.BLOB);
+			{
+				switch (AppSettings.getDBType()) {
+				case MSSQL:
+					finalizeTaskStmt.setNull(2, java.sql.Types.BLOB);
+					break;
+				case POSTGRES:
+					finalizeTaskStmt.setNull(2, java.sql.Types.VARBINARY);
+					break;
+				default:
+					finalizeTaskStmt.setNull(2, java.sql.Types.VARBINARY);
+				}
+			}
 			else
 				finalizeTaskStmt.setBinaryStream(2, new ByteArrayInputStream(
 						task.getBuffer(), 0, task.getBufferLength()));

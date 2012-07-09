@@ -166,4 +166,33 @@ public final class AppSettings {
 	public static boolean neverStop() {
 		return theSettings.neverStop;
 	}
+
+	/**
+	 * Тип базы данных.
+	 * 
+	 */
+	public enum DBType {
+		/**
+		 * Postgre.
+		 */
+		POSTGRES, /**
+		 * MS SQL.
+		 */
+		MSSQL, /**
+		 * Неизвестный тип.
+		 */
+		UNKNOWN
+	}
+
+	/**
+	 * Возвращает тип базы данных на основе JDBC-строки подключения.
+	 */
+	public static DBType getDBType() {
+		if (theSettings.databaseConnection.startsWith("jdbc:sqlserver"))
+			return DBType.MSSQL;
+		else if (theSettings.databaseConnection.startsWith("jdbc:postgresql"))
+			return DBType.POSTGRES;
+		else
+			return DBType.UNKNOWN;
+	}
 }
