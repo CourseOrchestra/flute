@@ -187,4 +187,43 @@ public final class Main {
 		TaskManager.stop();
 		System.out.println("Service stopped on request.");
 	}
+
+	/**
+	 * init-метод Apache Commons Daemon: Here open configuration files, create a
+	 * trace file, create ServerSockets, Threads.
+	 * 
+	 * @param arguments
+	 *            параметры (в нашем случае игнорируются).
+	 */
+	public void init(String[] arguments) {
+
+	}
+
+	/**
+	 * start-метод Apache Commons Daemon: Start the Thread, accept incoming
+	 * connections.
+	 */
+	public void start() {
+		System.err.println("Flute starting...");
+		startService();
+		System.err.println("Flute started.");
+	}
+
+	/**
+	 * stop-метод Apache Commons Daemon: Inform the Thread to terminate the
+	 * run(), close the ServerSockets.
+	 */
+	public void stop() {
+		System.err.println("Flute stopping...");
+		stopService();
+		System.err.println("Flute stopped");
+	}
+
+	/**
+	 * destroy-метод Apache Commons Daemon: Destroy any object created in
+	 * init().
+	 */
+	public void destroy() {
+
+	}
 }
