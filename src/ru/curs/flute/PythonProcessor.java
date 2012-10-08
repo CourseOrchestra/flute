@@ -116,8 +116,7 @@ public abstract class PythonProcessor extends Thread {
 
 			finalizeTaskStmt.setInt(1, success ? 2 : 3);
 
-			if (task.getBufferLength() == 0)
-			{
+			if (task.getBufferLength() == 0) {
 				switch (AppSettings.getDBType()) {
 				case MSSQL:
 					finalizeTaskStmt.setNull(2, java.sql.Types.BLOB);
@@ -128,10 +127,27 @@ public abstract class PythonProcessor extends Thread {
 				default:
 					finalizeTaskStmt.setNull(2, java.sql.Types.VARBINARY);
 				}
-			}
-			else
-				finalizeTaskStmt.setBinaryStream(2, new ByteArrayInputStream(
-						task.getBuffer(), 0, task.getBufferLength()));
+			} else
+				switch (AppSettings.getDBType()) {
+				case MSSQL:
+					finalizeTaskStmt.setBinaryStream(
+							2,
+							new ByteArrayInputStream(task.getBuffer(), 0, task
+									.getBufferLength()));
+					break;
+				case POSTGRES:
+					finalizeTaskStmt
+							.setBinaryStream(2,
+									new ByteArrayInputStream(task.getBuffer(),
+											0, task.getBufferLength()), task
+											.getBufferLength());
+					break;
+				default:
+					finalizeTaskStmt.setBinaryStream(
+							2,
+							new ByteArrayInputStream(task.getBuffer(), 0, task
+									.getBufferLength()));
+				}
 
 			finalizeTaskStmt.setString(3, details);
 			finalizeTaskStmt.setInt(4, task.getId());
