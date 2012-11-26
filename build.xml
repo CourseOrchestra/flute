@@ -58,7 +58,10 @@
 		</jar>
 		<jar destfile="wininstall/xml2spreadsheet.jar">
 			<fileset dir="build/xml2spreadsheet" />
-			<zipfileset src="lib/saxon9he.jar" excludes="META-INF/SAXONICA.*"/>
+			<zipfileset src="lib/saxon9he.jar" excludes="META-INF/SAXONICA.*" />
+			<manifest>
+				<attribute name="Main-Class" value="ru.curs.flute.xml2spreadsheet.Main" />
+			</manifest>
 		</jar>
 	</target>
 	<target name="nsis" depends="jar">
