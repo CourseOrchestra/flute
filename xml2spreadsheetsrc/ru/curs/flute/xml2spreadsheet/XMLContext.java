@@ -19,6 +19,7 @@ import org.xml.sax.Attributes;
 abstract class XMLContext {
 
 	private static final Pattern P = Pattern.compile("~\\{([^}]+)\\}");
+	private static final Pattern CURRENT = Pattern.compile("current\\(\\)");
 
 	boolean containsPlaceholder(String formatString) {
 		return P.matcher(formatString).find();
@@ -45,20 +46,27 @@ abstract class XMLContext {
 
 	static final class DOMContext extends XMLContext {
 		private final Node n;
+		private final String path;
 		private XPath evaluator;
 
-		DOMContext(Node n) {
+		DOMContext(Node n, String path) {
 			if (n == null)
 				throw new NullPointerException();
 			this.n = n;
+			this.path = path;
 		}
 
 		@Override
 		String getXPathValue(String xpath) {
+			Matcher m = CURRENT.matcher(xpath);
+			StringBuffer sb = new StringBuffer();
+			while (m.find())
+				m.appendReplacement(sb, path);
+			m.appendTail(sb);
 			if (evaluator == null)
 				evaluator = XPathFactory.newInstance().newXPath();
 			try {
-				XPathExpression expr = evaluator.compile(xpath);
+				XPathExpression expr = evaluator.compile(sb.toString());
 				return (String) expr.evaluate(n, XPathConstants.STRING);
 			} catch (XPathExpressionException e) {
 				return "{" + e.getMessage() + "}";
