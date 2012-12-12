@@ -203,7 +203,9 @@ abstract class POIReportWriter extends ReportWriter {
 	protected void putSection(XMLContext context, CellAddress growthPoint,
 			String sourceSheet, RangeAddress range) throws XML2SpreadSheetError {
 		updateActiveTemplateSheet(sourceSheet);
-
+		if (activeResultSheet == null)
+			sheet("Sheet1", sourceSheet, -1, -1, -1, -1);
+		
 		for (int i = range.top(); i <= range.bottom(); i++) {
 			Row sourceRow = activeTemplateSheet.getRow(i - 1);
 			if (sourceRow == null)
