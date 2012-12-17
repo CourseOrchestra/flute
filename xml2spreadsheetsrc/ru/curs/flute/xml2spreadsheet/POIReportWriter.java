@@ -2,8 +2,10 @@ package ru.curs.flute.xml2spreadsheet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -28,6 +30,8 @@ abstract class POIReportWriter extends ReportWriter {
 	 */
 	private static final Pattern NUMBER = Pattern
 			.compile("[+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?");
+	private static final Pattern DATE = Pattern
+			.compile("(\\d\\d\\d\\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])");
 	private final Workbook template;
 	private final Workbook result;
 	private Sheet activeTemplateSheet;
@@ -205,7 +209,7 @@ abstract class POIReportWriter extends ReportWriter {
 		updateActiveTemplateSheet(sourceSheet);
 		if (activeResultSheet == null)
 			sheet("Sheet1", sourceSheet, -1, -1, -1, -1);
-		
+
 		for (int i = range.top(); i <= range.bottom(); i++) {
 			Row sourceRow = activeTemplateSheet.getRow(i - 1);
 			if (sourceRow == null)
@@ -222,7 +226,7 @@ abstract class POIReportWriter extends ReportWriter {
 				resultRow.setHeight(sourceRow.getHeight());
 			// Скрытые строки
 			resultRow.setZeroHeight(sourceRow.getZeroHeight());
-			
+
 			for (int j = range.left(); j < Math.min(range.right(),
 					sourceRow.getLastCellNum()) + 1; j++) {
 				Cell sourceCell = sourceRow.getCell(j - 1);
@@ -279,10 +283,23 @@ abstract class POIReportWriter extends ReportWriter {
 
 	private void writeTextOrNumber(Cell resultCell, String buf, boolean decide) {
 		if (decide
-				&& !"@".equals(resultCell.getCellStyle().getDataFormatString())
-				&& NUMBER.matcher(buf.trim()).matches())
-			resultCell.setCellValue(Double.parseDouble(buf));
-		else
+				&& !"@".equals(resultCell.getCellStyle().getDataFormatString())) {
+			Matcher numberMatcher = NUMBER.matcher(buf.trim());
+			Matcher dateMatcher = DATE.matcher(buf.trim());
+			// может, число?
+			if (numberMatcher.matches())
+				resultCell.setCellValue(Double.parseDouble(buf));
+			// может, дата?
+			else if (dateMatcher.matches()) {
+				Calendar c = Calendar.getInstance();
+				c.clear();
+				c.set(Integer.parseInt(dateMatcher.group(1)),
+						Integer.parseInt(dateMatcher.group(2)) - 1,
+						Integer.parseInt(dateMatcher.group(3)));
+				resultCell.setCellValue(c.getTime());
+			} else
+				resultCell.setCellValue(buf);
+		} else
 			resultCell.setCellValue(buf);
 	}
 
