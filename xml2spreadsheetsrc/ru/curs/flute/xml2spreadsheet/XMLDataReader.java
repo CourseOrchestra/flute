@@ -88,6 +88,18 @@ abstract class XMLDataReader {
 								return -1;
 							}
 						}).getValue("index");
+						
+						int merge = (new AttrReader<Integer>() {
+							@Override
+							Integer getIfNotEmpty(String value) {
+								return Integer.parseInt(value);
+							}
+
+							@Override
+							Integer getIfEmpty() {
+								return 0;
+							}
+						}).getValue("merge");
 
 						boolean horizontal = (new AttrReader<Boolean>() {
 							@Override
@@ -102,7 +114,7 @@ abstract class XMLDataReader {
 						}).getValue("mode");
 
 						DescriptorIteration currIteration = new DescriptorIteration(
-								index, horizontal);
+								index, horizontal, merge); 
 						elementsStack.peek().getSubelements()
 								.add(currIteration);
 						parserState = ParserState.ITERATION;
@@ -289,12 +301,14 @@ abstract class XMLDataReader {
 
 	static final class DescriptorIteration extends DescriptorSubelement {
 		private final int index;
+		private final int merge;
 		private final boolean horizontal;
 		private final List<DescriptorElement> elements = new LinkedList<>();
 
-		public DescriptorIteration(int index, boolean horizontal) {
+		public DescriptorIteration(int index, boolean horizontal, int merge) {
 			this.index = index;
 			this.horizontal = horizontal;
+			this.merge = merge;
 		}
 
 		int getIndex() {
@@ -308,6 +322,12 @@ abstract class XMLDataReader {
 		List<DescriptorElement> getElements() {
 			return elements;
 		}
+
+		public int getMerge() {
+			return merge;
+		}
+		
+		
 	}
 
 	static final class DescriptorOutput extends DescriptorSubelement {

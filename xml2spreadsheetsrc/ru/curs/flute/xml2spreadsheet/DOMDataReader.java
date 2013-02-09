@@ -89,7 +89,7 @@ final class DOMDataReader extends XMLDataReader {
 			if ("(after)".equals(de.getElementName()))
 				processElement(elementPath, de, parent);
 
-		getWriter().endSequence();
+		getWriter().endSequence(i.getMerge());
 	}
 
 	@Override

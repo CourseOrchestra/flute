@@ -127,7 +127,7 @@ abstract class ReportWriter {
 	 * вниз, то позиция смещается в столбец A, и строку, определяемую высотой
 	 * самого высокого элемента в группе.
 	 */
-	public void endSequence() {
+	public void endSequence(int merge) {
 		if (blocks.isEmpty())
 			return;
 
@@ -136,6 +136,18 @@ abstract class ReportWriter {
 		// ничего и не делаем
 		if (b2.borders == null || blocks.isEmpty())
 			return;
+
+		// Делаем мёрдж тех ячеек, которые необходимы
+		if (merge > 0) {
+			RangeAddress borders = b2.borders;
+			CellAddress tl = new CellAddress(borders.topLeft().getCol(),
+					borders.topLeft().getRow());
+			CellAddress br = b2.horizontal ? new CellAddress(borders
+					.bottomRight().getCol(), tl.getRow() + merge - 1)
+					: new CellAddress(tl.getCol() + merge - 1, borders
+							.bottomRight().getRow());
+			mergeUp(tl, br);
+		}
 
 		// Иначе, мы вставили прямоугольник, и его следует оприходовать, как
 		// большую секцию:
@@ -224,6 +236,8 @@ abstract class ReportWriter {
 
 	abstract void putSection(XMLContext context, CellAddress growthPoint2,
 			String sourceSheet, RangeAddress range) throws XML2SpreadSheetError;
+
+	abstract void mergeUp(CellAddress a1, CellAddress a2);
 
 	/**
 	 * Сбрасывает результат создания документа в поток.

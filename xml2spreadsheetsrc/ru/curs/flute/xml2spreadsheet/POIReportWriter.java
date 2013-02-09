@@ -330,6 +330,12 @@ abstract class POIReportWriter extends ReportWriter {
 	}
 
 	abstract void evaluate();
+	
+	void mergeUp(CellAddress a1, CellAddress a2){
+		CellRangeAddress res = new CellRangeAddress(a1.getRow() - 1, a2.getRow() - 1,
+				a1.getCol(), a2.getCol());
+		activeResultSheet.addMergedRegion(res);
+	}
 
 	@Override
 	public void flush() throws XML2SpreadSheetError {

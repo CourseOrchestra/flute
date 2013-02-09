@@ -32,4 +32,10 @@ final class ODSReportWriter extends ReportWriter {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	void mergeUp(CellAddress a1, CellAddress a2) {
+		// TODO Auto-generated method stub
+		
+	}
 }

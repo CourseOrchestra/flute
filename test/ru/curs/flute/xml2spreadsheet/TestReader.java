@@ -182,7 +182,7 @@ class DummyWriter extends ReportWriter {
 	}
 
 	@Override
-	public void endSequence() {
+	public void endSequence(int merge) {
 		log.append("}");
 	}
 
@@ -212,6 +212,11 @@ class DummyWriter extends ReportWriter {
 	public void flush() throws XML2SpreadSheetError {
 		// Также проверяем, что последним всегда вызывается метод flush.
 		log.append("F");
+	}
+
+	@Override
+	void mergeUp(CellAddress a1, CellAddress a2) {
+		log.append("merge");
 	}
 
 }

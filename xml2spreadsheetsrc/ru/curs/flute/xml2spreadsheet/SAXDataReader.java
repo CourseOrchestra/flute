@@ -42,12 +42,14 @@ final class SAXDataReader extends XMLDataReader {
 		private final List<DescriptorOutput> postOutputs = new LinkedList<>();
 		private final List<DescriptorOutput> headerOutputs = new LinkedList<>();
 		private final List<DescriptorOutput> footerOutputs = new LinkedList<>();
+		private final int merge;
 
 		SAXElementDescriptor() {
 			context = null;
 			iterate = false;
 			horizontal = false;
 			desiredIndex = -1;
+			merge = 0;
 		}
 
 		SAXElementDescriptor(DescriptorElement e, XMLContext context)
@@ -56,6 +58,7 @@ final class SAXDataReader extends XMLDataReader {
 			boolean iterate = false;
 			boolean horizontal = false;
 			int desiredIndex = -1;
+			int merge = 0;
 			for (DescriptorSubelement se : e.getSubelements())
 				if (!iterate) {
 					// До тэга iteration
@@ -82,7 +85,7 @@ final class SAXDataReader extends XMLDataReader {
 						desiredIndex = ((DescriptorIteration) se).getIndex();
 						iterate = true;
 						horizontal = ((DescriptorIteration) se).isHorizontal();
-
+						merge = ((DescriptorIteration) se).getMerge();
 					}
 				} else {
 					// После тэга iteration
@@ -95,6 +98,7 @@ final class SAXDataReader extends XMLDataReader {
 			this.iterate = iterate;
 			this.horizontal = horizontal;
 			this.desiredIndex = desiredIndex;
+			this.merge = merge;
 		}
 	}
 
@@ -159,7 +163,7 @@ final class SAXDataReader extends XMLDataReader {
 					if (sed.iterate) {
 						for (DescriptorOutput deo : sed.footerOutputs)
 							processOutput(sed.context, deo);
-						getWriter().endSequence();
+						getWriter().endSequence(sed.merge);
 					}
 					// По пост-выводам выполняем вывод
 					for (DescriptorOutput o : sed.postOutputs)
