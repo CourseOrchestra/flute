@@ -25,7 +25,7 @@ abstract class XMLDataReader {
 	private static final Pattern RANGE = Pattern
 			.compile("(-?[0-9]+):(-?[0-9]+)");
 	private static final Pattern XQUERY = Pattern
-			.compile("([^\\[]+)\\[@([^=]+)=['\"]([^'\"]+)['\"]\\]");
+			.compile("([^\\[]+)\\[@([^=]+)=('([^']+)'|\"([^\"]+)\")\\]");
 
 	private final ReportWriter writer;
 	private final DescriptorElement descriptor;
@@ -283,7 +283,7 @@ abstract class XMLDataReader {
 			if (!tagName.equals(actual))
 				return false;
 			String attribute = m.group(2);
-			String value = m.group(3);
+			String value = m.group(4) == null ? m.group(5) : m.group(4);
 			return value.equals(attributes.get(attribute));
 		} else
 			return false;
