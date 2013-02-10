@@ -71,8 +71,16 @@ final class DOMDataReader extends XMLDataReader {
 
 				elementIndex++;
 				if (compareIndices(i.getIndex(), elementIndex)) {
+					HashMap<String, String> atts = new HashMap<>();
+					
+					for (int j = 0; j < n.getAttributes().getLength(); j++) {
+						Node att = n.getAttributes().item(j);
+						atts.put(att.getNodeName(), att.getNodeValue());
+					}
+
 					for (DescriptorElement e : i.getElements())
-						if (compareNames(e.getElementName(), n.getNodeName()))
+						if (compareNames(e.getElementName(), n.getNodeName(),
+								atts))
 							processElement(String.format("%s/%s[%s]",
 									elementPath, n.getNodeName(),
 									elementIndices.get(n.getNodeName())

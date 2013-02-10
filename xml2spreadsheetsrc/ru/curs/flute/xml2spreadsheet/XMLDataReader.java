@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,8 @@ abstract class XMLDataReader {
 
 	private static final Pattern RANGE = Pattern
 			.compile("(-?[0-9]+):(-?[0-9]+)");
+	private static final Pattern XQUERY = Pattern
+			.compile("([^\\[]+)\\[@([^=]+)=\"([^\"]+)\"\\]");
 
 	private final ReportWriter writer;
 	private final DescriptorElement descriptor;
@@ -88,7 +91,7 @@ abstract class XMLDataReader {
 								return -1;
 							}
 						}).getValue("index");
-						
+
 						int merge = (new AttrReader<Integer>() {
 							@Override
 							Integer getIfNotEmpty(String value) {
@@ -114,7 +117,7 @@ abstract class XMLDataReader {
 						}).getValue("mode");
 
 						DescriptorIteration currIteration = new DescriptorIteration(
-								index, horizontal, merge); 
+								index, horizontal, merge);
 						elementsStack.peek().getSubelements()
 								.add(currIteration);
 						parserState = ParserState.ITERATION;
@@ -262,13 +265,28 @@ abstract class XMLDataReader {
 			getWriter().section(c, o.getSourceSheet(), o.getRange());
 	}
 
-	final boolean compareIndices(int expected, int actual) {
+	static final boolean compareIndices(int expected, int actual) {
 		return (expected < 0) || (actual == expected);
 	}
 
-	final boolean compareNames(String expected, String actual) {
-		return "*".equals(expected)
-				|| (expected != null && expected.equals(actual));
+	static final boolean compareNames(String expected, String actual,
+			Map<String, String> attributes) {
+		if (expected == null)
+			return actual == null;
+
+		if (expected.startsWith("*") || expected.equals(actual))
+			return true;
+
+		Matcher m = XQUERY.matcher(expected);
+		if (m.matches()) {
+			String tagName = m.group(1);
+			if (!tagName.equals(actual))
+				return false;
+			String attribute = m.group(2);
+			String value = m.group(3);
+			return value.equals(attributes.get(attribute));
+		} else
+			return false;
 	}
 
 	final ReportWriter getWriter() {
@@ -326,8 +344,7 @@ abstract class XMLDataReader {
 		public int getMerge() {
 			return merge;
 		}
-		
-		
+
 	}
 
 	static final class DescriptorOutput extends DescriptorSubelement {

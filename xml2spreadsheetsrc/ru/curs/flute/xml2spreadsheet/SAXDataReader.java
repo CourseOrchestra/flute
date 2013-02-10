@@ -2,6 +2,7 @@ package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -119,8 +120,12 @@ final class SAXDataReader extends XMLDataReader {
 				curDescr.elementIndex++;
 				if (compareIndices(curDescr.desiredIndex, curDescr.elementIndex)) {
 					boolean found = false;
+					HashMap<String, String> attsmap = new HashMap<>();
+					for (int i = 0; i < atts.getLength(); i++)
+						attsmap.put(atts.getLocalName(i), atts.getValue(i));
+					
 					searchElements: for (DescriptorElement e : curDescr.expectedElements) {
-						if (compareNames(e.getElementName(), localName)) {
+						if (compareNames(e.getElementName(), localName, attsmap)) {
 
 							XMLContext context = new SAXContext(atts);
 							SAXElementDescriptor sed = new SAXElementDescriptor(

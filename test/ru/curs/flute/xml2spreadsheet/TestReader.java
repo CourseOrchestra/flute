@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Test;
@@ -22,15 +23,36 @@ public class TestReader {
 	@After
 	public void TearDown() {
 		try {
-			descrStream.close();
+			if (descrStream != null)
+				descrStream.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		try {
-			dataStream.close();
+			if (dataStream != null)
+				dataStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testCompareNames() {
+		HashMap<String, String> a = new HashMap<>();
+		a.put("a1", "v1");
+		a.put("a2", "v2");
+		assertFalse(XMLDataReader.compareNames("bb", "aa", a));
+		assertTrue(XMLDataReader.compareNames("bb", "bb", a));
+		assertTrue(XMLDataReader.compareNames("*", "aa", a));
+		assertTrue(XMLDataReader.compareNames("*", "bb", a));
+		assertFalse(XMLDataReader.compareNames("aa", "*", a));
+		
+		assertFalse(XMLDataReader.compareNames("bb[@a1=\"v1\"]", "aa", a));
+		assertTrue(XMLDataReader.compareNames("aa[@a1=\"v1\"]", "aa", a));
+		assertTrue(XMLDataReader.compareNames("aa[@a2=\"v2\"]", "aa", a));
+		assertFalse(XMLDataReader.compareNames("aa[@a1=\"v2\"]", "aa", a));
+		assertFalse(XMLDataReader.compareNames("aa[@a3=\"v2\"]", "aa", a));
+
 	}
 
 	@Test
