@@ -25,7 +25,7 @@ abstract class XMLDataReader {
 	private static final Pattern RANGE = Pattern
 			.compile("(-?[0-9]+):(-?[0-9]+)");
 	private static final Pattern XQUERY = Pattern
-			.compile("([^\\[]+)\\[@([^=]+)=\"([^\"]+)\"\\]");
+			.compile("([^\\[]+)\\[@([^=]+)=['\"]([^'\"]+)['\"]\\]");
 
 	private final ReportWriter writer;
 	private final DescriptorElement descriptor;

@@ -52,6 +52,12 @@ public class TestReader {
 		assertTrue(XMLDataReader.compareNames("aa[@a2=\"v2\"]", "aa", a));
 		assertFalse(XMLDataReader.compareNames("aa[@a1=\"v2\"]", "aa", a));
 		assertFalse(XMLDataReader.compareNames("aa[@a3=\"v2\"]", "aa", a));
+		
+		assertFalse(XMLDataReader.compareNames("bb[@a1='v1']", "aa", a));
+		assertTrue(XMLDataReader.compareNames("aa[@a1='v1']", "aa", a));
+		assertTrue(XMLDataReader.compareNames("aa[@a2='v2']", "aa", a));
+		assertFalse(XMLDataReader.compareNames("aa[@a1='v2']", "aa", a));
+		assertFalse(XMLDataReader.compareNames("aa[@a3='v2']", "aa", a));
 
 	}
 
