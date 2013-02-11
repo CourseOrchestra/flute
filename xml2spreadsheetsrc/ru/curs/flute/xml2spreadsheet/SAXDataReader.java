@@ -34,6 +34,7 @@ final class SAXDataReader extends XMLDataReader {
 	 */
 	private final class SAXElementDescriptor {
 		private int elementIndex = -1;
+		private int position = 0;
 		private final int desiredIndex;
 		private final XMLContext context;
 		private final boolean iterate;
@@ -123,11 +124,12 @@ final class SAXDataReader extends XMLDataReader {
 					HashMap<String, String> attsmap = new HashMap<>();
 					for (int i = 0; i < atts.getLength(); i++)
 						attsmap.put(atts.getLocalName(i), atts.getValue(i));
-					
+
 					searchElements: for (DescriptorElement e : curDescr.expectedElements) {
 						if (compareNames(e.getElementName(), localName, attsmap)) {
 
-							XMLContext context = new SAXContext(atts);
+							XMLContext context = new SAXContext(atts,
+									curDescr.position + 1);
 							SAXElementDescriptor sed = new SAXElementDescriptor(
 									e, context);
 							elementsStack.push(sed);
@@ -153,7 +155,9 @@ final class SAXDataReader extends XMLDataReader {
 							break searchElements;
 						}
 					}
-					if (!found)
+					if (found)
+						curDescr.position++;
+					else
 						bypass();
 				} else
 					bypass();

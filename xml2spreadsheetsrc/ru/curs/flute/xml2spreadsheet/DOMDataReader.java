@@ -30,16 +30,18 @@ final class DOMDataReader extends XMLDataReader {
 
 	// В режиме итерации нашёлся подходящий элемент
 	private void processElement(String elementPath, DescriptorElement de,
-			Element xe) throws XML2SpreadSheetError {
+			Element xe, int position) throws XML2SpreadSheetError {
 		XMLContext context = null;
 		for (DescriptorSubelement se : de.getSubelements()) {
 			if (se instanceof DescriptorIteration) {
-				processIteration(elementPath, xe, (DescriptorIteration) se);
+				processIteration(elementPath, xe, (DescriptorIteration) se,
+						position);
 			} else if (se instanceof DescriptorOutput) {
 				// Контекст имеет смысл создавать лишь если есть хоть один
 				// output
 				if (context == null)
-					context = new XMLContext.DOMContext(xe, elementPath);
+					context = new XMLContext.DOMContext(xe, elementPath,
+							position);
 				processOutput(context, (DescriptorOutput) se);
 			}
 		}
@@ -48,7 +50,7 @@ final class DOMDataReader extends XMLDataReader {
 
 	// По субэлементам текущего элемента надо провести итерацию
 	private void processIteration(String elementPath, Element parent,
-			DescriptorIteration i) throws XML2SpreadSheetError {
+			DescriptorIteration i, int position) throws XML2SpreadSheetError {
 
 		final HashMap<String, Integer> elementIndices = new HashMap<>();
 
@@ -56,10 +58,12 @@ final class DOMDataReader extends XMLDataReader {
 
 		for (DescriptorElement de : i.getElements())
 			if ("(before)".equals(de.getElementName()))
-				processElement(elementPath, de, parent);
+				processElement(elementPath, de, parent, position);
 
 		Node n = parent.getFirstChild();
 		int elementIndex = -1;
+
+		int pos = 0;
 		iteration: while (n != null) {
 			// Нас интересуют только элементы
 			if (n.getNodeType() == Node.ELEMENT_NODE) {
@@ -70,9 +74,10 @@ final class DOMDataReader extends XMLDataReader {
 				elementIndices.put(n.getNodeName(), ind + 1);
 
 				elementIndex++;
+				boolean found = false;
 				if (compareIndices(i.getIndex(), elementIndex)) {
 					HashMap<String, String> atts = new HashMap<>();
-					
+
 					for (int j = 0; j < n.getAttributes().getLength(); j++) {
 						Node att = n.getAttributes().item(j);
 						atts.put(att.getNodeName(), att.getNodeValue());
@@ -80,22 +85,27 @@ final class DOMDataReader extends XMLDataReader {
 
 					for (DescriptorElement e : i.getElements())
 						if (compareNames(e.getElementName(), n.getNodeName(),
-								atts))
+								atts)) {
+							found = true;
 							processElement(String.format("%s/%s[%s]",
 									elementPath, n.getNodeName(),
 									elementIndices.get(n.getNodeName())
-											.toString()), e, (Element) n);
+											.toString()), e, (Element) n,
+									pos + 1);
+						}
 					// Если явно задан индекс, то на этом заканчиваем итерацию
 					if (i.getIndex() >= 0)
 						break iteration;
 				}
+				if (found)
+					pos++;
 			}
 			n = n.getNextSibling();
 		}
 
 		for (DescriptorElement de : i.getElements())
 			if ("(after)".equals(de.getElementName()))
-				processElement(elementPath, de, parent);
+				processElement(elementPath, de, parent, position);
 
 		getWriter().endSequence(i.getMerge());
 	}
@@ -106,7 +116,7 @@ final class DOMDataReader extends XMLDataReader {
 		if (getDescriptor().getElementName().equals(
 				xmlData.getDocumentElement().getNodeName()))
 			processElement("/" + getDescriptor().getElementName() + "[1]",
-					getDescriptor(), xmlData.getDocumentElement());
+					getDescriptor(), xmlData.getDocumentElement(), 1);
 		getWriter().flush();
 	}
 }

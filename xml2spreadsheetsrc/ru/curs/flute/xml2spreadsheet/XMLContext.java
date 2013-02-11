@@ -19,7 +19,10 @@ import org.xml.sax.Attributes;
 abstract class XMLContext {
 
 	private static final Pattern P = Pattern.compile("~\\{([^}]+)\\}");
-	private static final Pattern CURRENT = Pattern.compile("current\\(\\)");
+	private static final String CURRENT = "current";
+	private static final String POSITION = "position";
+	private static final Pattern FUNCTION = Pattern.compile("((" + CURRENT
+			+ ")|(" + POSITION + "))\\(\\)");
 
 	boolean containsPlaceholder(String formatString) {
 		return P.matcher(formatString).find();
@@ -47,21 +50,27 @@ abstract class XMLContext {
 	static final class DOMContext extends XMLContext {
 		private final Node n;
 		private final String path;
+		private final int position;
 		private XPath evaluator;
 
-		DOMContext(Node n, String path) {
+		DOMContext(Node n, String path, int position) {
 			if (n == null)
 				throw new NullPointerException();
 			this.n = n;
 			this.path = path;
+			this.position = position;
 		}
 
 		@Override
 		String getXPathValue(String xpath) {
-			Matcher m = CURRENT.matcher(xpath);
+			Matcher m = FUNCTION.matcher(xpath);
 			StringBuffer sb = new StringBuffer();
-			while (m.find())
-				m.appendReplacement(sb, path);
+			while (m.find()) {
+				if (CURRENT.equals(m.group(1)))
+					m.appendReplacement(sb, path);
+				else if (POSITION.equals(m.group(1)))
+					m.appendReplacement(sb, Integer.toString(position));
+			}
 			m.appendTail(sb);
 			if (evaluator == null)
 				evaluator = XPathFactory.newInstance().newXPath();
@@ -77,17 +86,21 @@ abstract class XMLContext {
 	static final class SAXContext extends XMLContext {
 
 		private final Attributes attr;
+		private final int position;
 
-		SAXContext(Attributes attr) {
+		SAXContext(Attributes attr, int position) {
 			this.attr = attr;
+			this.position = position;
 		}
 
 		@Override
 		String getXPathValue(String xpath) {
 			if (xpath.startsWith("@"))
 				return attr.getValue(xpath.substring(1));
+			else if (xpath.startsWith(POSITION))
+				return Integer.toString(position);
 			else
-				return "{Only references to attributes in SAX mode are allowed}";
+				return "{Only references to attributes or position() function in SAX mode are allowed}";
 		}
 	}
 
