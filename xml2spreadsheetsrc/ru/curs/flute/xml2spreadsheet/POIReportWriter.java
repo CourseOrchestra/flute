@@ -30,6 +30,9 @@ abstract class POIReportWriter extends ReportWriter {
 	 */
 	private static final Pattern NUMBER = Pattern
 			.compile("[+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?");
+	/**
+	 * Регексп для даты в ISO-формате.
+	 */
 	private static final Pattern DATE = Pattern
 			.compile("(\\d\\d\\d\\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])");
 	private final Workbook template;
