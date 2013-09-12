@@ -152,10 +152,10 @@ Function .onMouseOverSection
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Компонента гибкого построения отчётов в различных форматах."
     
     StrCmp $0 3 "" +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотека Apache POI для формирования MS Office файлов."
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Стандартная библиотека Python."
     
     StrCmp $0 4 "" +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Стандартная библиотека Python."
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотека Apache POI для формирования MS Office файлов."
 
 FunctionEnd
 

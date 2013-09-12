@@ -66,10 +66,13 @@
 	</target>
 	<target name="nsis" depends="jar">
 		<echo>Update SVN revision number</echo>
-		<exec executable="wininstall/svnver/svnversion" output="wininstall/buildno.txt">
-			<arg line="-n" />
+		<exec executable="wininstall/svnver/svnversion.exe" output="wininstall/buildno.txt">
 		</exec>
 		<loadfile property="buildno" srcFile="wininstall/buildno.txt" />
+		<script language="javascript">
+		    var before = project.getProperty("buildno");
+		    project.setProperty("buildno", before.replaceAll("\r\n", ""));
+		</script>
 		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "1"${line.separator}!define BUILD_VERSION "${buildno}"</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
