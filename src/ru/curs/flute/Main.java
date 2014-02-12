@@ -31,8 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
-
+ */
 
 package ru.curs.flute;
 
@@ -70,10 +69,11 @@ public final class Main {
 		if (args.length > 0)
 			cmd = args[0];
 
-		if ("start".equals(cmd))
+		if ("start".equals(cmd)) {
 			startService();
-		else
+		} else {
 			stopService();
+		}
 	}
 
 	/**
@@ -97,21 +97,22 @@ public final class Main {
 		String path = Main.class.getProtectionDomain().getCodeSource()
 				.getLocation().getPath();
 		File f = new File(path.replace("%20", " "));
-		if (f.getAbsolutePath().toLowerCase().endsWith(".jar"))
+		if (f.getAbsolutePath().toLowerCase().endsWith(".jar")) {
 			return f.getParent() + File.separator;
-		else
+		} else {
 			return f.getAbsolutePath() + File.separator;
+		}
 	}
 
 	private static void initCL(String path) {
-		
+
 		File lib = new File(path + "lib");
-		
+
 		// Construct the "class path" for this class loader
 		Set<URL> set = new LinkedHashSet<URL>();
 
 		if (lib.isDirectory() && lib.exists() && lib.canRead()) {
-			String filenames[] = lib.list();
+			String[] filenames = lib.list();
 			for (String filename : filenames) {
 				if (!filename.toLowerCase().endsWith(".jar"))
 					continue;
@@ -143,7 +144,8 @@ public final class Main {
 		postProperties.setProperty("python.packages.directories",
 				"java.ext.dirs,flute.lib");
 		postProperties.setProperty("flute.lib", libfolder);
-		postProperties.setProperty("python.path", path + "pylib" + ";" + path + "scripts");
+		postProperties.setProperty("python.path", path + "pylib" + ";" + path
+				+ "scripts");
 
 		PythonInterpreter.initialize(System.getProperties(), postProperties,
 				null);
@@ -194,7 +196,7 @@ public final class Main {
 			}
 		});
 
-		while (true)
+		while (true) {
 			try {
 				// Если до сих пор ничего критического не произошло, запускаем в
 				// бесконечном цикле опрос и раздачу заданий.
@@ -204,22 +206,34 @@ public final class Main {
 			} catch (EFluteCritical e) {
 				AppSettings.getLogger().log(
 						Level.SEVERE,
-						"The following critical problem stopped the process:\n"
+						"The following critical problem stopped the normal execution:\n"
 								+ e.getMessage());
-				if (!AppSettings.neverStop())
+				if (!AppSettings.neverStop()) {
+					AppSettings
+							.getLogger()
+							.log(Level.SEVERE,
+									"never.stop=false, so flute service is now stopping and exiting.");
 					System.exit(1);
-				else {
+				} else {
+					AppSettings
+							.getLogger()
+							.log(Level.INFO,
+									String.format(
+											"never.stop=true, so flute will try to start again in %d ms.",
+											10 * AppSettings.getQueryPeriod()));
 					// Выдерживаем хорошую паузу
 					try {
 						Thread.sleep(10 * AppSettings.getQueryPeriod());
 					} catch (InterruptedException e1) {
-						// Do nothing
+						AppSettings.getLogger().log(Level.INFO,
+								"Thread sleep interrupted.");
 					}
 					AppSettings.getLogger().log(Level.INFO,
 							"Trying to revive the service...");
 				}
 
 			}
+		}
 	}
 
 	private static void stopService() {

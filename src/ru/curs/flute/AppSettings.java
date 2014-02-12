@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute;
 
 import java.io.File;
@@ -74,20 +74,20 @@ public final class AppSettings {
 
 		StringBuffer sb = new StringBuffer();
 		// Читаем настройки и проверяем их, где можно.
-		int threadsNumber = 0;
+		int tn = 0;
 		try {
-			threadsNumber = Integer.parseInt(settings.getProperty(
-					"threads.number", "1"));
-			if (threadsNumber < 1)
+			tn = Integer.parseInt(settings.getProperty("threads.number", "1")
+					.trim());
+			if (tn < 1)
 				sb.append("Invalid number of execution threads (threads.number): "
-						+ threadsNumber + '\n');
+						+ tn + '\n');
 		} catch (NumberFormatException e) {
 			sb.append("Invalid number of execution threads (threads.number): "
 					+ settings.getProperty("threads.number") + '\n');
 		}
-		this.threadsNumber = threadsNumber;
+		this.threadsNumber = tn;
 
-		File sp = new File(settings.getProperty("scripts.path", ""));
+		File sp = new File(settings.getProperty("scripts.path", "").trim());
 		if (!sp.isDirectory())
 			sp = new File(f.getParent() + File.separator + "scripts");
 		if (sp.isDirectory() && sp.exists())
@@ -97,33 +97,32 @@ public final class AppSettings {
 			sb.append("Invalid path to Python scripts (scripts.path): " + sp
 					+ '\n');
 		}
-		int queryPeriod = 0;
+
+		int qp = 0;
 		try {
-			queryPeriod = Integer.parseInt(settings.getProperty("query.period",
-					"3000"));
-			if (queryPeriod < 0)
+			qp = Integer.parseInt(settings.getProperty("query.period", "3000")
+					.trim());
+			if (qp < 0)
 				sb.append("Invalid value of query period in milliseconds (query.period): "
-						+ queryPeriod + '\n');
+						+ qp + '\n');
 		} catch (NumberFormatException e) {
 			sb.append("Invalid value of query period in milliseconds (query.period): "
 					+ settings.getProperty("query.period") + '\n');
 		}
-		this.queryPeriod = queryPeriod;
+		this.queryPeriod = qp;
 
-		dbClassName = settings.getProperty("database.classname", "");
+		dbClassName = settings.getProperty("database.classname", "").trim();
 		if (dbClassName.isEmpty())
 			sb.append("No JDBC driver class name given (database.classname).\n");
-
-		databaseConnection = settings.getProperty("database.connection", "");
+		databaseConnection = settings.getProperty("database.connection", "")
+				.trim();
 		if (databaseConnection.isEmpty())
 			sb.append("No JDBC URL given (database.connection).\n");
-
-		tableName = settings.getProperty("table.name", "");
+		tableName = settings.getProperty("table.name", "").trim();
 		if (tableName.isEmpty())
 			sb.append("No tasks table name given (table.name).\n");
 
-		String lf = settings.getProperty("log.file");
-
+		String lf = settings.getProperty("log.file").trim();
 		if (lf != null)
 			try {
 				FileHandler fh = new FileHandler(lf, true);
@@ -137,7 +136,7 @@ public final class AppSettings {
 			throw new EFluteCritical(sb.toString());
 
 		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop",
-				"false"));
+				"false").trim());
 	}
 
 	static void init(File f) throws EFluteCritical {
@@ -222,11 +221,12 @@ public final class AppSettings {
 	 * Возвращает тип базы данных на основе JDBC-строки подключения.
 	 */
 	public static DBType getDBType() {
-		if (theSettings.databaseConnection.startsWith("jdbc:sqlserver"))
+		if (theSettings.databaseConnection.startsWith("jdbc:sqlserver")) {
 			return DBType.MSSQL;
-		else if (theSettings.databaseConnection.startsWith("jdbc:postgresql"))
+		} else if (theSettings.databaseConnection.startsWith("jdbc:postgresql")) {
 			return DBType.POSTGRES;
-		else
+		} else {
 			return DBType.UNKNOWN;
+		}
 	}
 }

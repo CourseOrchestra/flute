@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute;
 
 import java.sql.Connection;
@@ -44,8 +44,12 @@ import java.util.Queue;
  * Пул соединений с базой данных.
  * 
  */
-public class ConnectionPool {
+public final class ConnectionPool {
 	private static final Queue<Connection> POOL = new LinkedList<>();
+
+	private ConnectionPool() {
+
+	}
 
 	/**
 	 * Извлекает соединение из пула.
@@ -69,7 +73,7 @@ public class ConnectionPool {
 					.getDatabaseConnection());
 		} catch (SQLException e) {
 			throw new EFluteCritical("Could not connect to "
-					+ AppSettings.getDatabaseConnection() + "with error: "
+					+ AppSettings.getDatabaseConnection() + " with error: "
 					+ e.getMessage());
 		}
 
@@ -87,6 +91,7 @@ public class ConnectionPool {
 			if (c != null && !c.isValid(1))
 				POOL.add(c);
 		} catch (SQLException e) {
+
 		}
 	}
 
