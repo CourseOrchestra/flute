@@ -122,8 +122,8 @@ public final class AppSettings {
 		if (tableName.isEmpty())
 			sb.append("No tasks table name given (table.name).\n");
 
-		String lf = settings.getProperty("log.file").trim();
-		if (lf != null)
+		String lf = settings.getProperty("log.file", "").trim();
+		if (!lf.isEmpty())
 			try {
 				FileHandler fh = new FileHandler(lf, true);
 				fh.setFormatter(new SimpleFormatter());
