@@ -49,6 +49,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.python.core.PyException;
 import org.python.core.codecs;
 import org.python.util.PythonInterpreter;
 
@@ -149,7 +150,12 @@ public final class Main {
 
 		PythonInterpreter.initialize(System.getProperties(), postProperties,
 				null);
-		codecs.setDefaultEncoding("UTF-8");
+		try {
+			codecs.setDefaultEncoding("utf-8");
+		} catch (PyException e) {
+			// do nothing
+			System.out.println("Warning: codecs.setDefaultEncoding failed.");
+		}
 	}
 
 	private static void startService() {
