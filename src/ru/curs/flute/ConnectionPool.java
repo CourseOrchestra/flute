@@ -64,8 +64,11 @@ public final class ConnectionPool {
 				if (c.isValid(1)) {
 					return c;
 				}
-			} catch (SQLException e) {
+
+			} catch (SQLException e) { // CHECKSTYLE:OFF
+				// CHECKSTYLE:ON
 			}
+
 			c = POOL.poll();
 		}
 		try {
@@ -80,6 +83,26 @@ public final class ConnectionPool {
 	}
 
 	/**
+	 * Выполняет починку коннекшна.
+	 * 
+	 * @param c
+	 *            Коннекшн на починку.
+	 * @return Новый коннекшн или тот же самый, если он непуст и валиден.
+	 * @throws EFluteCritical
+	 *             В случае, если новое соединение не удалось создать.
+	 */
+	public static synchronized Connection repair(Connection c)
+			throws EFluteCritical {
+		try {
+			if (c.isValid(1))
+				return c;
+		} catch (SQLException e) { // CHECKSTYLE:OFF
+			// CHECKSTYLE:ON
+		}
+		return get();
+	}
+
+	/**
 	 * Возвращает соединение в пул.
 	 * 
 	 * @param c
@@ -88,10 +111,10 @@ public final class ConnectionPool {
 	public static synchronized void putBack(Connection c) {
 		// Вставляем только хорошие соединения...
 		try {
-			if (c != null && !c.isValid(1))
+			if (c != null && c.isValid(1))
 				POOL.add(c);
-		} catch (SQLException e) {
-
+		} catch (SQLException e) { // CHECKSTYLE:OFF
+			// CHECKSTYLE:ON
 		}
 	}
 

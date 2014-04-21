@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute;
 
 import java.sql.Connection;
@@ -47,8 +47,9 @@ import org.w3c.dom.Document;
 /**
  * Менеджер, запускающий потоки выполнения, обрабатывающие задание.
  */
-public class TaskManager {
+public final class TaskManager {
 
+	private static final int SHUTDOWN_TIME = 6000;
 	private static final TaskManager THE_MANAGER = new TaskManager();
 	private static boolean stop;
 
@@ -57,6 +58,10 @@ public class TaskManager {
 	private Connection mainConn;
 	private PreparedStatement selectNextStmt;
 	private PreparedStatement markNextStmt;
+
+	private TaskManager() {
+
+	}
 
 	private void initMainConn() throws EFluteCritical {
 		String sql;
@@ -111,8 +116,9 @@ public class TaskManager {
 				if (!mainConn.getAutoCommit())
 					mainConn.commit();
 				return new TaskParams(id, template, doc, str);
-			} else
+			} else {
 				return null;
+			}
 		} catch (SQLException e) {
 			throw new EFluteCritical(
 					"Error during getting the next task data: "
@@ -133,8 +139,9 @@ public class TaskManager {
 			};
 			processCount++;
 			return p;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	/**
@@ -148,8 +155,9 @@ public class TaskManager {
 			while (p == null) {
 				try {
 					wait();
-				} catch (InterruptedException e) {
+				} catch (InterruptedException e) {// CHECKSTYLE:OFF
 					// Do nothing
+					// CHECKSTYLE:ON
 				}
 				if (stop)
 					return;
@@ -162,8 +170,9 @@ public class TaskManager {
 			while (currentTask == null) {
 				try {
 					Thread.sleep(AppSettings.getQueryPeriod());
-				} catch (InterruptedException e) {
+				} catch (InterruptedException e) {// CHECKSTYLE:OFF
 					// Do nothing
+					// CHECKSTYLE:ON
 				}
 				if (stop)
 					return;
@@ -200,8 +209,10 @@ public class TaskManager {
 		stop = true;
 		// Ждём 6 сек.
 		try {
-			Thread.sleep(6000);
-		} catch (InterruptedException e) {
+			Thread.sleep(SHUTDOWN_TIME);
+		} catch (InterruptedException e) {// CHECKSTYLE:OFF
+			// Do nothing
+			// CHECKSTYLE:ON
 		}
 	}
 }

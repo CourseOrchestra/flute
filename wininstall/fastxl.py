@@ -6,6 +6,7 @@
 #	conn	JDBC connection from the connecton pool (you should not close it, it will be reused!)
 #	resultstream	OutputStream to write the result
 #   message Script's message to log
+# and procedure repair(conn) to obtain repaired version of connection, if needed
 
 import ru.curs.flute.fastxl as fastxl
 

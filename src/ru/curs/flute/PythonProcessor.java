@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute;
 
 import java.io.ByteArrayInputStream;
@@ -50,6 +50,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.python.core.JavaImporter;
+import org.python.core.Py;
 import org.python.core.PyException;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
@@ -110,7 +112,21 @@ public abstract class PythonProcessor extends Thread {
 			sw.append(task.getStrParams());
 
 		PythonInterpreter interp = new PythonInterpreter();
+		interp.set("repair", new JavaImporter() {
+			private static final long serialVersionUID = 1L;
 
+			@Override
+			// CHECKSTYLE:OFF
+			public PyObject __call__(PyObject[] args, String[] keywords) {
+				// CHECKSTYLE:ON
+				Connection c = Py.tojava(args[0], Connection.class);
+				try {
+					return Py.java2py(ConnectionPool.repair(c));
+				} catch (EFluteCritical e) {
+					throw new PyException(Py.java2py(e));
+				}
+			}
+		});
 		interp.set("taskid", new PyInteger(task.getId()));
 		interp.set("params", new PyString(sw.toString()));
 		interp.set("conn", conn);
@@ -161,7 +177,7 @@ public abstract class PythonProcessor extends Thread {
 				default:
 					finalizeTaskStmt.setNull(2, java.sql.Types.VARBINARY);
 				}
-			} else
+			} else {
 				switch (AppSettings.getDBType()) {
 				case MSSQL:
 					finalizeTaskStmt.setBinaryStream(
@@ -182,6 +198,7 @@ public abstract class PythonProcessor extends Thread {
 							new ByteArrayInputStream(task.getBuffer(), 0, task
 									.getBufferLength()));
 				}
+			}
 
 			finalizeTaskStmt.setString(3, details);
 			finalizeTaskStmt.setInt(4, task.getId());
