@@ -145,7 +145,7 @@ public final class Main {
 		postProperties.setProperty("python.packages.directories",
 				"java.ext.dirs,flute.lib");
 		postProperties.setProperty("flute.lib", libfolder);
-		postProperties.setProperty("python.path", path + "pylib" + ";" + path
+		postProperties.setProperty("python.path", path + "pylib" + File.pathSeparatorChar + path
 				+ "scripts");
 
 		PythonInterpreter.initialize(System.getProperties(), postProperties,
