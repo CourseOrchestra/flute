@@ -51,11 +51,9 @@ public final class AppSettings {
 	private static AppSettings theSettings;
 
 	private final int threadsNumber;
-	private final File scriptsPath;
 	private final int queryPeriod;
-	private final String dbClassName;
-	private final String databaseConnection;
 	private final String tableName;
+	private final String fluteUserId;
 	private final Logger logger;
 	private final boolean neverStop;
 	{
@@ -63,16 +61,9 @@ public final class AppSettings {
 		logger.setLevel(Level.INFO);
 	}
 
-	private AppSettings(File f) throws EFluteCritical {
-		Properties settings = new Properties();
-		try {
-			FileInputStream in = new FileInputStream(f);
-			settings.load(in);
-		} catch (IOException e) {
-			throw new EFluteCritical("IOException: " + e.getMessage());
-		}
+	private AppSettings(File f, Properties settings) throws EFluteCritical {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		// Читаем настройки и проверяем их, где можно.
 		int tn = 0;
 		try {
@@ -87,17 +78,6 @@ public final class AppSettings {
 		}
 		this.threadsNumber = tn;
 
-		File sp = new File(settings.getProperty("scripts.path", "").trim());
-		if (!sp.isDirectory())
-			sp = new File(f.getParent() + File.separator + "scripts");
-		if (sp.isDirectory() && sp.exists())
-			scriptsPath = sp;
-		else {
-			scriptsPath = null;
-			sb.append("Invalid path to Python scripts (scripts.path): " + sp
-					+ '\n');
-		}
-
 		int qp = 0;
 		try {
 			qp = Integer.parseInt(settings.getProperty("query.period", "3000")
@@ -111,16 +91,10 @@ public final class AppSettings {
 		}
 		this.queryPeriod = qp;
 
-		dbClassName = settings.getProperty("database.classname", "").trim();
-		if (dbClassName.isEmpty())
-			sb.append("No JDBC driver class name given (database.classname).\n");
-		databaseConnection = settings.getProperty("database.connection", "")
-				.trim();
-		if (databaseConnection.isEmpty())
-			sb.append("No JDBC URL given (database.connection).\n");
-		tableName = settings.getProperty("table.name", "").trim();
-		if (tableName.isEmpty())
-			sb.append("No tasks table name given (table.name).\n");
+		tableName = readStringProperty(settings, sb, "table.name",
+				"tasks table name");
+		fluteUserId = readStringProperty(settings, sb, "flute.userid",
+				"flute user id");
 
 		String lf = settings.getProperty("log.file", "").trim();
 		if (!lf.isEmpty())
@@ -132,15 +106,31 @@ public final class AppSettings {
 				sb.append("Could not access or create log file " + lf + '\n');
 			}
 
-		if (sb.length() > 0)
-			throw new EFluteCritical(sb.toString());
-
 		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop",
 				"false").trim());
+
+		if (sb.length() > 0)
+			throw new EFluteCritical(sb.toString());
 	}
 
-	static void init(File f) throws EFluteCritical {
-		theSettings = new AppSettings(f);
+	private String readStringProperty(Properties settings, StringBuilder sb,
+			String propName, String propDescr) {
+		String result = settings.getProperty(propName, "").trim();
+		if (result.isEmpty())
+			sb.append(String.format("No %s given (%s).\n", propDescr, propName));
+		return result;
+	}
+
+	static Properties init(File f) throws EFluteCritical {
+		Properties settings = new Properties();
+		try {
+			FileInputStream in = new FileInputStream(f);
+			settings.load(in);
+		} catch (IOException e) {
+			throw new EFluteCritical("IOException: " + e.getMessage());
+		}
+		theSettings = new AppSettings(f, settings);
+		return settings;
 	}
 
 	/**
@@ -148,13 +138,6 @@ public final class AppSettings {
 	 */
 	public static int getThreadNumber() {
 		return theSettings.threadsNumber;
-	}
-
-	/**
-	 * Значение параметра "Путь к папке, в которой лежат xlsx/xlsm-шаблоны".
-	 */
-	public static File getScriptsPath() {
-		return theSettings.scriptsPath;
 	}
 
 	/**
@@ -166,24 +149,17 @@ public final class AppSettings {
 	}
 
 	/**
-	 * Значение параметра "Класс JDBC-подключения".
-	 */
-	public static String getDbClassName() {
-		return theSettings.dbClassName;
-	}
-
-	/**
-	 * Значение параметра "Строка JDBC-подключения".
-	 */
-	public static String getDatabaseConnection() {
-		return theSettings.databaseConnection;
-	}
-
-	/**
 	 * Значение параметра "Имя таблицы отчетов".
 	 */
 	public static String getTableName() {
 		return theSettings.tableName;
+	}
+
+	/**
+	 * Значение параметра "Пользователь Flute".
+	 */
+	public static String getFluteUserId() {
+		return theSettings.fluteUserId;
 	}
 
 	/**
@@ -198,35 +174,5 @@ public final class AppSettings {
 	 */
 	public static boolean neverStop() {
 		return theSettings.neverStop;
-	}
-
-	/**
-	 * Тип базы данных.
-	 * 
-	 */
-	public enum DBType {
-		/**
-		 * Postgre.
-		 */
-		POSTGRES, /**
-		 * MS SQL.
-		 */
-		MSSQL, /**
-		 * Неизвестный тип.
-		 */
-		UNKNOWN
-	}
-
-	/**
-	 * Возвращает тип базы данных на основе JDBC-строки подключения.
-	 */
-	public static DBType getDBType() {
-		if (theSettings.databaseConnection.startsWith("jdbc:sqlserver")) {
-			return DBType.MSSQL;
-		} else if (theSettings.databaseConnection.startsWith("jdbc:postgresql")) {
-			return DBType.POSTGRES;
-		} else {
-			return DBType.UNKNOWN;
-		}
 	}
 }

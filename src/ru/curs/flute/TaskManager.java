@@ -44,6 +44,9 @@ import javax.xml.transform.dom.DOMSource;
 
 import org.w3c.dom.Document;
 
+import ru.curs.celesta.CelestaException;
+import ru.curs.celesta.ConnectionPool;
+
 /**
  * Менеджер, запускающий потоки выполнения, обрабатывающие задание.
  */
@@ -65,29 +68,33 @@ public final class TaskManager {
 
 	private void initMainConn() throws EFluteCritical {
 		String sql;
-		switch (AppSettings.getDBType()) {
+		switch (ru.curs.celesta.AppSettings.getDBType()) {
 		case MSSQL:
 			sql = "SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID";
 			break;
 		case POSTGRES:
+		case MYSQL:
 			sql = "SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID LIMIT 1";
+			break;
+		case ORACLE:
+			sql = "with a as (SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID) "
+					+ "select a.* from a where rownum <= 1";
 			break;
 		default:
 			throw new EFluteCritical(
-					"Cannot recognize database type from JDBC connection string.");
+					"Cannot recognize database type.");
 		}
 
 		try {
 			if (mainConn == null || mainConn.isClosed()) {
 				mainConn = ConnectionPool.get();
-
 				selectNextStmt = mainConn.prepareStatement(String.format(sql,
 						AppSettings.getTableName()));
 				markNextStmt = mainConn.prepareStatement(String.format(
 						"UPDATE %s SET STATUS = 1 WHERE ID = ?",
 						AppSettings.getTableName()));
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | CelestaException e) {
 			throw new EFluteCritical(
 					"Error during main connection initialization: "
 							+ e.getMessage());
@@ -113,8 +120,7 @@ public final class TaskManager {
 
 				markNextStmt.setInt(1, id);
 				markNextStmt.execute();
-				if (!mainConn.getAutoCommit())
-					mainConn.commit();
+				ConnectionPool.commit(mainConn);
 				return new TaskParams(id, template, doc, str);
 			} else {
 				return null;

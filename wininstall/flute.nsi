@@ -19,11 +19,12 @@
 
 ;Строка с версией продукта генерируется автоматически Ant-скриптом!
 !include "prodversion.nsh"
+!include "TextFunc.nsh"
 !define PRODUCT_PUBLISHER "ООО «КУРС»"
 !define PRODUCT_WEB_SITE "http://www.curs.ru"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\Flute"
-!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
-!define PRODUCT_SETUP_KEY "Software\CURS\Flute"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}${PRODUCT_VERSION}"
+!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}${PRODUCT_VERSION}"
+!define PRODUCT_SETUP_KEY "Software\CURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
@@ -51,10 +52,12 @@ Var FluteServiceName
 Var FluteServiceDefaultName
 Var FluteServiceFileName
 Var FluteServiceManagerFileName
+Var ScorePath
 
 ; Variables that store handles of dialog controls
 Var CtlJavaHome
 Var CtlFluteServiceName
+Var CtlScorePath
 
 
 !define MUI_ABORTWARNING
@@ -77,7 +80,7 @@ Page custom pageChooseJVM pageChooseJVMLeave "$(TEXT_JVM_PAGETITLE)"
 ;ВЫБОР ПАПКИ ДЛЯ МЕНЮ ПУСК
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${PRODUCT_SETUP_KEY}
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "КУРС\${PRODUCT_NAME}"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "КУРС\${PRODUCT_NAME}${PRODUCT_VERSION}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "StartMenuFolder"
 !insertmacro MUI_PAGE_STARTMENU APPLICATION $StartMenuFolder
 
@@ -112,6 +115,8 @@ LangString TEXT_JVM_PAGETITLE ${LANG_ENGLISH} ": Java Virtual Machine path and s
 LangString TEXT_JVM_PAGETITLE ${LANG_RUSSIAN} ": выбор пути к виртуальной машине Java и имени сервиса"
 LangString TEXT_JVM_LABEL1 ${LANG_ENGLISH} "Please select the path of a Java SE 7.0 or later JRE installed on your system."
 LangString TEXT_JVM_LABEL1 ${LANG_RUSSIAN} "Укажите папку установки Java SE 7.0 или более поздней версии JRE на Вашем компьютере."
+LangString TEXT_JVM_LABEL2 ${LANG_ENGLISH} "Please select the Celesta score path."
+LangString TEXT_JVM_LABEL2 ${LANG_RUSSIAN} "Укажите папку Celesta score."
 LangString TEXT_CONF_LABEL_SERVICE_NAME ${LANG_ENGLISH} "Windows Service Name"
 LangString TEXT_CONF_LABEL_SERVICE_NAME ${LANG_RUSSIAN} "Название сервиса Windows"
 
@@ -180,14 +185,31 @@ Section "Flute" SEC01
   SetOutPath "$INSTDIR"
   File flute.jar
   File flute.properties
+
+  Push $ScorePath
+  Push "\"
+  Call StrSlash
+  Pop $R0
+  ${ConfigWrite} "flute.properties" "score.path=" $R0 $R0
+
+  Push "$INSTDIR\pylib"
+  Push "\"
+  Call StrSlash
+  Pop $R0
+  ${ConfigWrite} "flute.properties" "pylib.path=" $R0 $R0
+
   ;Link to website
   WriteIniStr "$INSTDIR\curs.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   
   CreateDirectory $INSTDIR\logs
   CreateDirectory $INSTDIR\lib
   CreateDirectory $INSTDIR\pylib
-  CreateDirectory $INSTDIR\scripts
   
+  SetOutPath $ScorePath\flute
+  File flute\__init__.py
+  File flute\_flute.sql
+  File flute\hello.py
+
   SetOutPath $INSTDIR\bin
   StrCpy $R0 $FluteServiceName
   StrCpy $FluteServiceFileName $R0.exe
@@ -236,15 +258,15 @@ SectionEnd
 Section "FastXL" SEC02
   SetOutPath $INSTDIR\lib
   File fastxl.jar
-  SetOutPath $INSTDIR\scripts
-  File fastxl.py
+  SetOutPath $ScorePath\flute
+  File flute\fastxl.py
 SectionEnd
 
 Section "XML2Spreadsheet" SEC03
   SetOutPath $INSTDIR\lib
   File xml2spreadsheet.jar
-  SetOutPath $INSTDIR\scripts
-  File xml2spreadsheet.py
+  SetOutPath $ScorePath\flute
+  File flute\xml2spreadsheet.py
 SectionEnd
 
 Section "Python library" SEC04
@@ -324,12 +346,7 @@ Section Uninstall
   RMDir  /r "$INSTDIR\lib"
   RMDir  /r "$INSTDIR\pylib"
   RMDir  /r "$INSTDIR\cachedir"
-  
-  ;Удаляем стандартный скрипт, но если там понаписали своих скриптов --- их оставляем.
-  Delete "$INSTDIR\scripts\fastxl.py"
-  Delete "$INSTDIR\scripts\xml2spreadsheet.py"
-  RMDir  "$INSTDIR\scripts"
-  
+    
   ;Удаляем директорию bin с сервисраннером
   Delete "$INSTDIR\bin\$FluteServiceManagerFileName"
   Delete "$INSTDIR\bin\$FluteServiceFileName"
@@ -372,26 +389,52 @@ Function pageChooseJVM
     Pop $JavaHome
   ${EndIf}
 
+  ${If} $ScorePath == ""
+    StrCpy $ScorePath 'C:\score'
+  ${EndIf}
+
   nsDialogs::Create 1018
   Pop $R0
 
   ${NSD_CreateLabel} 0 5u 100% 25u "$(TEXT_JVM_LABEL1)"
   Pop $R0
-  ${NSD_CreateDirRequest} 0 35u 280u 13u "$JavaHome"
+
+  ${NSD_CreateDirRequest} 0 30u 280u 13u "$JavaHome"
   Pop $CtlJavaHome
-  ${NSD_CreateBrowseButton} 282u 35u 15u 13u "..."
+  ${NSD_CreateBrowseButton} 282u 30u 15u 13u "..."
   Pop $R0
   ${NSD_OnClick} $R0 pageChooseJVM_onDirBrowse
   
-  ${NSD_CreateLabel} 0 87u 140u 14u "$(TEXT_CONF_LABEL_SERVICE_NAME)"
+  ${NSD_CreateLabel} 0 55u 100% 14u "$(TEXT_JVM_LABEL2)"
+  Pop $R0
+  ${NSD_CreateDirRequest} 0 70u 280u 13u "$ScorePath"
+  Pop $CtlScorePath
+  ${NSD_CreateBrowseButton} 282u 70u 15u 13u "..."
+  Pop $R0
+  ${NSD_OnClick} $R0 chooseScorePath_onDirBrowse
+
+
+  ${NSD_CreateLabel} 0 100u 140u 14u "$(TEXT_CONF_LABEL_SERVICE_NAME)"
   Pop $R0
 
-  ${NSD_CreateText} 150u 85u 140u 12u "$FluteServiceName"
+  ${NSD_CreateText} 150u 98u 140u 12u "$FluteServiceName"
   Pop $CtlFluteServiceName
-
 
   ${NSD_SetFocus} $CtlJavaHome
   nsDialogs::Show
+FunctionEnd
+
+Function chooseScorePath_onDirBrowse
+  ; R0 is HWND of the button, it is on top of the stack
+  Pop $R0
+
+  ${NSD_GetText} $CtlScorePath $R1
+  nsDialogs::SelectFolderDialog "" "$R1"
+  Pop $R1
+
+  ${If} $R1 != "error"
+    ${NSD_SetText} $CtlScorePath $R1
+  ${EndIf}
 FunctionEnd
 
 ; onClick function for button next to DirRequest control
@@ -411,7 +454,14 @@ FunctionEnd
 Function pageChooseJVMLeave
   ${NSD_GetText} $CtlJavaHome $JavaHome
   ${If} $JavaHome == ""
-    Abort
+    MessageBox MB_ICONEXCLAMATION|MB_OK 'Choose valid Java installation directory'
+    Abort 
+  ${EndIf}
+
+  ${NSD_GetText} $CtlScorePath $ScorePath
+  ${If} $ScorePath == ""
+    MessageBox MB_ICONEXCLAMATION|MB_OK 'Choose score path'
+    Abort 
   ${EndIf}
 
   Call checkJava
@@ -601,13 +651,13 @@ DonePEHeader:
   ${If} "$INSTDIR" == ""
     ${If} $Arch == "x86"
       ${If} $FluteServiceName == $FluteServiceDefaultName
-        StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}"
+        StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
       ${Else}
         StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}_$FluteServiceName"
       ${EndIf}
     ${Else}
       ${If} $FluteServiceName == $FluteServiceDefaultName
-        StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}"
+        StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
       ${Else}
         StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}_$FluteServiceName"
       ${EndIf}
@@ -753,3 +803,39 @@ Function InstallDesktopShortcut
   CreateShortCut "$DESKTOP\Configure Flute.lnk" "$INSTDIR\bin\$FluteServiceManagerFileName" '//ES//$FluteServiceName'
 FunctionEnd
 
+; Push $filenamestring (e.g. 'c:\this\and\that\filename.htm')
+; Push "\"
+; Call StrSlash
+; Pop $R0
+; ;Now $R0 contains 'c:/this/and/that/filename.htm'
+Function StrSlash
+  Exch $R3 ; $R3 = needle ("\" or "/")
+  Exch
+  Exch $R1 ; $R1 = String to replacement in (haystack)
+  Push $R2 ; Replaced haystack
+  Push $R4 ; $R4 = not $R3 ("/" or "\")
+  Push $R6
+  Push $R7 ; Scratch reg
+  StrCpy $R2 ""
+  StrLen $R6 $R1
+  StrCpy $R4 "\"
+  StrCmp $R3 "/" loop
+  StrCpy $R4 "/"  
+loop:
+  StrCpy $R7 $R1 1
+  StrCpy $R1 $R1 $R6 1
+  StrCmp $R7 $R3 found
+  StrCpy $R2 "$R2$R7"
+  StrCmp $R1 "" done loop
+found:
+  StrCpy $R2 "$R2$R4"
+  StrCmp $R1 "" done loop
+done:
+  StrCpy $R3 $R2
+  Pop $R7
+  Pop $R6
+  Pop $R4
+  Pop $R2
+  Pop $R1
+  Exch $R3
+FunctionEnd

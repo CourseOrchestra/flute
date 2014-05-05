@@ -17,11 +17,15 @@
 	<target name="compile" depends="init">
 		<echo>Compile the source files</echo>
 		<javac destdir="build/flute" encoding="UTF-8">
+
 			<classpath>
 				<pathelement path="lib/jython.jar" />
+				<pathelement path="../celesta/lib/gson-1.7.1.jar" />
+				<pathelement path="../celesta/lib/java-json.jar" />
 			</classpath>
 			<src>
 				<pathelement path="src" />
+				<pathelement path="../celesta/src" />
 			</src>
 		</javac>
 		<javac destdir="build/fastxl" encoding="UTF-8">
@@ -49,8 +53,19 @@
 			<fileset dir="build/flute" />
 			<zipfileset src="lib/sqljdbc4.jar" excludes="META-INF/MSFTSIG.*" />
 			<zipfileset src="lib/jython.jar" />
+			<zipfileset src="lib/ojdbc6.jar" />
+			<zipfileset src="lib/jython.jar" />
+			<zipfileset src="lib/mysql-connector-java-5.1.27-bin.jar" />
+			<zipfileset src="lib/postgresql-9.3-1100.jdbc41.jar" />
 			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Main-Class" value="ru.curs.flute.Main" />
+				<attribute name="Specification-Title" value="Flute" />
+				<attribute name="Specification-Version" value="" />
+				<attribute name="Specification-Vendor" value="www.curs.ru" />
+				<attribute name="Implementation-Title" value="Flute" />
+				<attribute name="Implementation-Version" value="" />
+				<attribute name="Implementation-Vendor" value="www.curs.ru" />
 			</manifest>
 		</jar>
 		<jar destfile="wininstall/fastxl.jar">
@@ -70,10 +85,10 @@
 		</exec>
 		<loadfile property="buildno" srcFile="wininstall/buildno.txt" />
 		<script language="javascript">
-		    var before = project.getProperty("buildno");
-		    project.setProperty("buildno", before.replaceAll("\r\n", ""));
+			var before = project.getProperty("buildno");
+			project.setProperty("buildno", before.replaceAll("\r\n", ""));
 		</script>
-		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "1"${line.separator}!define BUILD_VERSION "${buildno}"</echo>
+		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${buildno}"</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
 		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />

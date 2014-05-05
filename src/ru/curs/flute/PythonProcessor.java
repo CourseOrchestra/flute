@@ -35,9 +35,6 @@
 package ru.curs.flute;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,13 +47,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.python.core.JavaImporter;
-import org.python.core.Py;
-import org.python.core.PyException;
-import org.python.core.PyInteger;
-import org.python.core.PyObject;
-import org.python.core.PyString;
-import org.python.util.PythonInterpreter;
+import ru.curs.celesta.Celesta;
+import ru.curs.celesta.CelestaException;
+import ru.curs.celesta.ConnectionPool;
 
 /**
  * Класс обработчика заданий. Одновременно запускается несколько обработчиков.
@@ -80,19 +73,6 @@ public abstract class PythonProcessor extends Thread {
 	}
 
 	String internalRun() throws EFluteRuntime {
-		final File f = new File(AppSettings.getScriptsPath() + File.separator
-				+ task.getScriptName());
-		if (!f.exists())
-			throw new EFluteRuntime("Script file " + f + " does not exist!");
-		if (!f.canRead())
-			throw new EFluteRuntime("Script file " + f + " cannot be read!");
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(f);
-		} catch (FileNotFoundException e) {
-			// This should not happen here.
-			e.printStackTrace();
-		}
 
 		StringWriter sw = new StringWriter();
 		if (task.getParams() != null)
@@ -111,33 +91,16 @@ public abstract class PythonProcessor extends Thread {
 		else if (task.getStrParams() != null)
 			sw.append(task.getStrParams());
 
-		PythonInterpreter interp = new PythonInterpreter();
-		interp.set("repair", new JavaImporter() {
-			private static final long serialVersionUID = 1L;
+		ProcParams params = new ProcParams(task.getId(), sw.toString(),
+				task.getOutStream());
 
-			@Override
-			// CHECKSTYLE:OFF
-			public PyObject __call__(PyObject[] args, String[] keywords) {
-				// CHECKSTYLE:ON
-				Connection c = Py.tojava(args[0], Connection.class);
-				try {
-					return Py.java2py(ConnectionPool.repair(c));
-				} catch (EFluteCritical e) {
-					throw new PyException(Py.java2py(e));
-				}
-			}
-		});
-		interp.set("taskid", new PyInteger(task.getId()));
-		interp.set("params", new PyString(sw.toString()));
-		interp.set("conn", conn);
-		interp.set("resultstream", task.getOutStream());
 		try {
-			interp.execfile(fis);
-			PyObject message = interp.get("message");
-			return message == null ? null : message.asString();
-		} catch (PyException e) {
-			throw new EFluteRuntime(String.format("Python error: %s:%s",
-					e.type, e.value));
+			Celesta.getInstance().runPython(AppSettings.getFluteUserId(),
+					task.getScriptName(), params);
+			return params.getMessage();
+		} catch (CelestaException e) {
+			throw new EFluteRuntime(String.format("Celesta error: %s",
+					e.getMessage()));
 		}
 	}
 
@@ -167,44 +130,17 @@ public abstract class PythonProcessor extends Thread {
 			finalizeTaskStmt.setInt(1, success ? 2 : 3);
 
 			if (task.getBufferLength() == 0) {
-				switch (AppSettings.getDBType()) {
-				case MSSQL:
-					finalizeTaskStmt.setNull(2, java.sql.Types.BLOB);
-					break;
-				case POSTGRES:
-					finalizeTaskStmt.setNull(2, java.sql.Types.VARBINARY);
-					break;
-				default:
-					finalizeTaskStmt.setNull(2, java.sql.Types.VARBINARY);
-				}
+				finalizeTaskStmt.setNull(2, java.sql.Types.NULL);
 			} else {
-				switch (AppSettings.getDBType()) {
-				case MSSQL:
-					finalizeTaskStmt.setBinaryStream(
-							2,
-							new ByteArrayInputStream(task.getBuffer(), 0, task
-									.getBufferLength()));
-					break;
-				case POSTGRES:
-					finalizeTaskStmt
-							.setBinaryStream(2,
-									new ByteArrayInputStream(task.getBuffer(),
-											0, task.getBufferLength()), task
-											.getBufferLength());
-					break;
-				default:
-					finalizeTaskStmt.setBinaryStream(
-							2,
-							new ByteArrayInputStream(task.getBuffer(), 0, task
-									.getBufferLength()));
-				}
+				finalizeTaskStmt.setBinaryStream(2, new ByteArrayInputStream(
+						task.getBuffer(), 0, task.getBufferLength()), task
+						.getBufferLength());
 			}
 
 			finalizeTaskStmt.setString(3, details);
 			finalizeTaskStmt.setInt(4, task.getId());
 			finalizeTaskStmt.execute();
-			if (!conn.getAutoCommit())
-				conn.commit();
+			ConnectionPool.commit(conn);
 
 			if (!success)
 				AppSettings
@@ -252,13 +188,8 @@ public abstract class PythonProcessor extends Thread {
 		try {
 			if (conn == null || conn.isClosed())
 				conn = ConnectionPool.get();
-		} catch (SQLException e) {
-			throw new EFluteRuntime("Could not connect to "
-					+ AppSettings.getDatabaseConnection() + "with error: "
-					+ e.getMessage());
-		} catch (EFluteCritical e) {
+		} catch (SQLException | CelestaException e) {
 			throw new EFluteRuntime(e.getMessage());
 		}
 	}
-
 }
