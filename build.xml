@@ -28,6 +28,8 @@
 				<pathelement path="../celesta/src" />
 			</src>
 		</javac>
+		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql" 
+		    file="../celesta/src/ru/curs/celesta/score/celesta.sql" />
 		<javac destdir="build/fastxl" encoding="UTF-8">
 			<src>
 				<pathelement path="fastxlsrc" />

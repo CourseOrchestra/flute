@@ -130,7 +130,9 @@ public final class Main {
 		}
 
 		// С ЭТОГО МОМЕНТА У НАС ЕСТЬ ЛОГГЕР
-
+		AppSettings.getLogger().log(Level.INFO,
+				"Celesta initialized successfully");
+		
 		// Затем инициализируем код, призванный высвобождать задания при
 		// закрытии приложения.
 		Runtime.getRuntime().addShutdownHook(new Thread() {
