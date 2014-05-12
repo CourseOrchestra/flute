@@ -252,6 +252,8 @@ public abstract class PythonProcessor extends Thread {
 		try {
 			if (conn == null || conn.isClosed())
 				conn = ConnectionPool.get();
+			else
+				conn = ConnectionPool.repair(conn);
 		} catch (SQLException e) {
 			throw new EFluteRuntime("Could not connect to "
 					+ AppSettings.getDatabaseConnection() + "with error: "
