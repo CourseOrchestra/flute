@@ -58,12 +58,10 @@ import ru.curs.celesta.ConnectionPool;
 public abstract class PythonProcessor extends Thread {
 
 	private TaskParams task;
-	private Connection conn;
 
 	@Override
 	public void run() {
 		try {
-			initConn();
 			String message = internalRun();
 			finish(true, message == null ? "" : message);
 		} catch (EFluteRuntime e) {
@@ -72,7 +70,7 @@ public abstract class PythonProcessor extends Thread {
 
 	}
 
-	String internalRun() throws EFluteRuntime {
+	private String internalRun() throws EFluteRuntime {
 
 		StringWriter sw = new StringWriter();
 		if (task.getParams() != null)
@@ -118,30 +116,32 @@ public abstract class PythonProcessor extends Thread {
 		PreparedStatement finalizeTaskStmt;
 
 		try {
-			// На случай, если коннекшн испортился после прогонки
-			// скрипта
-			initConn();
-
+			Connection conn = ConnectionPool.get();
 			finalizeTaskStmt = conn
 					.prepareStatement(String
 							.format("UPDATE %s SET STATUS = ?, result = ?, errortext = ? WHERE ID = ?",
 									AppSettings.getTableName()));
+			try {
+				finalizeTaskStmt.setInt(1, success ? 2 : 3);
 
-			finalizeTaskStmt.setInt(1, success ? 2 : 3);
+				if (task.getBufferLength() == 0) {
+					finalizeTaskStmt.setNull(2, java.sql.Types.NULL);
+				} else {
+					finalizeTaskStmt
+							.setBinaryStream(2,
+									new ByteArrayInputStream(task.getBuffer(),
+											0, task.getBufferLength()), task
+											.getBufferLength());
+				}
 
-			if (task.getBufferLength() == 0) {
-				finalizeTaskStmt.setNull(2, java.sql.Types.NULL);
-			} else {
-				finalizeTaskStmt.setBinaryStream(2, new ByteArrayInputStream(
-						task.getBuffer(), 0, task.getBufferLength()), task
-						.getBufferLength());
+				finalizeTaskStmt.setString(3, details);
+				finalizeTaskStmt.setInt(4, task.getId());
+				finalizeTaskStmt.execute();
+			} finally {
+				finalizeTaskStmt.close();
 			}
-
-			finalizeTaskStmt.setString(3, details);
-			finalizeTaskStmt.setInt(4, task.getId());
-			finalizeTaskStmt.execute();
 			ConnectionPool.commit(conn);
-
+			ConnectionPool.putBack(conn);
 			if (!success)
 				AppSettings
 						.getLogger()
@@ -150,7 +150,8 @@ public abstract class PythonProcessor extends Thread {
 										"Task %d for template '%s' failed with message: %s\n",
 										task.getId(), task.getScriptName(),
 										details));
-		} catch (SQLException | EFluteRuntime e) {
+
+		} catch (SQLException | CelestaException e) {
 			// Перевыбросить эксепшн в этом контексте сделать нельзя...
 			AppSettings.getLogger()
 					.log(Level.SEVERE,
@@ -158,7 +159,6 @@ public abstract class PythonProcessor extends Thread {
 									+ e.getMessage());
 		}
 
-		ConnectionPool.putBack(conn);
 		finish();
 	}
 
@@ -184,12 +184,4 @@ public abstract class PythonProcessor extends Thread {
 		return task;
 	}
 
-	private void initConn() throws EFluteRuntime {
-		try {
-			if (conn == null || conn.isClosed())
-				conn = ConnectionPool.get();
-		} catch (SQLException | CelestaException e) {
-			throw new EFluteRuntime(e.getMessage());
-		}
-	}
 }
