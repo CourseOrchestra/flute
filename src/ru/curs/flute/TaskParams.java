@@ -31,24 +31,24 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute;
 
-import java.io.OutputStream;
-
 import org.w3c.dom.Document;
+
+import ru.curs.celesta.dbutils.BLOB;
+
 
 /**
  * Содержит в себе параметры задания для выполнения.
  * 
  */
-public class TaskParams {
+public final class TaskParams {
 	private final int id;
 	private final String scriptName;
 	private final Document params;
 	private final String strParams;
-
-	private final ByteArrayOutputStreamHack bos = new ByteArrayOutputStreamHack();
+	private final BLOB blob = new BLOB();
 
 	TaskParams(int id, String scriptName, Document params, String str) {
 		this.id = id;
@@ -86,24 +86,10 @@ public class TaskParams {
 	}
 
 	/**
-	 * Возвращает поток для записи данных.
+	 * Возвращает BLOB для записи данных.
 	 */
-	public OutputStream getOutStream() {
-		return bos;
-	}
-
-	/**
-	 * Возвращает массив байт, содержащий сформированный результат.
-	 */
-	public byte[] getBuffer() {
-		return bos.getBuffer();
-	}
-
-	/**
-	 * Возвращает активную длину буфера, возвращённого методом getBuffer.
-	 */
-	public int getBufferLength() {
-		return bos.size();
+	public BLOB getBLOB() {
+		return blob;
 	}
 
 }

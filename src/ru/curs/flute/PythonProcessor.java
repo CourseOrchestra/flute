@@ -34,7 +34,6 @@
  */
 package ru.curs.flute;
 
-import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,6 +49,7 @@ import javax.xml.transform.stream.StreamResult;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
 import ru.curs.celesta.ConnectionPool;
+import ru.curs.celesta.dbutils.BLOB;
 
 /**
  * Класс обработчика заданий. Одновременно запускается несколько обработчиков.
@@ -89,8 +89,8 @@ public abstract class PythonProcessor extends Thread {
 		else if (task.getStrParams() != null)
 			sw.append(task.getStrParams());
 
-		ProcParams params = new ProcParams(task.getId(), sw.toString(),
-				task.getOutStream());
+		ProcParams params = new ProcParams(task.getId(), sw.toString(), task
+				.getBLOB().getOutStream());
 
 		try {
 			Celesta.getInstance().runPython(AppSettings.getFluteUserId(),
@@ -123,20 +123,17 @@ public abstract class PythonProcessor extends Thread {
 									AppSettings.getTableName()));
 			try {
 				finalizeTaskStmt.setInt(1, success ? 2 : 3);
-
-				if (task.getBufferLength() == 0) {
+				BLOB blob = task.getBLOB();
+				if (blob.isNull()) {
 					finalizeTaskStmt.setNull(2, java.sql.Types.NULL);
 				} else {
-					finalizeTaskStmt
-							.setBinaryStream(2,
-									new ByteArrayInputStream(task.getBuffer(),
-											0, task.getBufferLength()), task
-											.getBufferLength());
+					finalizeTaskStmt.setBinaryStream(2, blob.getInStream(),
+							blob.size());
 				}
 
 				finalizeTaskStmt.setString(3, details);
 				finalizeTaskStmt.setInt(4, task.getId());
-				finalizeTaskStmt.execute();
+				finalizeTaskStmt.executeUpdate();
 			} finally {
 				finalizeTaskStmt.close();
 			}
