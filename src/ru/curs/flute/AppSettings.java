@@ -121,7 +121,16 @@ public final class AppSettings {
 		return result;
 	}
 
-	static Properties init(File f) throws EFluteCritical {
+	/**
+	 * Инициализация по properties-файлу.
+	 * 
+	 * @param f
+	 *            файл
+	 * 
+	 * @throws EFluteCritical
+	 *             сбой
+	 */
+	public static Properties init(File f) throws EFluteCritical {
 		Properties settings = new Properties();
 		try {
 			FileInputStream in = new FileInputStream(f);

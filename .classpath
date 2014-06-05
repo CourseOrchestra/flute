@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="fastxlsrc"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="xml2spreadsheetsrc"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="webrunner"/>
 	<classpathentry kind="lib" path="lib/jython.jar" sourcepath="C:/jython2.5.2/src"/>
 	<classpathentry kind="lib" path="lib/sqljdbc4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
@@ -18,5 +18,13 @@
 	<classpathentry kind="lib" path="lib/saxon9he.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/celesta"/>
 	<classpathentry kind="lib" path="lib/postgresql-9.3-1100.jdbc41.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v7.0"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

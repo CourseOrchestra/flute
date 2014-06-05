@@ -1,5 +1,11 @@
+<!-- ВНИМАНИЕ! Чтобы данный скрипт заработал: 1) Скопируйте файл build.properties.template 
+	в build.properties и пропишите в нём путь к установленному у вас Tomcat 2) 
+	NSIS (c XML-плагином) должен быть установлен, а путь к нему - прописан в 
+	PATH -->
 <!DOCTYPE project>
 <project name="flute" default="nsis">
+	<property file="build.properties" />
+
 	<taskdef name="nsis" classname="com.danielreese.nsisant.Task">
 		<classpath location="wininstall/nsisant-1.3.jar" />
 	</taskdef>
@@ -13,6 +19,7 @@
 		<mkdir dir="build/flute" />
 		<mkdir dir="build/fastxl" />
 		<mkdir dir="build/xml2spreadsheet" />
+		<mkdir dir="build/webflute/WEB-INF/classes" />
 	</target>
 	<target name="compile" depends="init">
 		<echo>Compile the source files</echo>
@@ -28,8 +35,8 @@
 				<pathelement path="../celesta/src" />
 			</src>
 		</javac>
-		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql" 
-		    file="../celesta/src/ru/curs/celesta/score/celesta.sql" />
+		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql"
+			file="../celesta/src/ru/curs/celesta/score/celesta.sql" />
 		<javac destdir="build/fastxl" encoding="UTF-8">
 			<src>
 				<pathelement path="fastxlsrc" />
@@ -46,6 +53,15 @@
 			</classpath>
 			<src>
 				<pathelement path="xml2spreadsheetsrc" />
+			</src>
+		</javac>
+		<javac destdir="build/webflute/WEB-INF/classes" encoding="UTF-8">
+			<classpath>
+				<pathelement path="build/flute" />
+				<fileset dir="${tomcat.home}/lib" includes="*.jar" />
+			</classpath>
+			<src>
+				<pathelement path="webrunner" />
 			</src>
 		</javac>
 	</target>
@@ -80,6 +96,9 @@
 				<attribute name="Main-Class" value="ru.curs.flute.xml2spreadsheet.Main" />
 			</manifest>
 		</jar>
+		<war destfile="wininstall/webflute.war" webxml="WebContent/WEB-INF/web.xml">
+			<fileset dir="build/webflute" />
+		</war>
 	</target>
 	<target name="nsis" depends="jar">
 		<echo>Update SVN revision number</echo>
@@ -90,7 +109,8 @@
 			var before = project.getProperty("buildno");
 			project.setProperty("buildno", before.replaceAll("\r\n", ""));
 		</script>
-		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${buildno}"</echo>
+		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${buildno}"
+		</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
 		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />

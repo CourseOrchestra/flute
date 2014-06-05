@@ -52,7 +52,7 @@ import ru.curs.celesta.ConnectionPool;
  */
 public final class TaskManager {
 
-	private static final int SHUTDOWN_TIME = 6000;
+	static final int SHUTDOWN_TIME = 6000;
 	private static final TaskManager THE_MANAGER = new TaskManager();
 	private static boolean stop;
 
@@ -81,8 +81,7 @@ public final class TaskManager {
 					+ "select a.* from a where rownum <= 1";
 			break;
 		default:
-			throw new EFluteCritical(
-					"Cannot recognize database type.");
+			throw new EFluteCritical("Cannot recognize database type.");
 		}
 
 		try {
@@ -194,8 +193,11 @@ public final class TaskManager {
 	/**
 	 * Выполняет в бесконечном цикле опрос заданий и раздачу их
 	 * потокам-исполнителям.
+	 * 
+	 * @throws EFluteCritical
+	 *             сбой
 	 */
-	static void execute() throws EFluteCritical {
+	public static void execute() throws EFluteCritical {
 		stop = false;
 		THE_MANAGER.mainConn = null;
 		THE_MANAGER.internalExecute();
@@ -204,7 +206,7 @@ public final class TaskManager {
 	/**
 	 * Останавливает сервис.
 	 */
-	static void stop() {
+	public static void stop() {
 		/*
 		 * Вообще говоря, это всё надо переписать поаккуратнее, чтобы тут
 		 * дождаться, пока все кончат работу и т. д. Но сейчас с этим нет
@@ -213,12 +215,6 @@ public final class TaskManager {
 
 		// Блокируем раздачу новых заданий
 		stop = true;
-		// Ждём 6 сек.
-		try {
-			Thread.sleep(SHUTDOWN_TIME);
-		} catch (InterruptedException e) {// CHECKSTYLE:OFF
-			// Do nothing
-			// CHECKSTYLE:ON
-		}
+
 	}
 }

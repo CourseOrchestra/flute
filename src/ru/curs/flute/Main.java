@@ -132,7 +132,7 @@ public final class Main {
 		// С ЭТОГО МОМЕНТА У НАС ЕСТЬ ЛОГГЕР
 		AppSettings.getLogger().log(Level.INFO,
 				"Celesta initialized successfully");
-		
+
 		// Затем инициализируем код, призванный высвобождать задания при
 		// закрытии приложения.
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -184,6 +184,13 @@ public final class Main {
 
 	private static void stopService() {
 		TaskManager.stop();
+		// Ждём 6 сек.
+		try {
+			Thread.sleep(TaskManager.SHUTDOWN_TIME);
+		} catch (InterruptedException e) {// CHECKSTYLE:OFF
+			// Do nothing
+			// CHECKSTYLE:ON
+		}
 		System.out.println("Service stopped on request.");
 	}
 

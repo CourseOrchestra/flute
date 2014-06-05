@@ -185,6 +185,7 @@ Section "Flute" SEC01
   SetOutPath "$INSTDIR"
   File flute.jar
   File flute.properties
+  File webflute.war
 
   Push $ScorePath
   Push "\"
@@ -335,6 +336,7 @@ Section Uninstall
 
   ;Удаляем программные и вспомогательные файлы
   Delete "$INSTDIR\flute.jar"
+  Delete "$INSTDIR\webflute.war"
   Delete "$INSTDIR\flute.properties"
 
   Delete "$INSTDIR\curs.url"
