@@ -38,6 +38,7 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Random;
 import java.util.logging.Level;
 
 import javax.xml.transform.OutputKeys;
@@ -93,8 +94,11 @@ public abstract class PythonProcessor extends Thread {
 				.getBLOB().getOutStream());
 
 		try {
-			Celesta.getInstance().runPython(AppSettings.getFluteUserId(),
-					task.getScriptName(), params);
+			String sesId = String.format("FLUTE%08X", (new Random()).nextInt());
+			Celesta.getInstance().login(sesId, AppSettings.getFluteUserId());
+			Celesta.getInstance()
+					.runPython(sesId, task.getScriptName(), params);
+			Celesta.getInstance().logout(sesId, false);
 			return params.getMessage();
 		} catch (CelestaException e) {
 			throw new EFluteRuntime(String.format("Celesta error: %s",
