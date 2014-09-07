@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
@@ -149,9 +149,10 @@ abstract class XMLDataReader {
 								return false;
 							}
 						}).getValue("mode");
-
+						String regionName = new StringAttrReader()
+								.getValue("regionName");
 						DescriptorIteration currIteration = new DescriptorIteration(
-								index, horizontal, merge);
+								index, horizontal, merge, regionName);
 						elementsStack.peek().getSubelements()
 								.add(currIteration);
 						parserState = ParserState.ITERATION;
@@ -355,12 +356,15 @@ abstract class XMLDataReader {
 		private final int index;
 		private final int merge;
 		private final boolean horizontal;
+		private final String regionName;
 		private final List<DescriptorElement> elements = new LinkedList<>();
 
-		public DescriptorIteration(int index, boolean horizontal, int merge) {
+		public DescriptorIteration(int index, boolean horizontal, int merge,
+				String regionName) {
 			this.index = index;
 			this.horizontal = horizontal;
 			this.merge = merge;
+			this.regionName = regionName;
 		}
 
 		int getIndex() {
@@ -379,6 +383,9 @@ abstract class XMLDataReader {
 			return merge;
 		}
 
+		public String getRegionName() {
+			return regionName;
+		}
 	}
 
 	static final class DescriptorOutput extends DescriptorSubelement {

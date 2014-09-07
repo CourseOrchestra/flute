@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
@@ -53,6 +53,11 @@ abstract class ReportWriter {
 
 	private OutputStream output;
 
+	/**
+	 * Блок раскладки, состоящий из вложенных блоков, растущих внутри него
+	 * горизонтально или вертикально.
+	 * 
+	 */
 	private static class LayoutBlock {
 
 		/**
@@ -160,8 +165,9 @@ abstract class ReportWriter {
 	 * элементов выводилась слева направо, а охватывающая группа --- сверху
 	 * вниз, то позиция смещается в столбец A, и строку, определяемую высотой
 	 * самого высокого элемента в группе.
+	 * 
 	 */
-	public void endSequence(int merge) {
+	public void endSequence(int merge, String regionName) {
 		if (blocks.isEmpty())
 			return;
 
@@ -171,17 +177,20 @@ abstract class ReportWriter {
 		if (b2.borders == null || blocks.isEmpty())
 			return;
 
+		RangeAddress borders = b2.borders;
+		CellAddress tl = new CellAddress(borders.topLeft().getCol(), borders
+				.topLeft().getRow());
+		CellAddress br = b2.horizontal ? new CellAddress(borders.bottomRight()
+				.getCol(), tl.getRow() + merge - 1) : new CellAddress(
+				tl.getCol() + merge - 1, borders.bottomRight().getRow());
+
 		// Делаем мёрдж тех ячеек, которые необходимы
-		if (merge > 0) {
-			RangeAddress borders = b2.borders;
-			CellAddress tl = new CellAddress(borders.topLeft().getCol(),
-					borders.topLeft().getRow());
-			CellAddress br = b2.horizontal ? new CellAddress(borders
-					.bottomRight().getCol(), tl.getRow() + merge - 1)
-					: new CellAddress(tl.getCol() + merge - 1, borders
-							.bottomRight().getRow());
+		if (merge > 0)
 			mergeUp(tl, br);
-		}
+
+		// Добавляем именованный диапазон, если необходим
+		if (regionName != null)
+			addNamedRegion(regionName, tl, br);
 
 		// Иначе, мы вставили прямоугольник, и его следует оприходовать, как
 		// большую секцию:
@@ -272,6 +281,8 @@ abstract class ReportWriter {
 			String sourceSheet, RangeAddress range) throws XML2SpreadSheetError;
 
 	abstract void mergeUp(CellAddress a1, CellAddress a2);
+
+	abstract void addNamedRegion(String name, CellAddress a1, CellAddress a2);
 
 	/**
 	 * Сбрасывает результат создания документа в поток.

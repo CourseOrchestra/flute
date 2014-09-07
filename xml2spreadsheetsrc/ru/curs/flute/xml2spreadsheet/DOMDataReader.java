@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.io.InputStream;
@@ -44,6 +44,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * Класс, ответственный за чтение из XML-файла и перенаправление команд на вывод
+ * в объект ReportWriter методом DOM.
+ */
 final class DOMDataReader extends XMLDataReader {
 
 	private final Document xmlData;
@@ -141,7 +145,7 @@ final class DOMDataReader extends XMLDataReader {
 			if ("(after)".equals(de.getElementName()))
 				processElement(elementPath, de, parent, position);
 
-		getWriter().endSequence(i.getMerge());
+		getWriter().endSequence(i.getMerge(), i.getRegionName());
 	}
 
 	@Override

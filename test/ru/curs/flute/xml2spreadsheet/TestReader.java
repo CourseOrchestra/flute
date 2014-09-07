@@ -214,7 +214,7 @@ class DummyWriter extends ReportWriter {
 	}
 
 	@Override
-	public void endSequence(int merge) {
+	public void endSequence(int merge, String regionName) {
 		log.append("}");
 	}
 
@@ -249,6 +249,11 @@ class DummyWriter extends ReportWriter {
 	@Override
 	void mergeUp(CellAddress a1, CellAddress a2) {
 		log.append("merge");
+	}
+
+	@Override
+	void addNamedRegion(String name, CellAddress a1, CellAddress a2) {
+		log.append("addNamedRegion");
 	}
 
 }

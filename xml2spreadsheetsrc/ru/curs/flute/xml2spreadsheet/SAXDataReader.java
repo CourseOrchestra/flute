@@ -51,6 +51,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import ru.curs.flute.xml2spreadsheet.XMLContext.SAXContext;
 
+/**
+ * Класс, ответственный за чтение из XML-файла и перенаправление команд на вывод
+ * в объект ReportWriter методом SAX.
+ */
 final class SAXDataReader extends XMLDataReader {
 
 	private final Source xmlData;
@@ -79,6 +83,7 @@ final class SAXDataReader extends XMLDataReader {
 		private final List<DescriptorOutput> headerOutputs = new LinkedList<>();
 		private final List<DescriptorOutput> footerOutputs = new LinkedList<>();
 		private final int merge;
+		private final String regionName;
 
 		SAXElementDescriptor() {
 			context = null;
@@ -86,6 +91,7 @@ final class SAXDataReader extends XMLDataReader {
 			horizontal = false;
 			desiredIndex = -1;
 			merge = 0;
+			regionName = null;
 		}
 
 		SAXElementDescriptor(DescriptorElement e, XMLContext context)
@@ -95,6 +101,7 @@ final class SAXDataReader extends XMLDataReader {
 			boolean horizontal = false;
 			int desiredIndex = -1;
 			int merge = 0;
+			String regionName = null;
 			for (DescriptorSubelement se : e.getSubelements())
 				if (!iterate) {
 					// До тэга iteration
@@ -122,6 +129,7 @@ final class SAXDataReader extends XMLDataReader {
 						iterate = true;
 						horizontal = ((DescriptorIteration) se).isHorizontal();
 						merge = ((DescriptorIteration) se).getMerge();
+						regionName = ((DescriptorIteration) se).getRegionName();
 					}
 				} else {
 					// После тэга iteration
@@ -135,6 +143,7 @@ final class SAXDataReader extends XMLDataReader {
 			this.horizontal = horizontal;
 			this.desiredIndex = desiredIndex;
 			this.merge = merge;
+			this.regionName = regionName;
 		}
 	}
 
@@ -206,7 +215,7 @@ final class SAXDataReader extends XMLDataReader {
 					if (sed.iterate) {
 						for (DescriptorOutput deo : sed.footerOutputs)
 							processOutput(sed.context, deo);
-						getWriter().endSequence(sed.merge);
+						getWriter().endSequence(sed.merge, sed.regionName);
 					}
 					// По пост-выводам выполняем вывод
 					for (DescriptorOutput o : sed.postOutputs)

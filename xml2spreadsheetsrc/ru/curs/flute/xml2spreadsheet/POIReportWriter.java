@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.io.IOException;
@@ -49,6 +49,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Footer;
 import org.apache.poi.ss.usermodel.Header;
+import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -56,6 +57,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+/**
+ * Класс, ответственный за формирование результирующего вывода в документ при
+ * помощи библиотеки POI.
+ */
 abstract class POIReportWriter extends ReportWriter {
 
 	/**
@@ -310,6 +315,8 @@ abstract class POIReportWriter extends ReportWriter {
 					needEval = true;
 					break;
 				// Остальные типы ячеек пока игнорируем
+				default:
+					break;
 				}
 			}
 		}
@@ -334,10 +341,12 @@ abstract class POIReportWriter extends ReportWriter {
 						Integer.parseInt(dateMatcher.group(2)) - 1,
 						Integer.parseInt(dateMatcher.group(3)));
 				resultCell.setCellValue(c.getTime());
-			} else
+			} else {
 				resultCell.setCellValue(buf);
-		} else
+			}
+		} else {
 			resultCell.setCellValue(buf);
+		}
 	}
 
 	private void arrangeMergedCells(CellAddress growthPoint, RangeAddress range)
@@ -368,10 +377,22 @@ abstract class POIReportWriter extends ReportWriter {
 
 	abstract void evaluate();
 
+	@Override
 	void mergeUp(CellAddress a1, CellAddress a2) {
 		CellRangeAddress res = new CellRangeAddress(a1.getRow() - 1,
 				a2.getRow() - 1, a1.getCol() - 1, a2.getCol() - 1);
 		activeResultSheet.addMergedRegion(res);
+	}
+
+	@Override
+	void addNamedRegion(String name, CellAddress a1, CellAddress a2) {
+		Name region = activeResultSheet.getWorkbook().createName();
+		region.setNameName(name);
+		// don't forget to replace single quote with double quotes!
+		String formula = String.format("'%s'!%s:%s", activeResultSheet
+				.getSheetName().replaceAll("'", "''"), a1.getAddress(), a2
+				.getAddress());
+		region.setRefersToFormula(formula);
 	}
 
 	@Override
