@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.io.FileInputStream;
@@ -46,6 +46,41 @@ import java.io.OutputStream;
  * 
  */
 public final class XML2Spreadsheet {
+
+	private XML2Spreadsheet() {
+	}
+
+	/**
+	 * Запускает построение отчётов на исходных данных. Перегруженная версия
+	 * метода, работающая на потоках.
+	 * 
+	 * @param xmlData
+	 *            Исходные данные.
+	 * @param xmlDescriptor
+	 *            Дескриптор, описывающий порядок итерации по исходным данным.
+	 * @param template
+	 *            Шаблон отчёта.
+	 * @param outputType
+	 *            Тип шаблона отчёта (OpenOffice, XLS, XLSX).
+	 * @param useSAX
+	 *            Режим процессинга (DOM или SAX).
+	 * @param copyTemplate
+	 *            Копировать ли шаблон полностью перед началом обработки.
+	 * @param output
+	 *            Поток, в который записывается результирующий отчёт.
+	 * @throws XML2SpreadSheetError
+	 *             в случае возникновения ошибок
+	 */
+	public static void process(InputStream xmlData, InputStream xmlDescriptor,
+			InputStream template, OutputType outputType, boolean useSAX,
+			boolean copyTemplate, OutputStream output)
+			throws XML2SpreadSheetError {
+		ReportWriter writer = ReportWriter.createWriter(template, outputType,
+				copyTemplate, output);
+		XMLDataReader reader = XMLDataReader.createReader(xmlData,
+				xmlDescriptor, useSAX, writer);
+		reader.process();
+	}
 
 	/**
 	 * Запускает построение отчётов на исходных данных. Перегруженная версия
@@ -69,11 +104,54 @@ public final class XML2Spreadsheet {
 	public static void process(InputStream xmlData, InputStream xmlDescriptor,
 			InputStream template, OutputType outputType, boolean useSAX,
 			OutputStream output) throws XML2SpreadSheetError {
-		ReportWriter writer = ReportWriter.createWriter(template, outputType,
+		process(xmlData, xmlDescriptor, template, outputType, useSAX, false,
 				output);
-		XMLDataReader reader = XMLDataReader.createReader(xmlData,
-				xmlDescriptor, useSAX, writer);
-		reader.process();
+	}
+
+	/**
+	 * Запускает построение отчётов на исходных данных. Перегруженная версия
+	 * метода, работающая на файлах (для удобства использования из
+	 * Python-скриптов).
+	 * 
+	 * @param xmlData
+	 *            Исходные данные.
+	 * @param xmlDescriptor
+	 *            Дескриптор, описывающий порядок итерации по исходным данным.
+	 * @param template
+	 *            Шаблон отчёта. Тип шаблона отчёта определяется по расширению.
+	 * @param useSAX
+	 *            Режим процессинга (false, если DOM, или true, если SAX).
+	 * @param copyTemplate
+	 *            Копировать ли шаблон.
+	 * @param output
+	 *            Поток, в который записывается результирующий отчёт.
+	 * @throws FileNotFoundException
+	 *             в случае, если указанные файлы не существуют
+	 * @throws XML2SpreadSheetError
+	 *             в случае иных ошибок
+	 */
+	public static void process(InputStream xmlData, File xmlDescriptor,
+			File template, boolean useSAX, boolean copyTemplate,
+			OutputStream output) throws FileNotFoundException,
+			XML2SpreadSheetError {
+		InputStream descr = new FileInputStream(xmlDescriptor);
+		InputStream templ = new FileInputStream(template);
+		String buf = template.toString();
+		int dotInd = buf.lastIndexOf('.');
+		buf = (dotInd > 0 && dotInd < buf.length()) ? buf.substring(dotInd + 1)
+				: null;
+		OutputType outputType;
+		if ("ods".equalsIgnoreCase(buf)) {
+			outputType = OutputType.ODS;
+		} else if ("xls".equalsIgnoreCase(buf)) {
+			outputType = OutputType.XLS;
+		} else if ("xlsx".equalsIgnoreCase(buf)) {
+			outputType = OutputType.XLSX;
+		} else {
+			throw new XML2SpreadSheetError(
+					"Cannot define output format, template has non-standard extention.");
+		}
+		process(xmlData, descr, templ, outputType, useSAX, copyTemplate, output);
 	}
 
 	/**
@@ -99,22 +177,6 @@ public final class XML2Spreadsheet {
 	public static void process(InputStream xmlData, File xmlDescriptor,
 			File template, boolean useSAX, OutputStream output)
 			throws FileNotFoundException, XML2SpreadSheetError {
-		InputStream descr = new FileInputStream(xmlDescriptor);
-		InputStream templ = new FileInputStream(template);
-		String buf = template.toString();
-		int dotInd = buf.lastIndexOf('.');
-		buf = (dotInd > 0 && dotInd < buf.length()) ? buf.substring(dotInd + 1)
-				: null;
-		OutputType outputType;
-		if ("ods".equalsIgnoreCase(buf))
-			outputType = OutputType.ODS;
-		else if ("xls".equalsIgnoreCase(buf))
-			outputType = OutputType.XLS;
-		else if ("xlsx".equalsIgnoreCase(buf))
-			outputType = OutputType.XLSX;
-		else
-			throw new XML2SpreadSheetError(
-					"Cannot define output format, template has non-standard extention.");
-		process(xmlData, descr, templ, outputType, useSAX, output);
+		process(xmlData, xmlDescriptor, template, useSAX, false, output);
 	}
 }

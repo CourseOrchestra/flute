@@ -34,6 +34,7 @@
  */
 package ru.curs.flute.xml2spreadsheet;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Deque;
@@ -86,18 +87,30 @@ abstract class ReportWriter {
 	 *             В случае, если шаблон имеет неверный формат
 	 */
 	static ReportWriter createWriter(InputStream template, OutputType type,
-			OutputStream output) throws XML2SpreadSheetError {
-
+			boolean copyTemplate, OutputStream output)
+			throws XML2SpreadSheetError {
+		InputStream localTemplate = template;
+		InputStream templateCopy = null;
+		try {
+			if (copyTemplate) {
+				XML2SpreadseetBLOB b = new XML2SpreadseetBLOB(template);
+				localTemplate = b.getInStream();
+				templateCopy = b.getInStream();
+				template.close();
+			}
+		} catch (IOException e) {
+			throw new XML2SpreadSheetError(e.getMessage());
+		}
 		ReportWriter result;
 		switch (type) {
 		case ODS:
-			result = new ODSReportWriter(template);
+			result = new ODSReportWriter(localTemplate, templateCopy);
 			break;
 		case XLS:
-			result = new XLSReportWriter(template);
+			result = new XLSReportWriter(localTemplate, templateCopy);
 			break;
 		case XLSX:
-			result = new XLSXReportWriter(template);
+			result = new XLSXReportWriter(localTemplate, templateCopy);
 			break;
 		default:
 			// This will never happen

@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.io.File;
@@ -49,6 +49,7 @@ public class Main {
 	private static final String DESCR = "-descr";
 	private static final String OUT = "-out";
 	private static final String SAX = "-sax";
+	private static final String COPYTEMPLATE = "-copytemplate";
 
 	private enum State {
 		READTOKEN, READDATA, READTEMPLATE, READDESCR, READOUT,
@@ -72,6 +73,7 @@ public class Main {
 		File template = null;
 		FileOutputStream output = null;
 		boolean useSAX = false;
+		boolean copyTemplate = false;
 
 		State state = State.READTOKEN;
 
@@ -88,6 +90,8 @@ public class Main {
 					state = State.READOUT;
 				else if (SAX.equalsIgnoreCase(s))
 					useSAX = true;
+				else if (COPYTEMPLATE.equalsIgnoreCase(s))
+					copyTemplate = true;
 				else
 					showHelp();
 				break;
@@ -107,11 +111,14 @@ public class Main {
 				output = new FileOutputStream(new File(s));
 				state = State.READTOKEN;
 				break;
+			default:
+				break;
 			}
 
 		checkParams(iff, descr, template, output);
-		XML2Spreadsheet.process(iff, descr, template, useSAX, output);
-		
+		XML2Spreadsheet.process(iff, descr, template, useSAX, copyTemplate,
+				output);
+
 		System.out.println("Spreadsheet created successfully.");
 	}
 
@@ -130,7 +137,7 @@ public class Main {
 		System.out.println("[" + SAX
 				+ "] use SAX engine (instead of DOM) to parse data file");
 		System.out.println(OUT + " output file");
-		
+
 		System.exit(1);
 	}
 }

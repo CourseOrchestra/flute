@@ -81,16 +81,20 @@ abstract class POIReportWriter extends ReportWriter {
 	private boolean needEval = false;
 	private final Map<CellStyle, CellStyle> stylesMap = new HashMap<>();
 
-	public POIReportWriter(InputStream template) throws XML2SpreadSheetError {
+	public POIReportWriter(InputStream template, InputStream templateCopy)
+			throws XML2SpreadSheetError {
 		try {
 			this.template = WorkbookFactory.create(template);
+
+			// Создаём новую книгу
+			if (templateCopy != null) {
+				result = WorkbookFactory.create(templateCopy);
+			} else {
+				result = createResultWb();
+			}
 		} catch (InvalidFormatException | IOException e) {
 			throw new XML2SpreadSheetError(e.getMessage());
 		}
-
-		// Создаём новую книгу
-		result = createResultWb();
-
 		final Map<Short, Font> fontMap = new HashMap<>();
 
 		// Копируем шрифты
@@ -169,6 +173,9 @@ abstract class POIReportWriter extends ReportWriter {
 			int startRepeatingColumn, int endRepeatingColumn,
 			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError {
+		activeResultSheet = result.getSheet(sheetName);
+		if (activeResultSheet != null)
+			return;
 		activeResultSheet = result.createSheet(sheetName);
 		updateActiveTemplateSheet(sourceSheet);
 		// Ищем число столбцов в исходнике

@@ -41,7 +41,7 @@ import java.io.InputStream;
  */
 final class ODSReportWriter extends ReportWriter {
 
-	ODSReportWriter(InputStream template) throws XML2SpreadSheetError {
+	ODSReportWriter(InputStream template, InputStream templateCopy) throws XML2SpreadSheetError {
 		// TODO Auto-generated constructor stub
 		throw new XML2SpreadSheetError("ODS is not implemented yet!..");
 	}
