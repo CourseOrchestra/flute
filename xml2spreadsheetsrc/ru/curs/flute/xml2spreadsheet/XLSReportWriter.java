@@ -31,14 +31,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
  * Реализация ReportWriter для вывода в формат MSOffice 97-2003 (XLS).
@@ -47,13 +50,19 @@ final class XLSReportWriter extends POIReportWriter {
 
 	private HSSFWorkbook wb;
 
-	XLSReportWriter(InputStream template, InputStream templateCopy) throws XML2SpreadSheetError {
+	XLSReportWriter(InputStream template, InputStream templateCopy)
+			throws XML2SpreadSheetError {
 		super(template, templateCopy);
 	}
 
 	@Override
-	Workbook createResultWb() {
-		wb = new HSSFWorkbook();
+	Workbook createResultWb(InputStream templateCopy)
+			throws InvalidFormatException, IOException {
+		if (templateCopy == null) {
+			wb = new HSSFWorkbook();
+		} else {
+			wb = (HSSFWorkbook) WorkbookFactory.create(templateCopy);
+		}
 		return wb;
 	}
 

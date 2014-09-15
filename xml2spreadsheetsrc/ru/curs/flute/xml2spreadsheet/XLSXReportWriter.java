@@ -31,12 +31,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -47,13 +50,19 @@ final class XLSXReportWriter extends POIReportWriter {
 
 	private XSSFWorkbook wb;
 
-	XLSXReportWriter(InputStream template, InputStream templateCopy) throws XML2SpreadSheetError {
+	XLSXReportWriter(InputStream template, InputStream templateCopy)
+			throws XML2SpreadSheetError {
 		super(template, templateCopy);
 	}
 
 	@Override
-	Workbook createResultWb() {
-		wb = new XSSFWorkbook();
+	Workbook createResultWb(InputStream templateCopy)
+			throws InvalidFormatException, IOException {
+		if (templateCopy == null) {
+			wb = new XSSFWorkbook();
+		} else {
+			wb = (XSSFWorkbook) WorkbookFactory.create(templateCopy);
+		}
 		return wb;
 	}
 

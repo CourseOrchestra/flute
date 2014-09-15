@@ -85,13 +85,8 @@ abstract class POIReportWriter extends ReportWriter {
 			throws XML2SpreadSheetError {
 		try {
 			this.template = WorkbookFactory.create(template);
-
 			// Создаём новую книгу
-			if (templateCopy != null) {
-				result = WorkbookFactory.create(templateCopy);
-			} else {
-				result = createResultWb();
-			}
+			result = createResultWb(templateCopy);
 		} catch (InvalidFormatException | IOException e) {
 			throw new XML2SpreadSheetError(e.getMessage());
 		}
@@ -155,7 +150,8 @@ abstract class POIReportWriter extends ReportWriter {
 
 	}
 
-	abstract Workbook createResultWb();
+	abstract Workbook createResultWb(InputStream is)
+			throws InvalidFormatException, IOException;
 
 	private void updateActiveTemplateSheet(String sourceSheet)
 			throws XML2SpreadSheetError {
