@@ -389,7 +389,9 @@ abstract class POIReportWriter extends ReportWriter {
 
 	@Override
 	void addNamedRegion(String name, CellAddress a1, CellAddress a2) {
-		Name region = activeResultSheet.getWorkbook().createName();
+		Name region = activeResultSheet.getWorkbook().getName(name);
+		if (region == null)
+			region = activeResultSheet.getWorkbook().createName();
 		region.setNameName(name);
 		// don't forget to replace single quote with double quotes!
 		String formula = String.format("'%s'!%s:%s", activeResultSheet

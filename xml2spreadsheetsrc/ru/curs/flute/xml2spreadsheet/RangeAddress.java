@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.util.regex.Matcher;
@@ -92,5 +92,9 @@ final class RangeAddress {
 	public void setBottom(int max) {
 		bottomRight.setRow(max);
 
+	}
+
+	public String getAddress() {
+		return topLeft.getAddress() + ":" + bottomRight.getAddress();
 	}
 }
