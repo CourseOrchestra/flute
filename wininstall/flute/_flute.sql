@@ -6,4 +6,6 @@ CREATE TABLE tasks(
     parameters TEXT,
     status INT NOT NULL DEFAULT 0,
     result BLOB,
-    errortext TEXT);
+    errortext TEXT) with no version check;
+
+CREATE INDEX idxtasks ON tasks (status);
