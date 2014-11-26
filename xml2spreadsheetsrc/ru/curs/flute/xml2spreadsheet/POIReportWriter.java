@@ -169,11 +169,13 @@ abstract class POIReportWriter extends ReportWriter {
 			int startRepeatingColumn, int endRepeatingColumn,
 			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError {
+		
+		updateActiveTemplateSheet(sourceSheet);
 		activeResultSheet = result.getSheet(sheetName);
 		if (activeResultSheet != null)
 			return;
 		activeResultSheet = result.createSheet(sheetName);
-		updateActiveTemplateSheet(sourceSheet);
+		
 		// Ищем число столбцов в исходнике
 		int maxCol = 1;
 		for (int i = activeTemplateSheet.getFirstRowNum(); i <= activeTemplateSheet
