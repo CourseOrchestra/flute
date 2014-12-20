@@ -96,7 +96,13 @@ abstract class POIReportWriter extends ReportWriter {
 		// Внимание: в цикле --- <=, а не < из-за ошибки то ли в названии,
 		// то ли в реализации метода getNumberOfFonts ;-)
 		for (short i = 0; i <= this.template.getNumberOfFonts(); i++) {
-			Font fSource = this.template.getFontAt(i);
+			Font fSource;
+			try {
+				// Но в некоторых файлах тут случается вот такое..
+				fSource = this.template.getFontAt(i);
+			} catch (IndexOutOfBoundsException e) {
+				break;
+			}
 			Font fResult = (i == 0) ? result.getFontAt((short) 0) : result
 					.createFont();
 			fResult.setBoldweight(fSource.getBoldweight());
@@ -169,13 +175,13 @@ abstract class POIReportWriter extends ReportWriter {
 			int startRepeatingColumn, int endRepeatingColumn,
 			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError {
-		
+
 		updateActiveTemplateSheet(sourceSheet);
 		activeResultSheet = result.getSheet(sheetName);
 		if (activeResultSheet != null)
 			return;
 		activeResultSheet = result.createSheet(sheetName);
-		
+
 		// Ищем число столбцов в исходнике
 		int maxCol = 1;
 		for (int i = activeTemplateSheet.getFirstRowNum(); i <= activeTemplateSheet

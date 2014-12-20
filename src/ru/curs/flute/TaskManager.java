@@ -104,25 +104,28 @@ public final class TaskManager {
 		initMainConn();
 		try {
 			ResultSet rs = selectNextStmt.executeQuery();
-			if (rs.next()) {
-				int id = rs.getInt(1);
-				String template = rs.getString(2);
-				Document doc = null;
-				String str = null;
-				try {
-					SQLXML xml = rs.getSQLXML(3);
-					doc = xml == null ? null : (Document) xml.getSource(
-							DOMSource.class).getNode();
-				} catch (SQLException e) {
-					str = rs.getString(3);
+			try {
+				if (rs.next()) {
+					int id = rs.getInt(1);
+					String template = rs.getString(2);
+					Document doc = null;
+					String str = null;
+					try {
+						SQLXML xml = rs.getSQLXML(3);
+						doc = xml == null ? null : (Document) xml.getSource(
+								DOMSource.class).getNode();
+					} catch (SQLException e) {
+						str = rs.getString(3);
+					}
+					markNextStmt.setInt(1, id);
+					markNextStmt.execute();
+					return new TaskParams(id, template, doc, str);
+				} else {
+					return null;
 				}
-
-				markNextStmt.setInt(1, id);
-				markNextStmt.execute();
+			} finally {
+				rs.close();
 				ConnectionPool.commit(mainConn);
-				return new TaskParams(id, template, doc, str);
-			} else {
-				return null;
 			}
 		} catch (SQLException e) {
 			throw new EFluteCritical(
