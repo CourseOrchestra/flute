@@ -31,11 +31,12 @@ class XLSharedStrings {
 			TransformerFactory.newInstance().newTransformer()
 					.transform(new StreamSource(is), new SAXResult(p));
 		} catch (Exception e) {
-			if (p.getError() != null)
+			if (p.getError() != null) {
 				throw p.getError();
-			else
+			} else {
 				throw new EFastXLRuntime(
 						"Could not parse sharedStrings.xml: " + e.getMessage());
+			}
 		}
 	}
 

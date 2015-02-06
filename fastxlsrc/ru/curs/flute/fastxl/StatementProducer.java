@@ -130,10 +130,11 @@ public final class StatementProducer {
 			// Случай непустого перечня аргументов.
 			do {
 				ProcedureParameter p = result.parseParameter(buf);
-				if (p != null)
+				if (p != null) {
 					result.parameters.add(p);
-				else
+				} else {
 					return null;
+				}
 			} while (buf.readLexem(COMMA) != null);
 
 			// Читаем закрывающую скобку.
@@ -231,10 +232,11 @@ public final class StatementProducer {
 		lexem = l.readLexem(StatementProducer.NUMBER);
 		if (lexem != null) {
 			Matcher m = StatementProducer.INTEGER.matcher(lexem);
-			if (m.matches())
+			if (m.matches()) {
 				return new IntParameter(Integer.parseInt(lexem));
-			else
+			} else {
 				return new DoubleParameter(Double.parseDouble(lexem));
+			}
 		}
 
 		lexem = l.readLexem(StatementProducer.XPATH);
@@ -305,17 +307,19 @@ public final class StatementProducer {
 						state = 1;
 					break;
 				case 1:
-					if (c == '\'')
+					if (c == '\'') {
 						state = 2;
-					else
+					} else {
 						sb.append(c);
+					}
 					break;
 				case 2:
 					if (c == '\'') {
 						sb.append('\'');
 						state = 1;
-					} else
+					} else {
 						break iteration;
+					}
 				}
 			}
 
@@ -382,10 +386,11 @@ public final class StatementProducer {
 
 		@Override
 		void apply(int index, PreparedStatement stmt) throws SQLException {
-			if (value != null)
+			if (value != null) {
 				stmt.setNString(index, value);
-			else
+			} else {
 				stmt.setNull(index, Types.VARCHAR);
+			}
 		}
 
 		@Override
@@ -396,6 +401,9 @@ public final class StatementProducer {
 	}
 }
 
+/**
+ * Лексический анализатор.
+ */
 final class Lexer implements CharSequence {
 	private final CharSequence buf;
 	private int position;

@@ -73,11 +73,12 @@ final class WorksheetProcessor {
 					.transform(new StreamSource(is), new SAXResult(p));
 			xmlWriter.flush();
 		} catch (Exception e) {
-			if (p != null && p.getError() != null)
+			if (p != null && p.getError() != null) {
 				throw p.getError();
-			else
+			} else {
 				throw new EFastXLRuntime("Error while transforming worksheet: "
 						+ e.getClass() + " - " + e.getMessage());
+			}
 		}
 	}
 
@@ -129,10 +130,11 @@ final class WorksheetProcessor {
 			prefixes.put(prefix, uri);
 
 			try {
-				if ("".equals(prefix))
+				if ("".equals(prefix)) {
 					xmlWriter.setDefaultNamespace(uri);
-				else
+				} else {
 					xmlWriter.setPrefix(prefix, uri);
+				}
 
 			} catch (XMLStreamException e) {
 				error(e);
@@ -158,9 +160,10 @@ final class WorksheetProcessor {
 									.getMetaData().getColumnName(1));
 
 							state = ParserState.AFTER_PLACEHOLDER;
-						} else
+						} else {
 							index = sharedStrings
 									.appendString("No result set.");
+						}
 					}
 					xmlWriter.writeCharacters(String.valueOf(index));
 					// И если при этом мы --- в резалтсете, то заполняем именами
@@ -187,8 +190,9 @@ final class WorksheetProcessor {
 						}
 						return;
 					}
-				} else if (state != ParserState.AFTER_PLACEHOLDER)
+				} else if (state != ParserState.AFTER_PLACEHOLDER) {
 					xmlWriter.writeCharacters(chars);
+				}
 			} catch (XMLStreamException e) {
 				this.e = new EFastXLRuntime(e.getMessage());
 				throw new SAXException(e);
@@ -303,11 +307,12 @@ final class WorksheetProcessor {
 		private void copyAttrs(Attributes atts, String newAddress)
 				throws XMLStreamException {
 			for (int i = 0; i < atts.getLength(); i++)
-				if ("r".equals(atts.getQName(i)))
+				if ("r".equals(atts.getQName(i))) {
 					xmlWriter.writeAttribute("r", newAddress);
-				else
+				} else {
 					xmlWriter
 							.writeAttribute(atts.getQName(i), atts.getValue(i));
+				}
 		}
 
 		@Override
@@ -356,16 +361,17 @@ final class WorksheetProcessor {
 								xmlWriter.writeStartElement("v");
 
 								String value;
-								if (isInteger(ct))
+								if (isInteger(ct)) {
 									value = String.valueOf(activeResultSet
 											.getInt(i + 1));
-								else if (isFloat(ct))
+								} else if (isFloat(ct)) {
 									value = String.valueOf(activeResultSet
 											.getDouble(i + 1));
-								else
+								} else {
 									value = String.valueOf(sharedStrings
 											.appendString(activeResultSet
 													.getString(i + 1)));
+								}
 								xmlWriter.writeCharacters(value);
 								xmlWriter.writeEndElement(); // v
 								xmlWriter.writeEndElement(); // c

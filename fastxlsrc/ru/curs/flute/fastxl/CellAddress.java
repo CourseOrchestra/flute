@@ -72,8 +72,9 @@ public final class CellAddress {
 			if (digit == 0) {
 				c -= RADIX;
 				d = 'Z';
-			} else
+			} else {
 				d = (char) (digit + 'A' - 1);
+			}
 
 			sc = d + sc;
 

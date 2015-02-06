@@ -45,7 +45,7 @@ public final class FastXLProcessor {
 		}
 	}
 
-	private final byte buffer[] = new byte[2048];
+	private final byte[] buffer = new byte[2048];
 
 	public FastXLProcessor(Connection conn, String templatePath,
 			String xmlParams, OutputStream resultStream) throws EFastXLRuntime {
@@ -197,8 +197,9 @@ public final class FastXLProcessor {
 			throws IOException {
 		ByteArrayOutputStreamHack os = new ByteArrayOutputStreamHack();
 		int bytesRead;
-		while ((bytesRead = zis.read(buffer)) != -1)
+		while ((bytesRead = zis.read(buffer)) != -1) {
 			os.write(buffer, 0, bytesRead);
+		}
 		return os;
 	}
 
