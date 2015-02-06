@@ -27,16 +27,16 @@
 
 			<classpath>
 				<pathelement path="lib/jython.jar" />
-				<pathelement path="../celesta/lib/gson-1.7.1.jar" />
-				<pathelement path="../celesta/lib/java-json.jar" />
+				<pathelement path="lib/gson-1.7.1.jar" />
+				<pathelement path="lib/java-json.jar" />
 			</classpath>
 			<src>
 				<pathelement path="src" />
-				<pathelement path="../celesta/src" />
+				<pathelement path="celesta" />
 			</src>
 		</javac>
 		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql"
-			file="../celesta/src/ru/curs/celesta/score/celesta.sql" />
+			file="celesta/ru/curs/celesta/score/celesta.sql" />
 		<javac destdir="build/fastxl" encoding="UTF-8">
 			<src>
 				<pathelement path="fastxlsrc" />
