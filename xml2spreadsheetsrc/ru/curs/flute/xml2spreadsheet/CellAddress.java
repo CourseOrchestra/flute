@@ -106,8 +106,9 @@ public final class CellAddress {
 			if (digit == 0) {
 				c -= RADIX;
 				d = 'Z';
-			} else
+			} else {
 				d = (char) (digit + 'A' - 1);
+			}
 
 			sc = d + sc;
 
@@ -145,10 +146,11 @@ public final class CellAddress {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof CellAddress)
+		if (obj instanceof CellAddress) {
 			return equals((CellAddress) obj);
-		else
+		} else {
 			return super.equals(obj);
+		}
 	}
 
 	/**

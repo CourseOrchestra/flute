@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.util.regex.Matcher;
@@ -40,10 +40,13 @@ import java.util.regex.Pattern;
 /**
  * Содержит метод обработки формул (сдвижки адресов ячеек).
  */
-public class FormulaModifier {
+public final class FormulaModifier {
 
 	private static final Pattern CELL_ADDRESS = Pattern
 			.compile("[A-Z]+[0-9]+[(]?");
+
+	private FormulaModifier() {
+	}
 
 	/**
 	 * Модифицирует формулу, сдвигая адреса ячеек.

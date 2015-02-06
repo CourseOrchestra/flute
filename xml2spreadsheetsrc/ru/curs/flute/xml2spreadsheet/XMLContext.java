@@ -31,7 +31,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
-*/
+ */
 package ru.curs.flute.xml2spreadsheet;
 
 import java.util.regex.Matcher;
@@ -81,6 +81,9 @@ abstract class XMLContext {
 
 	abstract String getXPathValue(String xpath);
 
+	/**
+	 * Реализация XMLContext для DOM.
+	 */
 	static final class DOMContext extends XMLContext {
 		private final Node n;
 		private final String path;
@@ -117,6 +120,9 @@ abstract class XMLContext {
 		}
 	}
 
+	/**
+	 * Реализация XMLContext для SAX.
+	 */
 	static final class SAXContext extends XMLContext {
 
 		private final Attributes attr;
@@ -129,12 +135,13 @@ abstract class XMLContext {
 
 		@Override
 		String getXPathValue(String xpath) {
-			if (xpath.startsWith("@"))
+			if (xpath.startsWith("@")) {
 				return attr.getValue(xpath.substring(1));
-			else if (xpath.startsWith(POSITION))
+			} else if (xpath.startsWith(POSITION)) {
 				return Integer.toString(position);
-			else
+			} else {
 				return "{Only references to attributes or position() function in SAX mode are allowed}";
+			}
 		}
 	}
 
