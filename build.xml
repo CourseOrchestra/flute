@@ -81,6 +81,7 @@
 		</javac>
 	</target>
 	<target name="jar" depends="compile">
+		<copy verbose="true" file="src\version.info" tofile="build/flute/version.info" />
 		<echo>Building the jar files</echo>
 		<jar destfile="wininstall/flute.jar" filesetmanifest="merge">
 			<fileset dir="build/flute" />
@@ -121,6 +122,7 @@
 	</target>
 
 	<target name="ci.war" depends="ci.compile.classes.for.jar">
+		<copy verbose="true" file="src\version.info" tofile="build/webflute/WEB-INF/classes/version.info" />
 		<war destfile="wininstall/webflute.war" webxml="WebContent/WEB-INF/web.xml">
 			<fileset dir="build/webflute" />
 		</war>
