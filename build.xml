@@ -127,6 +127,7 @@
 	</target>
 	
 	<target name="ci.init.properties.files" description="Create local properties files from templates for ci">
+		<echo>Creating build.properties file</echo>
 		<copy verbose="true" file="build.properties.template" tofile="build.properties" />
 	</target>
 
@@ -162,7 +163,8 @@
 			<property name="flute.version" value="${flute.major.version}.${flute.last.rev}" />
 			<echo>Flute version ${flute.version}</echo>
 		
-		
+		    <echo>Updating build number file version.info</echo>
+		    <echo file="src/version.info" message="${flute.version}_build${os.BUILD_NUMBER}" />
 	</target>	
 	
 	<target name="ci.start.process" depends="ci.nsis, ci.copying.artifact.files">
