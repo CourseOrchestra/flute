@@ -164,4 +164,7 @@
 		
 	</target>	
 	
+	<target name="ci.start.process" depends="ci.nsis, ci.copying.artifact.files">
+	</target>
+	
 </project>
