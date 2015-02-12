@@ -1,6 +1,6 @@
 <!-- ВНИМАНИЕ! Чтобы данный скрипт заработал: 1) Скопируйте файл build.properties.template 
 	в build.properties и пропишите в нём путь к установленному у вас Tomcat 2) 
-	NSIS (c XML-плагином) должен быть установлен, а путь к нему - прописан в 
+	NSIS версии 2.46 (c XML-плагином) должен быть установлен, а путь к нему - прописан в 
 	PATH -->
 <!DOCTYPE project>
 <project name="flute" default="ci.nsis">
