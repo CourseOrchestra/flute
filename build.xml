@@ -147,9 +147,9 @@
 	</target>
 	
 	<target name="ci.copying.artifact.files" description="Copying prepeared artifact files for ci">
-		<copy verbose="true" file="wininstall/flute.jar" tofile="artifacts/flute.jar" />
-		<copy verbose="true" file="wininstall/flute.war" tofile="artifacts/flute.war" />
-		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="artifacts/flute-setup.exe" />
+		<copy verbose="true" file="wininstall/flute.jar" tofile="wininstall/artifacts/flute.jar" />
+		<copy verbose="true" file="wininstall/flute.war" tofile="wininstall/artifacts/flute.war" />
+		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="wininstall/artifacts/flute-setup.exe" />
 	</target>	
 	
 </project>
