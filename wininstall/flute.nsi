@@ -166,7 +166,7 @@ FunctionEnd
 
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "flute-setup-${PRODUCT_VERSION}.${BUILD_VERSION}.exe"
+OutFile "flute-setup.exe"
 
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
