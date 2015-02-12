@@ -138,7 +138,7 @@
 	</target>
 
 	
-	<target name="ci.nsis" depends="jar,ci.war">
+	<target name="ci.nsis" depends="ci.write.app.version, jar,ci.war">
 		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"
 			</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
@@ -147,9 +147,22 @@
 	</target>
 	
 	<target name="ci.copying.artifact.files" description="Copying prepeared artifact files for ci">
-		<copy verbose="true" file="wininstall/flute.jar" tofile="wininstall/artifacts/flute.jar" />
-		<copy verbose="true" file="wininstall/webflute.war" tofile="wininstall/artifacts/webflute.war" />
-		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="wininstall/artifacts/flute-setup.exe" />
+		<copy verbose="true" file="wininstall/flute.jar" tofile="wininstall/artifacts/flute-${flute.version}_build${flute.last.rev}.jar" />
+		<copy verbose="true" file="wininstall/webflute.war" tofile="wininstall/artifacts/webflute-${flute.version}_build${flute.last.rev}.war" />
+		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="wininstall/artifacts/flute-setup-${flute.version}_build${flute.last.rev}.exe" />
+	</target>	
+	
+	<target name="ci.write.app.version" description="Write current app version to file">
+		    <property name="flute.last.rev" value="${os.SVN_REVISION}"/>		
+			<echo>Last revision of code is ${flute.last.rev}</echo>
+			<echo>Reading major version from src/version.properties</echo>
+			<property prefix="flute.major." file="src/version.properties"  />
+
+			<property name="flute.version" value="${flute.major.version}.${flute.last.rev}" />
+			<echo>Flute version ${flute.version}</echo>
+		
+			<echo>Updating build number file</echo>
+			<echo file="build/WEB-INF/classes/versioninfo" message="${flute.version}_build${os.BUILD_NUMBER}" />	
 	</target>	
 	
 </project>
