@@ -13,7 +13,6 @@
 	<target name="clean">
 		<echo>Cleaning the build and destination directories</echo>
 		<delete dir="build" />
-
 	</target>
 	<target name="init" depends="clean">
 		<echo>Creating the required directories</echo>
@@ -36,8 +35,7 @@
 				<pathelement path="celesta" />
 			</src>
 		</javac>
-		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql"
-			file="celesta/ru/curs/celesta/score/celesta.sql" />
+		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql" file="celesta/ru/curs/celesta/score/celesta.sql" />
 		<javac destdir="build/fastxl" encoding="UTF-8">
 			<src>
 				<pathelement path="fastxlsrc" />
@@ -56,10 +54,24 @@
 				<pathelement path="xml2spreadsheetsrc" />
 			</src>
 		</javac>
+
+	</target>
+	<target name="compile.classes.for.jar" depends="init">
 		<javac destdir="build/webflute/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
 				<pathelement path="build/flute" />
 				<fileset dir="${tomcat.home}/lib" includes="*.jar" />
+			</classpath>
+			<src>
+				<pathelement path="webrunner" />
+			</src>
+		</javac>
+	</target>
+	<target name="ci.compile.classes.for.jar" depends="ci.init.properties.files, init">
+		<javac destdir="build/webflute/WEB-INF/classes" encoding="UTF-8">
+			<classpath>
+				<pathelement path="build/flute" />
+				<fileset dir="${ci.tomcat.dir}/lib" includes="*.jar" />
 			</classpath>
 			<src>
 				<pathelement path="webrunner" />
@@ -97,16 +109,39 @@
 				<attribute name="Main-Class" value="ru.curs.flute.xml2spreadsheet.Main" />
 			</manifest>
 		</jar>
+
+	</target>
+
+	<target name="war" depends="compile.classes.for.jar">
+		<war destfile="wininstall/webflute.war" webxml="WebContent/WEB-INF/web.xml">
+			<fileset dir="build/webflute" />
+		</war>
+	</target>
+
+	<target name="ci.war" depends="ci.compile.classes.for.jar">
 		<war destfile="wininstall/webflute.war" webxml="WebContent/WEB-INF/web.xml">
 			<fileset dir="build/webflute" />
 		</war>
 	</target>
 	
-	<target name="ci.nsis" depends="jar">
-			<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"
+	<target name="ci.init.properties.files" description="Create local properties files from templates for ci">
+		<copy verbose="true" file="build.properties.template" tofile="build.properties" />
+	</target>
+
+	<target name="nsis" depends="jar,war">
+		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "develop"
 			</echo>
-			<replace file="wininstall/prodversion.nsh" token=":" value="_" />
-			<echo>Building the installer</echo>
-			<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
-		</target>
+		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
+		<echo>Building the installer</echo>
+		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
+	</target>
+
+	
+	<target name="ci.nsis" depends="jar,ci.war">
+		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"
+			</echo>
+		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
+		<echo>Building the installer</echo>
+		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
+	</target>
 </project>
