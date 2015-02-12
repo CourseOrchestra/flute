@@ -13,6 +13,7 @@
 	<target name="clean">
 		<echo>Cleaning the build and destination directories</echo>
 		<delete dir="build" />
+		<delete dir="wininstall/artifacts" />
 	</target>
 	<target name="init" depends="clean">
 		<echo>Creating the required directories</echo>
@@ -147,9 +148,9 @@
 	</target>
 	
 	<target name="ci.copying.artifact.files" description="Copying prepeared artifact files for ci">
-		<copy verbose="true" file="wininstall/flute.jar" tofile="wininstall/artifacts/flute-${flute.version}_build${flute.last.rev}.jar" />
-		<copy verbose="true" file="wininstall/webflute.war" tofile="wininstall/artifacts/webflute-${flute.version}_build${flute.last.rev}.war" />
-		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="wininstall/artifacts/flute-setup-${flute.version}_build${flute.last.rev}.exe" />
+		<copy verbose="true" file="wininstall/flute.jar" tofile="wininstall/artifacts/flute-${flute.version}_build${os.BUILD_NUMBER}.jar" />
+		<copy verbose="true" file="wininstall/webflute.war" tofile="wininstall/artifacts/webflute-${flute.version}_build${os.BUILD_NUMBER}.war" />
+		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="wininstall/artifacts/flute-setup-${flute.version}_build${os.BUILD_NUMBER}.exe" />
 	</target>	
 	
 	<target name="ci.write.app.version" description="Write current app version to file">
