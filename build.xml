@@ -3,8 +3,9 @@
 	NSIS (c XML-плагином) должен быть установлен, а путь к нему - прописан в 
 	PATH -->
 <!DOCTYPE project>
-<project name="flute" default="nsis">
+<project name="flute" default="ci.nsis">
 	<property file="build.properties" />
+	<property environment="os" />
 
 	<taskdef name="nsis" classname="com.danielreese.nsisant.Task">
 		<classpath location="wininstall/nsisant-1.3.jar" />
@@ -100,19 +101,12 @@
 			<fileset dir="build/webflute" />
 		</war>
 	</target>
-	<target name="nsis" depends="jar">
-		<echo>Update SVN revision number</echo>
-		<exec executable="wininstall/svnver/svnversion.exe" output="wininstall/buildno.txt">
-		</exec>
-		<loadfile property="buildno" srcFile="wininstall/buildno.txt" />
-		<script language="javascript">
-			var before = project.getProperty("buildno");
-			project.setProperty("buildno", before.replaceAll("\r\n", ""));
-		</script>
-		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${buildno}"
-		</echo>
-		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
-		<echo>Building the installer</echo>
-		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
-	</target>
+	
+	<target name="ci.nsis" depends="jar">
+			<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"
+			</echo>
+			<replace file="wininstall/prodversion.nsh" token=":" value="_" />
+			<echo>Building the installer</echo>
+			<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
+		</target>
 </project>
