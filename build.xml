@@ -161,8 +161,7 @@
 			<property name="flute.version" value="${flute.major.version}.${flute.last.rev}" />
 			<echo>Flute version ${flute.version}</echo>
 		
-			<echo>Updating build number file</echo>
-			<echo file="build/WEB-INF/classes/versioninfo" message="${flute.version}_build${os.BUILD_NUMBER}" />	
+		
 	</target>	
 	
 </project>
