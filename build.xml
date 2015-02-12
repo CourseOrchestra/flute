@@ -20,6 +20,7 @@
 		<mkdir dir="build/fastxl" />
 		<mkdir dir="build/xml2spreadsheet" />
 		<mkdir dir="build/webflute/WEB-INF/classes" />
+		<mkdir dir="wininstall/artifacts" />
 	</target>
 	<target name="compile" depends="init">
 		<echo>Compile the source files</echo>
@@ -144,4 +145,11 @@
 		<echo>Building the installer</echo>
 		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
 	</target>
+	
+	<target name="ci.copying.artifact.files" description="Copying prepeared artifact files for ci">
+		<copy verbose="true" file="wininstall/flute.jar" tofile="artifacts/flute.jar" />
+		<copy verbose="true" file="wininstall/flute.war" tofile="artifacts/flute.war" />
+		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="artifacts/flute-setup.exe" />
+	</target>	
+	
 </project>
