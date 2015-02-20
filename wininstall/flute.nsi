@@ -161,7 +161,9 @@ Function .onMouseOverSection
     
     StrCmp $0 4 "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотека Apache POI для формирования MS Office файлов."
-
+    
+    StrCmp $0 5 "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотеки для работы с JSON."
 FunctionEnd
 
 
@@ -283,6 +285,13 @@ Section "Apache POI files" SEC05
   File "..\lib\geronimo-stax-api_1.0_spec-1.0.jar"
   File "..\lib\xmlbeans-2.3.0.jar" 
   File "..\lib\dom4j-1.6.1.jar"
+SectionEnd
+
+Section "Celesta JSON utilities" SEC06
+    SetOutPath $INSTDIR\lib
+    File showcaseutils.jar
+    File "..\lib\gson-1.7.1.jar"
+    File "..\lib\java-json.jar"
 SectionEnd
 
 

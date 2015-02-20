@@ -37,7 +37,8 @@
 				<pathelement path="celesta" />
 			</src>
 		</javac>
-		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql" file="celesta/ru/curs/celesta/score/celesta.sql" />
+		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql"
+			file="celesta/ru/curs/celesta/score/celesta.sql" />
 		<javac destdir="build/fastxl" encoding="UTF-8">
 			<src>
 				<pathelement path="fastxlsrc" />
@@ -58,7 +59,7 @@
 		</javac>
 
 	</target>
-	<target name="compile.classes.for.jar" depends="init">
+	<target name="compile.classes.for.war" depends="init, compile">
 		<javac destdir="build/webflute/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
 				<pathelement path="build/flute" />
@@ -69,7 +70,7 @@
 			</src>
 		</javac>
 	</target>
-	<target name="ci.compile.classes.for.jar" depends="ci.init.properties.files, init">
+	<target name="ci.compile.classes.for.war" depends="ci.init.properties.files, init, compile">
 		<javac destdir="build/webflute/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
 				<pathelement path="build/flute" />
@@ -84,7 +85,10 @@
 		<copy verbose="true" file="src\version.info" tofile="build/flute/version.info" />
 		<echo>Building the jar files</echo>
 		<jar destfile="wininstall/flute.jar" filesetmanifest="merge">
-			<fileset dir="build/flute" />
+			<fileset dir="build/flute">
+				<exclude name="**/dbschemasync/" />
+				<exclude name="**/showcase/utils/" />
+			</fileset>
 			<zipfileset src="lib/sqljdbc4.jar" excludes="META-INF/MSFTSIG.*" />
 			<zipfileset src="lib/jython.jar" />
 			<zipfileset src="lib/ojdbc6.jar" />
@@ -102,9 +106,24 @@
 				<attribute name="Implementation-Vendor" value="www.curs.ru" />
 			</manifest>
 		</jar>
+		
+		<jar destfile="wininstall/showcaseutils.jar">
+			<fileset dir="build/flute" includes="ru/curs/celesta/showcase/utils/*" />
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Specification-Title" value="Celesta" />
+				<attribute name="Specification-Version" value="" />
+				<attribute name="Specification-Vendor" value="www.curs.ru" />
+				<attribute name="Implementation-Title" value="Celesta" />
+				<attribute name="Implementation-Version" value="" />
+				<attribute name="Implementation-Vendor" value="www.curs.ru" />
+			</manifest>
+		</jar>
+		
 		<jar destfile="wininstall/fastxl.jar">
 			<fileset dir="build/fastxl" />
 		</jar>
+		
 		<jar destfile="wininstall/xml2spreadsheet.jar">
 			<fileset dir="build/xml2spreadsheet" />
 			<zipfileset src="lib/saxon9he.jar" excludes="META-INF/SAXONICA.*" />
@@ -112,39 +131,38 @@
 				<attribute name="Main-Class" value="ru.curs.flute.xml2spreadsheet.Main" />
 			</manifest>
 		</jar>
-
+		
 	</target>
 
-	<target name="war" depends="compile.classes.for.jar">
+	<target name="war" depends="compile.classes.for.war">
 		<war destfile="wininstall/webflute.war" webxml="WebContent/WEB-INF/web.xml">
 			<fileset dir="build/webflute" />
 		</war>
 	</target>
 
-	<target name="ci.war" depends="ci.compile.classes.for.jar">
+	<target name="ci.war" depends="ci.compile.classes.for.war">
 		<copy verbose="true" file="src\version.info" tofile="build/webflute/WEB-INF/classes/version.info" />
 		<war destfile="wininstall/webflute.war" webxml="WebContent/WEB-INF/web.xml">
 			<fileset dir="build/webflute" />
 		</war>
 	</target>
-	
-	<target name="ci.init.properties.files" description="Create local properties files from templates for ci">
+
+	<target name="ci.init.properties.files"
+		description="Create local properties files from templates for ci">
 		<echo>Creating build.properties file</echo>
 		<copy verbose="true" file="build.properties.template" tofile="build.properties" />
 	</target>
 
 	<target name="nsis" depends="jar,war">
-		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "develop"
-			</echo>
+		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "develop"</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
 		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
 	</target>
 
-	
+
 	<target name="ci.nsis" depends="ci.write.app.version, jar,ci.war">
-		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"
-			</echo>
+		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
 		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
