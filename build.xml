@@ -108,6 +108,7 @@
 		</javac>
 	</target>
 	<target name="ci.compile.classes.for.war" depends="ci.init.properties.files, compile">
+		<mkdir dir="build/webflute/WEB-INF/classes" />
 		<javac destdir="build/webflute/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
 				<pathelement path="build/flute" />
