@@ -55,7 +55,7 @@
 	</target>
 	
 	<target name="test" depends="compile">
-		<echo>Compile unit tests</echo>
+		<echo>Compile and run unit tests</echo>
 		<mkdir dir="build/tests" />
 		<javac destdir="build/tests" encoding="UTF-8">
 			<classpath>
@@ -206,7 +206,7 @@
 		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
 	</target>
 
-	<target name="ci.copying.artifact.files" description="Copying prepeared artifact files for ci">
+	<target name="ci.copying.artifact.files" description="Copying prepared artifact files for ci">
 		<copy verbose="true" file="wininstall/flute.jar" tofile="wininstall/artifacts/flute-${flute.version}_build${os.BUILD_NUMBER}.jar" />
 		<copy verbose="true" file="wininstall/webflute.war" tofile="wininstall/artifacts/webflute-${flute.version}_build${os.BUILD_NUMBER}.war" />
 		<copy verbose="true" file="wininstall/flute-setup.exe" tofile="wininstall/artifacts/flute-setup-${flute.version}_build${os.BUILD_NUMBER}.exe" />
