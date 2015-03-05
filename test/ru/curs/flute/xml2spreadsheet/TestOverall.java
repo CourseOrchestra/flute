@@ -1,9 +1,10 @@
 package ru.curs.flute.xml2spreadsheet;
 
-import java.io.File;
+import static org.junit.Assert.assertTrue;
+
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.junit.Test;
 
@@ -17,13 +18,14 @@ public class TestOverall {
 		InputStream templateStream = TestReader.class
 				.getResourceAsStream("template.xls");
 
-		File f = new File("c:/temp/result.xls");
-		FileOutputStream fos = new FileOutputStream(f);
-
+		XML2SpreadseetBLOB b = new XML2SpreadseetBLOB();
+		OutputStream fos = b.getOutStream();
 		XML2Spreadsheet.process(dataStream, descrStream, templateStream,
 				OutputType.XLS, false, fos);
+
+		assertTrue(b.size() > 6000);
 	}
-	
+
 	@Test
 	public void test2() throws FileNotFoundException, XML2SpreadSheetError {
 		InputStream descrStream = TestReader.class
@@ -33,10 +35,10 @@ public class TestOverall {
 		InputStream templateStream = TestReader.class
 				.getResourceAsStream("template.xls");
 
-		File f = new File("c:/temp/resultSAX.xls");
-		FileOutputStream fos = new FileOutputStream(f);
-
+		XML2SpreadseetBLOB b = new XML2SpreadseetBLOB();
+		OutputStream fos = b.getOutStream();
 		XML2Spreadsheet.process(dataStream, descrStream, templateStream,
 				OutputType.XLS, true, fos);
+		assertTrue(b.size() > 6000);
 	}
 }
