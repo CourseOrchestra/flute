@@ -170,11 +170,25 @@ abstract class XMLDataReader {
 							}
 						}).getValue("range");
 						StringAttrReader sar = new StringAttrReader();
+						
+						boolean pagebreak = (new AttrReader<Boolean>() {
+							@Override
+							Boolean getIfNotEmpty(String value)
+									throws XML2SpreadSheetError {
+								return "true".equalsIgnoreCase(value);
+							}
+
+							@Override
+							Boolean getIfEmpty() {
+								return false;
+							}
+						}).getValue("pagebreak");
+
 						DescriptorOutput output = new DescriptorOutput(
 								sar.getValue("worksheet"), range,
 								sar.getValue("sourcesheet"),
 								sar.getValue("repeatingcols"),
-								sar.getValue("repeatingrows"));
+								sar.getValue("repeatingrows"), pagebreak);
 						elementsStack.peek().getSubelements().add(output);
 
 						parserState = ParserState.OUTPUT;
@@ -297,7 +311,7 @@ abstract class XMLDataReader {
 					o.getStartRepeatingRow(), o.getEndRepeatingRow());
 		}
 		if (o.getRange() != null)
-			getWriter().section(c, o.getSourceSheet(), o.getRange());
+			getWriter().section(c, o.getSourceSheet(), o.getRange(), o.getPageBreak());
 	}
 
 	static final boolean compareIndices(int expected, int actual) {
@@ -396,14 +410,15 @@ abstract class XMLDataReader {
 		private final int endRepeatingColumn;
 		private final int startRepeatingRow;
 		private final int endRepeatingRow;
+		private final boolean pageBreak;
 
 		public DescriptorOutput(String worksheet, RangeAddress range,
-				String sourceSheet, String repeatingCols, String repeatingRows)
-				throws XML2SpreadSheetError {
+				String sourceSheet, String repeatingCols, String repeatingRows,
+				boolean pageBreak) throws XML2SpreadSheetError {
 			this.worksheet = worksheet;
 			this.range = range;
 			this.sourceSheet = sourceSheet;
-
+			this.pageBreak = pageBreak;
 			Matcher m1 = RANGE.matcher(repeatingCols == null ? "-1:-1"
 					: repeatingCols);
 			Matcher m2 = RANGE.matcher(repeatingRows == null ? "-1:-1"
@@ -413,10 +428,11 @@ abstract class XMLDataReader {
 				this.endRepeatingColumn = Integer.parseInt(m1.group(2));
 				this.startRepeatingRow = Integer.parseInt(m2.group(1));
 				this.endRepeatingRow = Integer.parseInt(m2.group(2));
-			} else
+			} else {
 				throw new XML2SpreadSheetError(String.format(
 						"Invalid col/row range %s %s", repeatingCols,
 						repeatingRows));
+			}
 
 		}
 
@@ -448,6 +464,9 @@ abstract class XMLDataReader {
 			return endRepeatingRow;
 		}
 
+		public boolean getPageBreak() {
+			return pageBreak;
+		}
 	}
 
 }

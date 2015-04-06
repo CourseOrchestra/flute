@@ -79,7 +79,22 @@ public class TestReader {
 		assertEquals("report", d.getElementName());
 		DescriptorIteration i = (DescriptorIteration) d.getSubelements().get(0);
 		assertEquals(0, i.getIndex());
+
 		assertFalse(i.isHorizontal());
+		DescriptorElement de = i.getElements().get(0);
+		i = (DescriptorIteration) de.getSubelements().get(1);
+
+		de = i.getElements().get(0);
+
+		assertEquals("line", de.getElementName());
+		assertFalse(((DescriptorOutput) de.getSubelements().get(0))
+				.getPageBreak());
+
+		de = i.getElements().get(1);
+		assertEquals("group", de.getElementName());
+		assertTrue(((DescriptorOutput) de.getSubelements().get(0))
+				.getPageBreak());
+
 		i = (DescriptorIteration) d.getSubelements().get(1);
 		assertEquals(-1, i.getIndex());
 		assertFalse(i.isHorizontal());
@@ -110,7 +125,7 @@ public class TestReader {
 				descrStream, false, w);
 		reader.process();
 		assertEquals(
-				"Q{TCQ{CCQ{CC}C}}Q{TCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCQh{}Q{}}F",
+				"Q{TCQ{CCbQ{CC}C}}Q{TCQh{CCC}Q{CQh{CCC}CQh{CCC}CQh{CCC}}TCQh{}Q{}}F",
 				w.getLog().toString());
 	}
 
@@ -220,9 +235,11 @@ class DummyWriter extends ReportWriter {
 
 	@Override
 	public void section(XMLContext context, String sourceSheet,
-			RangeAddress range) {
+			RangeAddress range, boolean pagebreak) {
 		// seCtion
 		log.append("C");
+		if (pagebreak)
+			log.append("b");
 	}
 
 	StringBuilder getLog() {
@@ -254,6 +271,18 @@ class DummyWriter extends ReportWriter {
 	@Override
 	void addNamedRegion(String name, CellAddress a1, CellAddress a2) {
 		log.append("addNamedRegion");
+	}
+
+	@Override
+	void putRowBreak(int rowNumber) {
+		log.append(String.format("[rowbreak%d]", rowNumber));
+
+	}
+
+	@Override
+	void putColBreak(int colNumber) {
+		log.append(String.format("[colbreak%d]", colNumber));
+
 	}
 
 }

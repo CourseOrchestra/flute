@@ -239,7 +239,7 @@ abstract class ReportWriter {
 	 *             Если что-то пошло не так.
 	 */
 	public void section(XMLContext context, String sourceSheet,
-			RangeAddress range) throws XML2SpreadSheetError {
+			RangeAddress range, boolean pagebreak) throws XML2SpreadSheetError {
 		// На вершине стека должен находиться как минимум диапазон листа. Если
 		// пользователь не создал листа, делаем это за него.
 		if (blocks.isEmpty())
@@ -255,8 +255,10 @@ abstract class ReportWriter {
 				+ range.bottom() - range.top());
 
 		LayoutBlock b = blocks.peek();
+		// Устанавливаем page break, если это необходимо
+		processPageBreak(pagebreak, b);
+		
 		// Устанавливаем или расширяем границы текущего блока
-
 		if (b.borders == null) {
 			b.borders = new RangeAddress(growthPoint.getAddress() + ":"
 					+ bottomRight.getAddress());
@@ -268,6 +270,20 @@ abstract class ReportWriter {
 
 		// И устанавливаем точку роста в зависимости от режима раскладки
 		updateGrowthPoint(b);
+	}
+
+	private void processPageBreak(boolean pagebreak, LayoutBlock b) {
+		if (pagebreak) {
+			if (b.horizontal) {
+				int num = growthPoint.getCol() - 2;
+				if (num >= 0)
+					putColBreak(num);
+			} else {
+				int num = growthPoint.getRow() - 2;
+				if (num >= 0)
+					putRowBreak(num);
+			}
+		}
 	}
 
 	private void updateGrowthPoint(LayoutBlock b) {
@@ -296,6 +312,10 @@ abstract class ReportWriter {
 	abstract void mergeUp(CellAddress a1, CellAddress a2);
 
 	abstract void addNamedRegion(String name, CellAddress a1, CellAddress a2);
+
+	abstract void putRowBreak(int rowNumber);
+
+	abstract void putColBreak(int colNumber);
 
 	/**
 	 * Сбрасывает результат создания документа в поток.

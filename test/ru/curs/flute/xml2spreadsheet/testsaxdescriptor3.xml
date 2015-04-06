@@ -10,7 +10,7 @@
 					<output range="A5:Z5" />
 				</element>
 				<element name="group">
-					<output range="A6:Z6" />
+					<output range="A6:Z6" pagebreak ="true"/>
 					<iteration>
 						<element name="line">
 							<output range="A7:Z7" />

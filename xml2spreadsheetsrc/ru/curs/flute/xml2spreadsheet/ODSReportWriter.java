@@ -78,4 +78,16 @@ final class ODSReportWriter extends ReportWriter {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	void putRowBreak(int rowNumber) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	void putColBreak(int colNumber) {
+		// TODO Auto-generated method stub
+		
+	}
 }
