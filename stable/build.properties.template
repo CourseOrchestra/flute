@@ -1,0 +1,4 @@
+tomcat.home = c:/Program Files/Apache Software Foundation/Tomcat 7.0
+#Блок свойств необходимых для непрерывной интеграции Flute (continious integration - ci) на Jenkins.
+#не изменять эти свойства без специальной необходимости.
+ci.tomcat.dir = d:/Showcase_Tomcat7
