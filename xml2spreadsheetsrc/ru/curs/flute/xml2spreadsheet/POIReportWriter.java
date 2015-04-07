@@ -171,7 +171,7 @@ abstract class POIReportWriter extends ReportWriter {
 	}
 
 	@Override
-	protected void newSheet(String sheetName, String sourceSheet,
+	void newSheet(String sheetName, String sourceSheet,
 			int startRepeatingColumn, int endRepeatingColumn,
 			int startRepeatingRow, int endRepeatingRow)
 			throws XML2SpreadSheetError {
@@ -257,7 +257,7 @@ abstract class POIReportWriter extends ReportWriter {
 	}
 
 	@Override
-	protected void putSection(XMLContext context, CellAddress growthPoint,
+	void putSection(XMLContext context, CellAddress growthPoint,
 			String sourceSheet, RangeAddress range) throws XML2SpreadSheetError {
 		updateActiveTemplateSheet(sourceSheet);
 		if (activeResultSheet == null)
@@ -419,4 +419,15 @@ abstract class POIReportWriter extends ReportWriter {
 		}
 	}
 
+	@Override
+	void putRowBreak(int rowNumber) {
+		if (activeResultSheet != null && rowNumber >= 0)
+			activeResultSheet.setRowBreak(rowNumber);
+	}
+
+	@Override
+	void putColBreak(int colNumber) {
+		if (activeResultSheet != null && colNumber >= 0)
+			activeResultSheet.setColumnBreak(colNumber);
+	}
 }

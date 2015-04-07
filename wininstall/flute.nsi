@@ -279,11 +279,11 @@ SectionEnd
 
 Section "Apache POI files" SEC05
   SetOutPath $INSTDIR\lib
-  File "..\lib\poi-3.7-20101029.jar"
-  File "..\lib\poi-ooxml-3.7-20101029.jar" 
-  File "..\lib\poi-ooxml-schemas-3.7-20101029.jar" 
+  File "..\lib\poi-3.11-20141221.jar"
+  File "..\lib\poi-ooxml-3.11-20141221.jar" 
+  File "..\lib\poi-ooxml-schemas-3.11-20141221.jar" 
   File "..\lib\geronimo-stax-api_1.0_spec-1.0.jar"
-  File "..\lib\xmlbeans-2.3.0.jar" 
+  File "..\lib\xmlbeans-2.6.0.jar" 
   File "..\lib\dom4j-1.6.1.jar"
 SectionEnd
 
