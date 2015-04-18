@@ -7,6 +7,8 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/xml2spreadsheetsrc"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/webrunner"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/celesta"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/poi-scratchpad"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/excel2print"/>
         <property name="context-root" value="flute"/>
         <property name="java-output-path" value="/flute/bin"/>
     </wb-module>

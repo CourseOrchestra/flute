@@ -154,13 +154,13 @@ Function .onMouseOverSection
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Компонента быстрого построения больших отчётов в формате XLSX на основе результатов выполнения хранимых процедур."
 
     StrCmp $0 2 "" +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Компонента гибкого построения отчётов в различных форматах."
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Компонента гибкого построения отчётов в различных форматах и библиотека Apache POI для формирования MS Office файлов"
     
     StrCmp $0 3 "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Стандартная библиотека Python."
     
     StrCmp $0 4 "" +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотека Apache POI для формирования MS Office файлов."
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Система вывода Excel-файлов на печать и в формат PDF."
     
     StrCmp $0 5 "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотеки для работы с JSON."
@@ -265,9 +265,16 @@ Section "FastXL" SEC02
   File flute\fastxl.py
 SectionEnd
 
-Section "XML2Spreadsheet" SEC03
+Section "XML2Spreadsheet and Apache POI" SEC03
   SetOutPath $INSTDIR\lib
   File xml2spreadsheet.jar
+  File "..\lib\poi-3.11-20141221.jar"
+  File "..\lib\poi-ooxml-3.11-20141221.jar" 
+  File "..\lib\poi-ooxml-schemas-3.11-20141221.jar" 
+  File "..\lib\geronimo-stax-api_1.0_spec-1.0.jar"
+  File "..\lib\xmlbeans-2.6.0.jar" 
+  File "..\lib\dom4j-1.6.1.jar"
+
   SetOutPath $ScorePath\flute
   File flute\xml2spreadsheet.py
 SectionEnd
@@ -277,14 +284,17 @@ Section "Python library" SEC04
   File /r /x .svn pylib 
 SectionEnd
 
-Section "Apache POI files" SEC05
-  SetOutPath $INSTDIR\lib
-  File "..\lib\poi-3.11-20141221.jar"
-  File "..\lib\poi-ooxml-3.11-20141221.jar" 
-  File "..\lib\poi-ooxml-schemas-3.11-20141221.jar" 
-  File "..\lib\geronimo-stax-api_1.0_spec-1.0.jar"
-  File "..\lib\xmlbeans-2.6.0.jar" 
-  File "..\lib\dom4j-1.6.1.jar"
+Section "Excel2Print and Apache FOP" SEC05
+    SetOutPath $INSTDIR\lib
+    File poi-scratchpad.jar
+    File excel2print.jar
+    File fop.xconf
+    File "..\lib\avalon-framework-4.2.0.jar"
+    File "..\lib\batik-all-1.7.jar"
+    File "..\lib\commons-io-1.3.1.jar"
+    File "..\lib\commons-logging-1.0.4.jar"
+    File "..\lib\fop.jar"
+    File "..\lib\xmlgraphics-commons-1.5.jar"
 SectionEnd
 
 Section "Celesta JSON utilities" SEC06
@@ -293,7 +303,6 @@ Section "Celesta JSON utilities" SEC06
     File "..\lib\gson-1.7.1.jar"
     File "..\lib\java-json.jar"
 SectionEnd
-
 
 Section -AdditionalIcons
 SectionEnd
