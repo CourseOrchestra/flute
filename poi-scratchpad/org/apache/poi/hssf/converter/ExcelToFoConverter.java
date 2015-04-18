@@ -674,6 +674,12 @@ public class ExcelToFoConverter extends AbstractExcelConverter {
 		final List<Element> emptyRowElements = new ArrayList<Element>(
 				physicalNumberOfRows);
 		int maxSheetColumns = 1;
+
+		int[] breaks = sheet.getRowBreaks();
+		if (breaks == null)
+			breaks = new int[0];
+		int position = 0;
+
 		for (int r = sheet.getFirstRowNum(); r <= sheet.getLastRowNum(); r++) {
 			HSSFRow row = sheet.getRow(r);
 
@@ -686,6 +692,12 @@ public class ExcelToFoConverter extends AbstractExcelConverter {
 			Element tableRowElement = foDocumentFacade.createTableRow();
 			tableRowElement.setAttribute("height", row.getHeight() / 20.0
 					+ "pt");
+
+			if (position < breaks.length && row.getRowNum() == breaks[position]) {
+				tableRowElement.setAttribute("page-break-after", "always");
+				position++;
+			}
+
 			int maxRowColumnNumber = processRow(workbook, mergedRanges, row,
 					tableRowElement);
 
