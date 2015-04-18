@@ -243,7 +243,7 @@
 		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "develop"</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
-		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
+		<nsis script="wininstall/flute.nsi" verbosity="4"/>
 	</target>
 
 
@@ -251,7 +251,7 @@
 		<echo file="wininstall/prodversion.nsh">!define PRODUCT_VERSION "2"${line.separator}!define BUILD_VERSION "${os.SVN_REVISION}"</echo>
 		<replace file="wininstall/prodversion.nsh" token=":" value="_" />
 		<echo>Building the installer</echo>
-		<nsis script="wininstall/flute.nsi" verbosity="3" out="build.log" />
+		<nsis script="wininstall/flute.nsi" verbosity="4"/>
 	</target>
 
 	<target name="ci.copying.artifact.files" description="Copying prepared artifact files for ci">
