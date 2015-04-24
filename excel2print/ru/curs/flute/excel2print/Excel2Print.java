@@ -1,11 +1,13 @@
 package ru.curs.flute.excel2print;
 
+import java.awt.print.PrinterJob;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.print.PrintService;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,6 +21,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
@@ -38,6 +41,7 @@ public class Excel2Print {
 	private final HSSFWorkbook wb;
 	private File fopConfig;
 	private FopFactory fopFactory;
+	private String printerName;
 
 	public Excel2Print(HSSFWorkbook wb) {
 		if (wb == null)
@@ -158,14 +162,46 @@ public class Excel2Print {
 	 *             ошибка формата книги, ошибка ввода-вывода, ошибка
 	 *             конфигурации системы.
 	 */
+	@SuppressWarnings("unchecked")
 	public void toPrinter() throws Exception {
 		Document doc = getDoc();
-		OutputStream out = new ByteArrayOutputStream();
-		try {
-			Fop fop = getFopFactory().newFop(MimeConstants.MIME_FOP_PRINT, out);
+
+		if (printerName == null) {
+			OutputStream out = new ByteArrayOutputStream();
+			try {
+				Fop fop = getFopFactory().newFop(MimeConstants.MIME_FOP_PRINT,
+						out);
+
+				fopTransform(doc, fop);
+			} finally {
+				out.close();
+			}
+		} else {
+			PrintService[] services = PrinterJob.lookupPrintServices();
+			PrintService srv = null;
+			StringBuilder printerNames = new StringBuilder();
+			for (int i = 0; i < services.length; i++) {
+				if (printerName.equals(services[i].getName())) {
+					srv = services[i];
+				} else {
+					if (printerNames.length() > 0)
+						printerNames.append("; ");
+					printerNames.append(services[i].getName());
+				}
+			}
+			if (srv == null) {
+				throw new Exception(
+						String.format(
+								"No printer service named '%s' found. Availiable services are: %s.",
+								printerName, printerNames.toString()));
+			}
+			PrinterJob printerJob = PrinterJob.getPrinterJob();
+			printerJob.setPrintService(srv);
+			FOUserAgent userAgent = getFopFactory().newFOUserAgent();
+			userAgent.getRendererOptions().put("printerjob", printerJob);
+			Fop fop = fopFactory
+					.newFop(MimeConstants.MIME_FOP_PRINT, userAgent);
 			fopTransform(doc, fop);
-		} finally {
-			out.close();
 		}
 	}
 
@@ -176,6 +212,16 @@ public class Excel2Print {
 		Source src = new DOMSource(doc);
 		Result res = new SAXResult(fop.getDefaultHandler());
 		transformer.transform(src, res);
+	}
+
+	/**
+	 * Устанавливает имя принтера.
+	 * 
+	 * @param printerName
+	 *            Имя принтера.
+	 */
+	public void setPrinterName(String printerName) {
+		this.printerName = printerName;
 	}
 
 }
