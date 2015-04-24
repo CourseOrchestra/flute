@@ -135,7 +135,7 @@ public abstract class PythonProcessor extends Thread {
 							blob.size());
 				}
 				int limit = AppSettings.getErrorTextMaxLength();
-				if (limit > 0) {
+				if (limit > 0 && details.length() > limit) {
 					finalizeTaskStmt.setString(3, details.substring(0, limit));
 				} else {
 					finalizeTaskStmt.setString(3, details);
