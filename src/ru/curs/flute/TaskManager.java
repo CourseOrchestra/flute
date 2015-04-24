@@ -71,16 +71,16 @@ public final class TaskManager {
 		switch (ru.curs.celesta.AppSettings.getDBType()) {
 		case MSSQL:
 			sql = "SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 "
-					+ "AND (PREVID = 0 OR PREVID IN (SELECT ID FROM %s WHERE STATUS > 1)) ORDER BY ID";
+					+ "AND NOT (PREVID IN (SELECT ID FROM %s WHERE STATUS < 2)) ORDER BY ID";
 			break;
 		case POSTGRES:
 		case MYSQL:
 			sql = "SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 "
-					+ "AND (PREVID = 0 OR PREVID IN (SELECT ID FROM %s WHERE STATUS > 1)) ORDER BY ID LIMIT 1";
+					+ "AND NOT (PREVID IN (SELECT ID FROM %s WHERE STATUS < 2)) ORDER BY ID LIMIT 1";
 			break;
 		case ORACLE:
 			sql = "with a as (SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 "
-					+ "AND (PREVID = 0 OR PREVID IN (SELECT ID FROM %s WHERE STATUS > 1)) ORDER BY ID) "
+					+ "AND NOT (PREVID IN (SELECT ID FROM %s WHERE STATUS < 2)) ORDER BY ID) "
 					+ "select a.* from a where rownum <= 1";
 			break;
 		default:
