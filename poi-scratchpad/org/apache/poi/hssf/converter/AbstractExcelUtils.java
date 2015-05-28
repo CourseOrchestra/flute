@@ -77,7 +77,7 @@ public class AbstractExcelUtils
         case HSSFCellStyle.BORDER_DASH_DOT:
         case HSSFCellStyle.BORDER_DASH_DOT_DOT:
         case HSSFCellStyle.BORDER_DOTTED:
-        case HSSFCellStyle.BORDER_HAIR:
+        //case HSSFCellStyle.BORDER_HAIR:
         case HSSFCellStyle.BORDER_MEDIUM_DASH_DOT:
         case HSSFCellStyle.BORDER_MEDIUM_DASH_DOT_DOT:
         case HSSFCellStyle.BORDER_SLANTED_DASH_DOT:

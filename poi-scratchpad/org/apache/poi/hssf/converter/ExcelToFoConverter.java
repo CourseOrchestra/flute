@@ -665,7 +665,9 @@ public class ExcelToFoConverter extends AbstractExcelConverter {
 
 		Element table = foDocumentFacade.createTable();
 		table.setAttribute("table-layout", "fixed");
-
+		table.setAttribute("margin-left", "2pt");
+		table.setAttribute("margin-right", "2pt");
+		
 		Element tableBody = foDocumentFacade.createTableBody();
 
 		final CellRangeAddress[][] mergedRanges = ExcelToHtmlUtils
