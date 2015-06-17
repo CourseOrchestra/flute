@@ -211,9 +211,11 @@ Section "Flute" SEC01
   CreateDirectory $INSTDIR\pylib
   
   SetOutPath $ScorePath\flute
+  SetOverwrite ifnewer
   File flute\__init__.py
   File flute\_flute.sql
   File flute\hello.py
+  SetOverwrite on
 
   SetOutPath $INSTDIR\bin
   StrCpy $R0 $FluteServiceName
