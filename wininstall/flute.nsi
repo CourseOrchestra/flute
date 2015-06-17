@@ -186,7 +186,9 @@ Section "Flute" SEC01
   
   SetOutPath "$INSTDIR"
   File flute.jar
+  SetOverwrite off
   File flute.properties
+  SetOverwrite on
   File webflute.war
 
   Push $ScorePath
