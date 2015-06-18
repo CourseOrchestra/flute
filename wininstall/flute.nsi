@@ -306,6 +306,11 @@ Section "Celesta JSON utilities" SEC06
     File showcaseutils.jar
     File "..\lib\gson-1.7.1.jar"
     File "..\lib\java-json.jar"
+    File "..\lib\asm-1.0.2.jar"
+    File "..\lib\asm-3.3.1.jar"
+    File "..\lib\json-path-2.0.0.jar"
+    File "..\lib\json-smart-2.1.1.jar"
+    File "..\lib\slf4j-api-1.7.10.jar"
 SectionEnd
 
 Section -AdditionalIcons
