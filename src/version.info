@@ -1,1 +1,1 @@
-development
+2.0.1.${os.SVN_REVISION}_build${os.BUILD_NUMBER}

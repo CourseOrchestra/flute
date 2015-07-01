@@ -34,11 +34,14 @@
  */
 package ru.curs.flute.xml2spreadsheet;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
 import java.io.OutputStream;
+
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * Основной класс построителя отчётов из XML данных в формате электронных
@@ -80,6 +83,56 @@ public final class XML2Spreadsheet {
 		XMLDataReader reader = XMLDataReader.createReader(xmlData,
 				xmlDescriptor, useSAX, writer);
 		reader.process();
+	}
+
+	/**
+	 * Запускает построение отчёта формата Excel (.XSL) на исходных данных и
+	 * возвращает объектное представление отчёта.
+	 * 
+	 * @param xmlData
+	 *            Исходные данные.
+	 * @param xmlDescriptor
+	 *            Дескриптор, описывающий порядок итерации по исходным данным.
+	 * @param template
+	 *            Шаблон отчёта.
+	 * @param useSAX
+	 *            Режим процессинга (DOM или SAX).
+	 * @param copyTemplate
+	 *            Копировать ли шаблон полностью перед началом обработки.
+	 * @throws XML2SpreadSheetError
+	 *             в случае возникновения ошибок
+	 * @throws IOException
+	 *             Если файлы шаблона или дескриптора не найдены или произошла
+	 *             иная ошибка ввода-вывода.
+	 */
+	public static Workbook toPOIWorkbook(InputStream xmlData,
+			File xmlDescriptor, File template, boolean useSAX,
+			boolean copyTemplate) throws XML2SpreadSheetError, IOException {
+
+		OutputType outputType = getOutputType(template);
+		if (!(outputType == OutputType.XLS || outputType == OutputType.XLSX))
+			throw new XML2SpreadSheetError(
+					"toPOIWorkbook method works only for POI output types (XLS, XLSX).");
+
+		InputStream descr = new FileInputStream(xmlDescriptor);
+		InputStream templ = new FileInputStream(template);
+		try {
+			ReportWriter writer = ReportWriter.createWriter(templ, outputType,
+					copyTemplate, new OutputStream() {
+						@Override
+						public void write(int b) throws IOException {
+							// Do nothing.
+						}
+					});
+			XMLDataReader reader = XMLDataReader.createReader(xmlData, descr,
+					useSAX, writer);
+			reader.process();
+			return ((POIReportWriter) writer).getResult();
+		} finally {
+			descr.close();
+			templ.close();
+		}
+
 	}
 
 	/**
@@ -136,6 +189,26 @@ public final class XML2Spreadsheet {
 			XML2SpreadSheetError {
 		InputStream descr = new FileInputStream(xmlDescriptor);
 		InputStream templ = new FileInputStream(template);
+		OutputType outputType = getOutputType(template);
+		try {
+			process(xmlData, descr, templ, outputType, useSAX, copyTemplate,
+					output);
+		} finally {
+			try {
+				templ.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				descr.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static OutputType getOutputType(File template)
+			throws XML2SpreadSheetError {
 		String buf = template.toString();
 		int dotInd = buf.lastIndexOf('.');
 		buf = (dotInd > 0 && dotInd < buf.length()) ? buf.substring(dotInd + 1)
@@ -151,7 +224,7 @@ public final class XML2Spreadsheet {
 			throw new XML2SpreadSheetError(
 					"Cannot define output format, template has non-standard extention.");
 		}
-		process(xmlData, descr, templ, outputType, useSAX, copyTemplate, output);
+		return outputType;
 	}
 
 	/**

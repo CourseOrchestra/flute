@@ -1,7 +1,4 @@
-
 # Jython Database Specification API 2.0
-#
-# $Id: runner.py 6647 2009-08-10 17:23:22Z fwierzbicki $
 #
 # Copyright (c) 2001 brian zimmer <bzimmer@ziclix.com>
 

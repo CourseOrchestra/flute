@@ -56,6 +56,7 @@ public final class AppSettings {
 	private final String fluteUserId;
 	private final Logger logger;
 	private final boolean neverStop;
+	private final int errorTextMaxLength;
 	{
 		logger = Logger.getLogger("ru.curs.flute");
 		logger.setLevel(Level.INFO);
@@ -108,6 +109,19 @@ public final class AppSettings {
 
 		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop",
 				"false").trim());
+
+		int ml = 0;
+		try {
+			ml = Integer.parseInt(settings.getProperty("message.max.length",
+					"0").trim());
+			if (ml < 0)
+				sb.append("Invalid value of maximum message length (message.max.length): "
+						+ qp + '\n');
+		} catch (NumberFormatException e) {
+			sb.append("Invalid value of maximum message length (message.max.length): "
+					+ settings.getProperty("query.period") + '\n');
+		}
+		this.errorTextMaxLength = ml;
 
 		if (sb.length() > 0)
 			throw new EFluteCritical(sb.toString());
@@ -183,5 +197,9 @@ public final class AppSettings {
 	 */
 	public static boolean neverStop() {
 		return theSettings.neverStop;
+	}
+
+	public static int getErrorTextMaxLength() {
+		return theSettings.errorTextMaxLength;
 	}
 }

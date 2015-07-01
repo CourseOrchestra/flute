@@ -430,4 +430,8 @@ abstract class POIReportWriter extends ReportWriter {
 		if (activeResultSheet != null && colNumber >= 0)
 			activeResultSheet.setColumnBreak(colNumber);
 	}
+
+	Workbook getResult() {
+		return result;
+	}
 }

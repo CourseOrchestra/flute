@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: python -*-
-# $Id: re_tests.py 4185 2008-02-28 16:55:33Z cgroves $
+# $Id$
 
 # Re test suite and benchmark suite v1.5
 

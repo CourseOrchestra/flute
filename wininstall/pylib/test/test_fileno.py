@@ -32,7 +32,7 @@ class TestFilenoTestCase(unittest.TestCase):
         self.assertEqual(os.path.getsize(self.filename), 0)
 
         self.fp.close()
-        raises(IOError, 9, os.ftruncate, self.fd, 0)
+        raises(OSError, 9, os.ftruncate, self.fd, 0)
 
     def test_lseek(self):
         self.assertEqual(os.lseek(self.fd, 0, 1), 0)
@@ -46,7 +46,9 @@ class TestFilenoTestCase(unittest.TestCase):
         self.fp.write('jython filenos')
         self.fp.flush()
         self.fp.seek(0)
-        self.assertEqual(os.read(self.fd, 7), 'jython ')
+        result = os.read(self.fd, 7)
+        self.assertTrue(isinstance(result, str))
+        self.assertEqual(result, 'jython ')
         self.assertEqual(os.read(self.fd, 99), 'filenos')
         self.fp.close()
         raises(OSError, 9, os.read, self.fd, 1)

@@ -1,14 +1,8 @@
 #!/usr/bin/env jython
-
-# $Id: test_zxjdbc_dbapi20.py 6646 2009-08-10 17:22:46Z fwierzbicki $
-
 """
 This is to be used with the DB API compatibility test available @
   http://stuartbishop.net/Software/DBAPI20TestSuite/
 """
-
-__rcs_id__  = '$Id: test_zxjdbc_dbapi20.py 6646 2009-08-10 17:22:46Z fwierzbicki $'
-__version__ = '$Revision: 6646 $'
 
 import dbapi20
 import unittest

@@ -6,5 +6,6 @@
   </fileset>
   <filter name="FilesFromPackage" enabled="true">
     <filter-data value="test"/>
+    <filter-data value="poi-scratchpad"/>
   </filter>
 </fileset-config>

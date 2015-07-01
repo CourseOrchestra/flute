@@ -134,8 +134,12 @@ public abstract class PythonProcessor extends Thread {
 					finalizeTaskStmt.setBinaryStream(2, blob.getInStream(),
 							blob.size());
 				}
-
-				finalizeTaskStmt.setString(3, details);
+				int limit = AppSettings.getErrorTextMaxLength();
+				if (limit > 0 && details.length() > limit) {
+					finalizeTaskStmt.setString(3, details.substring(0, limit));
+				} else {
+					finalizeTaskStmt.setString(3, details);
+				}
 				finalizeTaskStmt.setInt(4, task.getId());
 				finalizeTaskStmt.executeUpdate();
 			} finally {

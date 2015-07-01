@@ -1,11 +1,14 @@
 import unittest
-from test import test_support
+from test import test_support, test_set
 
-if test_support.is_jython:
-    from java.io import (ByteArrayInputStream, ByteArrayOutputStream,
-                         ObjectInputStream, ObjectOutputStream)
-    from java.util import Random
-    from javatests import PySetInJavaTest
+import pickle
+import threading
+
+from java.io import (ByteArrayInputStream, ByteArrayOutputStream,
+                     ObjectInputStream, ObjectOutputStream)
+from java.util import Random, HashSet, LinkedHashSet
+from javatests import PySetInJavaTest
+
 
 class SetTestCase(unittest.TestCase):
 
@@ -21,6 +24,24 @@ class SetTestCase(unittest.TestCase):
         self.assertEqual(s | foo, 'ror')
         self.assertEqual(s & foo, 'rand')
         self.assertEqual(s ^ foo, 'rxor')
+
+    def test_pop_race(self):
+        # issue 1854
+        nthreads = 200
+        # the race might not happen the first time so we try a few just in case
+        for i in xrange(4):
+            s = set(range(200))
+            threads = [threading.Thread(target=s.pop) for i in range(nthreads)]
+            for t in threads: t.start()
+            for t in threads: t.join()
+            self.assertEqual(len(s), 0)
+
+    def test_big_set(self):
+        """Verify that fairly large collection literals of primitives can be constructed."""
+        # use \n to separate to avoid parser problems
+        s = eval("{" + ",\n".join((str(x) for x in xrange(64000))) +"}")
+        self.assertEqual(len(s), 64000)
+        self.assertEqual(sum(s), 2047968000)
 
 
 class SetInJavaTestCase(unittest.TestCase):
@@ -62,10 +83,40 @@ class SetInJavaTestCase(unittest.TestCase):
         self.assertEqual(s, unserializer.readObject())
 
 
+class TestJavaSet(test_set.TestSet):
+    thetype = HashSet
+
+    def test_init(self):
+        # Instances of Java types cannot be re-initialized
+        pass
+
+    def test_cyclical_repr(self):
+        pass
+
+    def test_cyclical_print(self):
+        pass
+
+    def test_pickling(self):
+        for i in range(pickle.HIGHEST_PROTOCOL + 1):
+            p = pickle.dumps(self.s, i)
+            dup = pickle.loads(p)
+            self.assertEqual(self.s, dup, "%s != %s" % (self.s, dup))
+
+
+class TestJavaHashSet(TestJavaSet):
+    thetype = HashSet
+
+class TestJavaLinkedHashSet(TestJavaSet):
+    thetype = LinkedHashSet
+
+
 def test_main():
-    tests = [SetTestCase]
-    if test_support.is_jython:
-        tests.append(SetInJavaTestCase)
+    tests = [
+        SetTestCase,
+        SetInJavaTestCase,
+        TestJavaHashSet,
+        TestJavaLinkedHashSet,
+    ]
     test_support.run_unittest(*tests)
 
 

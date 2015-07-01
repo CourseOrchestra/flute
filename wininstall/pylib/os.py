@@ -114,6 +114,20 @@ elif 'riscos' in _names:
     __all__.extend(_get_exports_list(riscos))
     del riscos
 
+elif 'ibmi' in _names:
+    _name = 'ibmi'
+    linesep = '\n'
+    from ibmi import *
+    try:
+        from ibmi import _exit
+    except ImportError:
+        pass
+    import posixpath as path
+
+    import ibmi
+    __all__.extend(_get_exports_list(ibmi))
+    del ibmi
+
 else:
     raise ImportError, 'no os specific module found'
 
@@ -205,7 +219,7 @@ def renames(old, new):
         except error:
             pass
 
-__all__.extend(["makedirs", "removedirs", "renames"])
+__all__.extend(["makedirs", "removedirs", "renames", "system"])
 
 def walk(top, topdown=True, onerror=None, followlinks=False):
     """Directory tree generator.
@@ -705,3 +719,17 @@ class _wrap_close(object):
         return getattr(self._stream, name)
     def __iter__(self):
         return iter(self._stream)
+
+
+def system(command):
+    """system(command) -> exit_status
+
+    Execute the command (a string) in a subshell."""
+    # Because this is a circular import, we need to perform
+    # a late binding. Monkeypatch to avoid doing this import
+    # repeatedly.
+    global system  # writable name of this function!
+    
+    from subprocess import _os_system
+    system = _os_system
+    return _os_system(command)
