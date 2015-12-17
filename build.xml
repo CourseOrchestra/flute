@@ -25,6 +25,7 @@
 				<pathelement path="lib/jython.jar" />
 				<pathelement path="lib/gson-1.7.1.jar" />
 				<pathelement path="lib/java-json.jar" />
+				<pathelement path="lib/cron4j-2.2.5.jar" />
 			</classpath>
 			<src>
 				<pathelement path="src" />
@@ -156,6 +157,7 @@
 				<exclude name="**/showcase/utils/" />
 			</fileset>
 			<zipfileset src="lib/sqljdbc4.jar" excludes="META-INF/MSFTSIG.*" />
+			<zipfileset src="lib/cron4j-2.2.5.jar" />
 			<zipfileset src="lib/jython.jar" />
 			<zipfileset src="lib/ojdbc6.jar" />
 			<zipfileset src="lib/jython.jar" />

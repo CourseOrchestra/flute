@@ -57,6 +57,10 @@ public final class AppSettings {
 	private final Logger logger;
 	private final boolean neverStop;
 	private final int errorTextMaxLength;
+
+	private final String cronTableName;
+	private final boolean cronMode;
+
 	{
 		logger = Logger.getLogger("ru.curs.flute");
 		logger.setLevel(Level.INFO);
@@ -68,34 +72,31 @@ public final class AppSettings {
 		// Читаем настройки и проверяем их, где можно.
 		int tn = 0;
 		try {
-			tn = Integer.parseInt(settings.getProperty("threads.number", "1")
-					.trim());
+			tn = Integer.parseInt(settings.getProperty("threads.number", "1").trim());
 			if (tn < 1)
-				sb.append("Invalid number of execution threads (threads.number): "
-						+ tn + '\n');
+				sb.append("Invalid number of execution threads (threads.number): " + tn + '\n');
 		} catch (NumberFormatException e) {
-			sb.append("Invalid number of execution threads (threads.number): "
-					+ settings.getProperty("threads.number") + '\n');
+			sb.append("Invalid number of execution threads (threads.number): " + settings.getProperty("threads.number")
+					+ '\n');
 		}
 		this.threadsNumber = tn;
 
 		int qp = 0;
 		try {
-			qp = Integer.parseInt(settings.getProperty("query.period", "3000")
-					.trim());
+			qp = Integer.parseInt(settings.getProperty("query.period", "3000").trim());
 			if (qp < 0)
-				sb.append("Invalid value of query period in milliseconds (query.period): "
-						+ qp + '\n');
+				sb.append("Invalid value of query period in milliseconds (query.period): " + qp + '\n');
 		} catch (NumberFormatException e) {
 			sb.append("Invalid value of query period in milliseconds (query.period): "
 					+ settings.getProperty("query.period") + '\n');
 		}
 		this.queryPeriod = qp;
 
-		tableName = readStringProperty(settings, sb, "table.name",
-				"tasks table name");
-		fluteUserId = readStringProperty(settings, sb, "flute.userid",
-				"flute user id");
+		tableName = readStringProperty(settings, sb, "table.name", "tasks table name");
+
+		cronTableName = readStringProperty(settings, sb, "crontable.name", "cron schedule table name");
+
+		fluteUserId = readStringProperty(settings, sb, "flute.userid", "flute user id");
 
 		String lf = settings.getProperty("log.file", "").trim();
 		if (!lf.isEmpty())
@@ -107,19 +108,18 @@ public final class AppSettings {
 				sb.append("Could not access or create log file " + lf + '\n');
 			}
 
-		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop",
-				"false").trim());
+		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop", "false").trim());
+
+		cronMode = Boolean.parseBoolean(settings.getProperty("cron.mode", "false").trim());
 
 		int ml = 0;
 		try {
-			ml = Integer.parseInt(settings.getProperty("message.max.length",
-					"0").trim());
+			ml = Integer.parseInt(settings.getProperty("message.max.length", "0").trim());
 			if (ml < 0)
-				sb.append("Invalid value of maximum message length (message.max.length): "
-						+ qp + '\n');
+				sb.append("Invalid value of maximum message length (message.max.length): " + qp + '\n');
 		} catch (NumberFormatException e) {
 			sb.append("Invalid value of maximum message length (message.max.length): "
-					+ settings.getProperty("query.period") + '\n');
+					+ settings.getProperty("message.max.length") + '\n');
 		}
 		this.errorTextMaxLength = ml;
 
@@ -127,8 +127,7 @@ public final class AppSettings {
 			throw new EFluteCritical(sb.toString());
 	}
 
-	private String readStringProperty(Properties settings, StringBuilder sb,
-			String propName, String propDescr) {
+	private String readStringProperty(Properties settings, StringBuilder sb, String propName, String propDescr) {
 		String result = settings.getProperty(propName, "").trim();
 		if (result.isEmpty())
 			sb.append(String.format("No %s given (%s).\n", propDescr, propName));
@@ -199,7 +198,24 @@ public final class AppSettings {
 		return theSettings.neverStop;
 	}
 
+	/**
+	 * Значение параметра "максимальная длина поля для сообщения об ошибке".
+	 */
 	public static int getErrorTextMaxLength() {
 		return theSettings.errorTextMaxLength;
+	}
+
+	/**
+	 * Работает ли Флейта в CRON-режиме.
+	 */
+	public static boolean isCronMode() {
+		return theSettings.cronMode;
+	}
+
+	/**
+	 * Возвращает имя таблицы с cron-заданиями.
+	 */
+	public static String getCronTableName() {
+		return theSettings.cronTableName;
 	}
 }
