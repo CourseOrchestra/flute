@@ -141,7 +141,19 @@ public final class CronTaskManager {
 		try {
 			if (mainConn == null || mainConn.isClosed()) {
 				mainConn = ConnectionPool.get();
-				String sql = "SELECT ID, CRONSCHEDULE, SCRIPT FROM %s WHERE DISABLED = 0 ORDER BY ID";
+				String sql;
+				switch (ru.curs.celesta.AppSettings.getDBType()) {
+				case POSTGRES:
+					sql = "SELECT ID, CRONSCHEDULE, SCRIPT FROM %s WHERE DISABLED = FALSE ORDER BY ID";
+					break;
+				case MSSQL:
+				case MYSQL:
+				case ORACLE:
+					sql = "SELECT ID, CRONSCHEDULE, SCRIPT FROM %s WHERE DISABLED = 0 ORDER BY ID";
+					break;
+				default:
+					throw new EFluteCritical("Cannot recognize database type.");
+				}
 				selectSchedule = mainConn.prepareStatement(String.format(sql, AppSettings.getCronTableName()));
 			}
 		} catch (SQLException | CelestaException e) {
