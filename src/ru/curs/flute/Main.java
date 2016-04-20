@@ -76,9 +76,8 @@ public final class Main {
 	private static void releaseTasks() {
 		try {
 			Connection conn = ru.curs.celesta.ConnectionPool.get();
-			PreparedStatement stmt = conn.prepareStatement(String.format(
-					"UPDATE %s SET STATUS = 0 WHERE STATUS = 1",
-					AppSettings.getTableName()));
+			PreparedStatement stmt = conn.prepareStatement(
+					String.format("UPDATE %s SET STATUS = 0 WHERE STATUS = 1", AppSettings.getTableName()));
 			stmt.execute();
 			conn.close();
 		} catch (SQLException | CelestaException e) {
@@ -88,8 +87,7 @@ public final class Main {
 	}
 
 	private static String getMyPath() {
-		String path = Main.class.getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
+		String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		File f = new File(path.replace("%20", " "));
 		if (f.getAbsolutePath().toLowerCase().endsWith(".jar")) {
 			return f.getParent() + File.separator;
@@ -113,9 +111,7 @@ public final class Main {
 		try {
 			p = AppSettings.init(f);
 		} catch (EFluteCritical e) {
-			System.out
-					.println("The following problems occured while reading file "
-							+ f + ":");
+			System.out.println("The following problems occured while reading file " + f + ":");
 			System.out.print(e.getMessage());
 			System.exit(1);
 		}
@@ -123,59 +119,56 @@ public final class Main {
 		try {
 			Celesta.initialize(p);
 		} catch (CelestaException e) {
-			System.out
-					.println("The following problems occured while initializing Celesta:");
+			System.out.println("The following problems occured while initializing Celesta:");
 			System.out.print(e.getMessage());
 			System.exit(1);
 		}
 
 		// С ЭТОГО МОМЕНТА У НАС ЕСТЬ ЛОГГЕР
-		AppSettings.getLogger().log(Level.INFO,
-				"Celesta initialized successfully");
+		AppSettings.getLogger().log(Level.INFO, "Celesta initialized successfully");
 
 		// Затем инициализируем код, призванный высвобождать задания при
 		// закрытии приложения.
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				releaseTasks();
-			}
-		});
+		if (!AppSettings.isCronMode())
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				@Override
+				public void run() {
+					releaseTasks();
+				}
+			});
 
 		while (true) {
 			try {
 				// Если до сих пор ничего критического не произошло, запускаем в
 				// бесконечном цикле опрос и раздачу заданий.
-				TaskManager.execute();
+
+				if (AppSettings.isCronMode()) {
+					AppSettings.getLogger().log(Level.INFO, "Running Flute in CRON mode.");
+					CronTaskManager.execute();
+				} else {
+					AppSettings.getLogger().log(Level.INFO, "Running Flute in normal mode.");
+					TaskManager.execute();
+				}
 				// Если выполнение завершилось штатно -- выходим
 				break;
 			} catch (EFluteCritical e) {
-				AppSettings.getLogger().log(
-						Level.SEVERE,
-						"The following critical problem stopped the normal execution:\n"
-								+ e.getMessage());
+				AppSettings.getLogger().log(Level.SEVERE,
+						"The following critical problem stopped the normal execution:\n" + e.getMessage());
 				if (!AppSettings.neverStop()) {
-					AppSettings
-							.getLogger()
-							.log(Level.SEVERE,
-									"never.stop=false, so flute service is now stopping and exiting.");
+					AppSettings.getLogger().log(Level.SEVERE,
+							"never.stop=false, so flute service is now stopping and exiting.");
 					System.exit(1);
 				} else {
-					AppSettings
-							.getLogger()
-							.log(Level.INFO,
-									String.format(
-											"never.stop=true, so flute will try to start again in %d ms.",
-											10 * AppSettings.getQueryPeriod()));
+					AppSettings.getLogger().log(Level.INFO,
+							String.format("never.stop=true, so flute will try to start again in %d ms.",
+									10 * AppSettings.getQueryPeriod()));
 					// Выдерживаем хорошую паузу
 					try {
 						Thread.sleep(10 * AppSettings.getQueryPeriod());
 					} catch (InterruptedException e1) {
-						AppSettings.getLogger().log(Level.INFO,
-								"Thread sleep interrupted.");
+						AppSettings.getLogger().log(Level.INFO, "Thread sleep interrupted.");
 					}
-					AppSettings.getLogger().log(Level.INFO,
-							"Trying to revive the service...");
+					AppSettings.getLogger().log(Level.INFO, "Trying to revive the service...");
 				}
 
 			}
@@ -183,10 +176,16 @@ public final class Main {
 	}
 
 	private static void stopService() {
-		TaskManager.stop();
-		// Ждём 6 сек.
 		try {
-			Thread.sleep(TaskManager.SHUTDOWN_TIME);
+			if (AppSettings.isCronMode()) {
+				CronTaskManager.stop();
+				// Ждём 6 сек.
+				Thread.sleep(CronTaskManager.SHUTDOWN_TIME);
+			} else {
+				TaskManager.stop();
+				// Ждём 6 сек.
+				Thread.sleep(TaskManager.SHUTDOWN_TIME);
+			}
 		} catch (InterruptedException e) {// CHECKSTYLE:OFF
 			// Do nothing
 			// CHECKSTYLE:ON

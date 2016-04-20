@@ -70,17 +70,14 @@ public final class TaskManager {
 		String sql;
 		switch (ru.curs.celesta.AppSettings.getDBType()) {
 		case MSSQL:
-			sql = "SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 "
-					+ "AND NOT (PREVID IN (SELECT ID FROM %s WHERE STATUS < 2)) ORDER BY ID";
+			sql = "SELECT TOP 1 ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID";
 			break;
 		case POSTGRES:
 		case MYSQL:
-			sql = "SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 "
-					+ "AND NOT (PREVID IN (SELECT ID FROM %s WHERE STATUS < 2)) ORDER BY ID LIMIT 1";
+			sql = "SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID LIMIT 1";
 			break;
 		case ORACLE:
-			sql = "with a as (SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 "
-					+ "AND NOT (PREVID IN (SELECT ID FROM %s WHERE STATUS < 2)) ORDER BY ID) "
+			sql = "with a as (SELECT ID, SCRIPT, PARAMETERS FROM %s WHERE STATUS = 0 ORDER BY ID) "
 					+ "select a.* from a where rownum <= 1";
 			break;
 		default:
@@ -90,10 +87,8 @@ public final class TaskManager {
 		try {
 			if (mainConn == null || mainConn.isClosed()) {
 				mainConn = ConnectionPool.get();
-				selectNextStmt = mainConn
-						.prepareStatement(String.format(sql,
-								AppSettings.getTableName(),
-								AppSettings.getTableName()));
+				selectNextStmt = mainConn.prepareStatement(String.format(sql,
+						AppSettings.getTableName()));
 				markNextStmt = mainConn.prepareStatement(String.format(
 						"UPDATE %s SET STATUS = 1 WHERE ID = ?",
 						AppSettings.getTableName()));

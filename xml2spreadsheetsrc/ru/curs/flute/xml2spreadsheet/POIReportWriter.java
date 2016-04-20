@@ -250,10 +250,12 @@ abstract class POIReportWriter extends ReportWriter {
 		resultF.setRight(sourceF.getRight());
 
 		// Копируем сквозные ячейки
-		result.setRepeatingRowsAndColumns(
-				result.getSheetIndex(activeResultSheet), startRepeatingColumn,
-				endRepeatingColumn, startRepeatingRow, endRepeatingRow);
-
+		if (startRepeatingRow >= 0)
+			activeResultSheet.setRepeatingRows(new CellRangeAddress(
+					startRepeatingRow, endRepeatingRow, -1, -1));
+		if (startRepeatingColumn >= 0)
+			activeResultSheet.setRepeatingColumns(new CellRangeAddress(-1, -1,
+					startRepeatingColumn, endRepeatingColumn));
 	}
 
 	@Override
