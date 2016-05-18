@@ -94,8 +94,6 @@ public final class AppSettings {
 
 		tableName = readStringProperty(settings, sb, "table.name", "tasks table name");
 
-		cronTableName = readStringProperty(settings, sb, "crontable.name", "cron schedule table name");
-
 		fluteUserId = readStringProperty(settings, sb, "flute.userid", "flute user id");
 
 		String lf = settings.getProperty("log.file", "").trim();
@@ -111,6 +109,11 @@ public final class AppSettings {
 		neverStop = Boolean.parseBoolean(settings.getProperty("never.stop", "false").trim());
 
 		cronMode = Boolean.parseBoolean(settings.getProperty("cron.mode", "false").trim());
+		if (cronMode) {
+			cronTableName = readStringProperty(settings, sb, "crontable.name", "cron schedule table name");
+		} else {
+			cronTableName = "";
+		}
 
 		int ml = 0;
 		try {
