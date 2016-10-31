@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<dbconnstring>jdbc:postgresql://127.0.0.1:5432/celesta</dbconnstring>
+	<dbuser>postgres</dbuser>
+	<dbpassword>123</dbpassword>
+	<redishost>localhost</redishost>
+	<redisport>6379</redisport>
+	<neverstop>false</neverstop>
+	<retrywait>50000</retrywait>
+	<scorepath>D:/score</scorepath>
+    <pylibpath>D:/jython2.7.0/Lib</pylibpath>
+	<dbtable>
+		<tablename>flute.tasks</tablename>
+		<pollingperiod>5000</pollingperiod>
+		<terminationtimeout>10000</terminationtimeout>
+	</dbtable>
+
+	<redisqueue>
+		<queuename>q1</queuename>
+	</redisqueue>
+
+	<redisqueue>
+		<queuename>q2</queuename>
+	</redisqueue>
+
+	<crontask>
+		<schedule>5 * * * *</schedule>
+		<script>foo.module.script</script>
+		<params>234</params>
+	</crontask>
+</config>
