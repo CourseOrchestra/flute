@@ -5,8 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,18 +24,13 @@ import org.springframework.context.annotation.Import;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
-import ru.curs.flute.EFluteCritical;
-import ru.curs.flute.EFluteNonCritical;
-import ru.curs.flute.FluteTask;
-import ru.curs.flute.GlobalParams;
-import ru.curs.flute.RedisQueue;
 
 public class RedisQueueTest {
 	private static ApplicationContext ctx;
 
 	@BeforeClass
 	public static void setup() {
-		ctx = new AnnotationConfigApplicationContext(TestConf.class);
+		ctx = new AnnotationConfigApplicationContext(TestRedisConf.class);
 	}
 
 	@Test
@@ -97,8 +97,22 @@ public class RedisQueueTest {
 	}
 
 	@Test
+	public void testInterruption() throws InterruptedException, ExecutionException {
+		RedisQueue q = ctx.getBean(RedisQueue.class);
+		q.setQueueName(String.format("emptyQueue%08X", (new Random()).nextInt()));
+		ExecutorService s = Executors.newSingleThreadExecutor();
+		Future<?> f = s.submit(q);
+		// task is running and waiting
+		assertFalse(f.isDone());
+		// shutting down -- interrupting
+		s.shutdownNow();
+		s.awaitTermination(1, TimeUnit.MINUTES);
+		f.get();
+	}
+
+	@Test
 	public void jsontest() throws EFluteNonCritical {
-		FluteTask t = new FluteTask(null, "foo.bar", "param1");
+		FluteTask t = new FluteTask(null, 1, "foo.bar", "param1");
 		assertEquals("{\"script\":\"foo.bar\",\"params\":\"param1\"}", RedisQueue.toJSON(t));
 
 		RedisQueue q = ctx.getBean(RedisQueue.class);
@@ -145,7 +159,7 @@ public class RedisQueueTest {
 
 @Configuration
 @Import(RedisQueue.class)
-class TestConf {
+class TestRedisConf {
 	@Bean
 	public JedisPool getJedisPool() {
 		// use localhost

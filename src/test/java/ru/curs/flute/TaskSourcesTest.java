@@ -42,7 +42,7 @@ public class TaskSourcesTest {
 		assertEquals(4, ss.size());
 
 		assertEquals("flute.tasks", ((SQLTablePoller) ss.get(0)).getTableName());
-		assertEquals(5000, ((SQLTablePoller) ss.get(0)).getQueryPeriod());
+		assertEquals(6000, ((SQLTablePoller) ss.get(0)).getQueryPeriod());
 		assertEquals(10000, ((SQLTablePoller) ss.get(0)).getTerminationTimeout());
 
 		assertEquals("q1", ((RedisQueue) ss.get(1)).getQueueName());

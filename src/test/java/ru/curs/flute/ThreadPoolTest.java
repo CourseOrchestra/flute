@@ -17,7 +17,7 @@ import ru.curs.flute.TaskSource;
 
 class DummyFluteTask extends FluteTask {
 	public DummyFluteTask(TaskSource ts1) {
-		super(ts1, "", "");
+		super(ts1, 0, "", "");
 	}
 
 	@Override
@@ -28,7 +28,7 @@ class DummyFluteTask extends FluteTask {
 
 class DummyFluteTask2 extends FluteTask {
 	public DummyFluteTask2(TaskSource ts1) {
-		super(ts1, "", "");
+		super(ts1, 0, "", "");
 	}
 
 	@Override

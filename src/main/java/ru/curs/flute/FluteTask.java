@@ -10,20 +10,19 @@ import ru.curs.celesta.dbutils.BLOB;
 public class FluteTask implements Runnable {
 
 	private final TaskSource ts;
-	private Throwable error;
-
-	private FluteTaskState state = FluteTaskState.NEW;
-
 	private final String script;
-
 	private final String params;
+	private final int id;
 
+	private Throwable error;
+	private FluteTaskState state = FluteTaskState.NEW;
 	private String message;
 
 	private final BLOB blob = new BLOB();
 
-	public FluteTask(TaskSource ts, String script, String params) {
+	public FluteTask(TaskSource ts, int id, String script, String params) {
 		this.ts = ts;
+		this.id = id;
 		this.script = script;
 		this.params = params;
 	}
@@ -56,6 +55,10 @@ public class FluteTask implements Runnable {
 		return params;
 	}
 
+	public int getId() {
+		return id;
+	}
+
 	public OutputStream getResultstream() {
 		return blob.getOutStream();
 	}
@@ -70,14 +73,14 @@ public class FluteTask implements Runnable {
 
 	@Override
 	public void run() {
-		state = FluteTaskState.INPROCESS;
+		setState(FluteTaskState.INPROCESS);
 		try {
 			doJob();
-			state = FluteTaskState.SUCCESS;
+			setState(FluteTaskState.SUCCESS);
 		} catch (InterruptedException e) {
-			state = FluteTaskState.INTERRUPTED;
+			setState(FluteTaskState.INTERRUPTED);
 		} catch (Throwable e) {
-			state = FluteTaskState.FAIL;
+			setState(FluteTaskState.FAIL);
 			error = e;
 			message = e.getMessage();
 		} finally {

@@ -91,15 +91,27 @@ public final class Main {
 	}
 
 	private static void startService() {
+		System.out.printf("Flute (3rd generation) is starting.%n");
 		List<TaskSource> taskSources = ctx.getBean(TaskSources.class).getSources();
 		taskSources.forEach(svc::execute);
-		System.out.printf("%d queues are being processed.%n", taskSources.size());
+		if (taskSources.size() == 1) {
+			System.out.printf("Flute started. One queue is being processed.%n", taskSources.size());
+		} else {
+			System.out.printf("Flute started. %d queues are being processed.%n", taskSources.size());
+		}
+
+		/*
+		 * try { Thread.sleep(2000); } catch (InterruptedException e) {
+		 * e.printStackTrace(); } stopService();
+		 */
 	}
 
 	private static void stopService() {
 		try {
+			System.out.println("Flute stopping...");
 			svc.shutdownNow();
 			svc.awaitTermination(1, TimeUnit.MINUTES);
+			System.out.println("Flute stopped.");
 		} catch (InterruptedException e) {
 			return;
 		}

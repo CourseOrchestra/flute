@@ -11,7 +11,7 @@
     <pylibpath>D:/jython2.7.0/Lib</pylibpath>
 	<dbtable>
 		<tablename>flute.tasks</tablename>
-		<pollingperiod>5000</pollingperiod>
+		<pollingperiod>6000</pollingperiod>
 		<terminationtimeout>10000</terminationtimeout>
 	</dbtable>
 

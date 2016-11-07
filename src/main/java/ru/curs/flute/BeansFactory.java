@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import redis.clients.jedis.JedisPool;
+import ru.curs.celesta.AppSettings;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
 import ru.curs.celesta.ConnectionPool;
@@ -70,6 +71,21 @@ class BeansFactory {
 			@Override
 			public void commit(Connection conn) {
 				ConnectionPool.commit(conn);
+			}
+
+			@Override
+			public DBType getDBType() {
+				switch (AppSettings.getDBType()) {
+				case MSSQL:
+					return DBType.MSSQLServer;
+				case ORACLE:
+					return DBType.Oracle;
+				case MYSQL:
+					return DBType.MySQL;
+				case POSTGRES:
+				default:
+					return DBType.PostgreSQL;
+				}
 			}
 		};
 	}

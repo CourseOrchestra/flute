@@ -17,6 +17,8 @@ import redis.clients.jedis.exceptions.JedisException;
 @Component
 @Scope("prototype")
 class RedisQueue extends TaskSource {
+	private final static int INTERRUPTION_CHECK_PERIOD = 10; // seconds
+
 	@Autowired
 	private JedisPool pool;
 
@@ -31,12 +33,17 @@ class RedisQueue extends TaskSource {
 	}
 
 	@Override
-	FluteTask getTask() throws EFluteCritical {
+	FluteTask getTask() throws EFluteCritical, InterruptedException {
 		FluteTask result;
 		while (true) {
 			List<String> val;
 			try (Jedis j = pool.getResource()) {
-				val = j.brpop(0, queueName);
+				// val = j.brpop(0, queueName);
+				while ((val = j.brpop(INTERRUPTION_CHECK_PERIOD, queueName)) == null)
+					if (Thread.interrupted()) {
+						System.out.println("Shutting down Redis queue.");
+						throw new InterruptedException();
+					}
 			} catch (JedisException e) {
 				throw new EFluteCritical("Redis error: " + e.getMessage());
 			}
@@ -73,8 +80,22 @@ class RedisQueue extends TaskSource {
 			throw new EFluteNonCritical(String.format("No script value found in message '%s'", string));
 
 		JsonElement params = o.get("params");
+
+		JsonElement idElement = o.get("id");
+		int id;
+		if (idElement == null)
+			id = 0;
+		else {
+			try {
+				id = Integer.parseInt(idElement.getAsString());
+			} catch (Exception e) {
+				id = 0;
+			}
+		}
+
 		try {
-			FluteTask result = new FluteTask(this, script.getAsString(), params == null ? null : params.getAsString());
+			FluteTask result = new FluteTask(this, id, script.getAsString(),
+					params == null ? null : params.getAsString());
 			return result;
 		} catch (RuntimeException e) {
 			throw new EFluteNonCritical(String.format("Message parse error: script and params should be strings."));

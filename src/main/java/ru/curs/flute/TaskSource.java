@@ -82,6 +82,7 @@ public abstract class TaskSource implements Runnable {
 				}
 			} catch (InterruptedException e) {
 				try {
+					threads.shutdown();
 					threads.awaitTermination(terminationTimeout, TimeUnit.MILLISECONDS);
 				} catch (InterruptedException e1) {
 					// do nothing, contintue shutdown
