@@ -37,6 +37,7 @@ public class FluteTask implements Runnable {
 
 	public void setState(FluteTaskState newState) {
 		state = newState;
+		ts.changeTaskState(this);
 	}
 
 	public String getMessage() {
@@ -61,6 +62,10 @@ public class FluteTask implements Runnable {
 
 	public OutputStream getResultstream() {
 		return blob.getOutStream();
+	}
+
+	BLOB getBLOB() {
+		return blob;
 	}
 
 	public Throwable getError() {

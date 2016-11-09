@@ -94,18 +94,20 @@ public abstract class TaskSource implements Runnable {
 				});
 				break retrycycle;
 			} catch (EFluteCritical e) {
+				e.printStackTrace();
+				System.out.printf("Task source %s stopped execution on critical error (see stderr for details).%n",
+						this.toString());
 				if (params == null || !params.isNeverStop()) {
-					e.printStackTrace();
-					System.out.printf("Task source %s stopped execution on critical error (see stderr for details).%n",
-							this.toString());
-					break;
+					break retrycycle;
 				} else if (params.getRetryWait() > 0) {
 					try {
+						System.out.print("Restarting in %d milliseconds...");
 						Thread.sleep(params.getRetryWait());
 					} catch (InterruptedException e1) {
 						// do nothing, return
 						break retrycycle;
 					}
+					System.out.println("done.");
 				}
 			}
 		}
@@ -116,6 +118,10 @@ public abstract class TaskSource implements Runnable {
 	}
 
 	abstract FluteTask getTask() throws InterruptedException, EFluteCritical;
+
+	void changeTaskState(FluteTask t) {
+
+	}
 
 	public int getTerminationTimeout() {
 		return terminationTimeout;

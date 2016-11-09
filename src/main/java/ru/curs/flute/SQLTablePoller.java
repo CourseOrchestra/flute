@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import ru.curs.celesta.dbutils.BLOB;
+
 /**
  * The task source that polls SQL table on a regular basis.
  */
@@ -100,8 +102,59 @@ class SQLTablePoller extends TaskSource {
 				}
 			} catch (SQLException e) {
 				throw new EFluteCritical("Error during getting the next task data: " + e.getMessage());
+			} finally {
+				pool.commit(mainConn);
 			}
 			Thread.sleep(queryPeriod);
+		}
+	}
+
+	@Override
+	void changeTaskState(FluteTask task) {
+
+		int newState;
+
+		switch (task.getState()) {
+		case SUCCESS:
+			newState = 2;
+			break;
+		case FAIL:
+			newState = 3;
+			break;
+		case INTERRUPTED:
+			newState = 4;
+			break;
+		default:
+			return;
+		}
+
+		try {
+			Connection conn = pool.get();
+
+			PreparedStatement finalizeTaskStmt = mainConn.prepareStatement(String.format(
+					"UPDATE %s SET \"status\" = ?, \"result\" = ?, \"errortext\" = ? WHERE \"id\" = ?", tableName));
+
+			finalizeTaskStmt.setInt(1, newState);
+			BLOB blob = task.getBLOB();
+			if (blob.isNull()) {
+				finalizeTaskStmt.setNull(2, java.sql.Types.NULL);
+			} else {
+				finalizeTaskStmt.setBinaryStream(2, blob.getInStream(), blob.size());
+			}
+			int limit = errorTextMaxLength;
+			if (limit > 0 && task.getMessage().length() > limit) {
+				finalizeTaskStmt.setString(3, task.getMessage().substring(0, limit));
+			} else {
+				finalizeTaskStmt.setString(3, task.getMessage());
+			}
+
+			finalizeTaskStmt.setInt(4, task.getId());
+			finalizeTaskStmt.executeUpdate();
+			pool.commit(conn);
+			pool.putBack(conn);
+		} catch (Exception e) {
+			System.out.printf("System could not finalize task %s.%d properly%n", this.getTableName(), task.getId());
+			e.printStackTrace();
 		}
 	}
 
