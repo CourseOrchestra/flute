@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 @Component
-@Import({ SQLTablePoller.class, RedisQueue.class, CRONTasksSupplier.class })
+@Import({ SQLTablePoller.class, RedisQueue.class, ScheduledTaskSupplier.class, LoopTaskSupplier.class })
 class TaskSources extends XMLParamsParser {
 	private final List<TaskSource> tsList = new ArrayList<>();
 	private final Map<String, Runnable> startActions = new HashMap<>();
@@ -44,13 +44,27 @@ class TaskSources extends XMLParamsParser {
 			initTextActions();
 			textActions.put("queuename", ((RedisQueue) currentSource)::setQueueName);
 		});
-		startActions.put("crontask", () -> {
-			currentSource = ctx.getBean(CRONTasksSupplier.class);
+		startActions.put("scheduledtask", () -> {
+			currentSource = ctx.getBean(ScheduledTaskSupplier.class);
 			tsList.add(currentSource);
 			initTextActions();
-			textActions.put("schedule", ((CRONTasksSupplier) currentSource)::setSchedule);
-			textActions.put("script", ((CRONTasksSupplier) currentSource)::setScript);
-			textActions.put("params", ((CRONTasksSupplier) currentSource)::setParams);
+			textActions.put("schedule", ((ScheduledTaskSupplier) currentSource)::setSchedule);
+			textActions.put("script", ((ScheduledTaskSupplier) currentSource)::setScript);
+			textActions.put("params", ((ScheduledTaskSupplier) currentSource)::setParams);
+		});
+		startActions.put("looptask", () -> {
+			currentSource = ctx.getBean(LoopTaskSupplier.class);
+			tsList.add(currentSource);
+			initTextActions();
+			textActions.put("script", ((LoopTaskSupplier) currentSource)::setScript);
+			textActions.put("params", ((LoopTaskSupplier) currentSource)::setParams);
+			textActions.put("waitonsuccess", (s) -> {
+				processInt(s, "waitonsuccess", true, ((LoopTaskSupplier) currentSource)::setWaitOnSuccess);
+			});
+			textActions.put("waitonfailure", (s) -> {
+				processInt(s, "waitonfailure", true, ((LoopTaskSupplier) currentSource)::setWaitOnFailure);
+			});
+
 		});
 
 		parse(is, "queues");
@@ -58,8 +72,8 @@ class TaskSources extends XMLParamsParser {
 
 	private void initTextActions() {
 		textActions.clear();
-		textActions.put("maxThreads", (s) -> {
-			processInt(s, "maxThreads", false, currentSource::setMaxThreads);
+		textActions.put("maxthreads", (s) -> {
+			processInt(s, "maxthreads", false, currentSource::setMaxThreads);
 		});
 		textActions.put("terminationtimeout", (s) -> {
 			processInt(s, "terminationtimeout", true, currentSource::setTerminationTimeout);

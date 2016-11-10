@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+    <xs:element name="config">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded" minOccurs="0">
+                <xs:element name="neverstop" type="xs:boolean"/>
+                <xs:element name="retrywait" type="xs:int"/>
+                <xs:element name="dbconnstring"/>
+                <xs:element name="dbuser"/>
+                <xs:element name="dbpassword"/>
+                <xs:element name="redishost"/>
+                <xs:element name="redisport" type="xs:int"/>
+                <xs:element name="scorepath"/>
+                <xs:element name="pylibpath"/>
+                <xs:element name="fluteuserid"/>
+                <xs:element name="loglogins" type="xs:boolean"/>
+                <xs:element name="skipdbupdate" type="xs:boolean"/>
+                <xs:element name="forcedbinitialize" type="xs:boolean"/>
+                <xs:element name="dbtable">
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded" minOccurs="0">
+                            <xs:group ref="taskSourceElements"/>
+                            <xs:element name="tablename"/>
+                            <xs:element name="pollingperiod" type="xs:int"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="redisqueue">
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded" minOccurs="0">
+                            <xs:group ref="taskSourceElements"/>
+                            <xs:element name="queuename"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="scheduledtask">
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded" minOccurs="0">
+                            <xs:group ref="taskSourceElements"/>
+                            <xs:element name="schedule"/>
+                            <xs:element name="script"/>
+                            <xs:element name="params"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="looptask">
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded" minOccurs="0">
+                            <xs:element name="script"/>
+                            <xs:element name="params"/>
+                            <xs:element name="waitonsuccess" type="xs:int"/>
+                            <xs:element name="waitonfailure" type="xs:int"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:group name="taskSourceElements">
+        <xs:choice>
+            <xs:element name="maxthreads" type="xs:int"/>
+            <xs:element name="terminationtimeout" type="xs:int"/>
+        </xs:choice>
+    </xs:group>
+</xs:schema>

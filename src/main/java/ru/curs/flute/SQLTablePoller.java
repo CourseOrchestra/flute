@@ -27,10 +27,6 @@ class SQLTablePoller extends TaskSource {
 	private PreparedStatement markNextStmt;
 	private Connection mainConn;
 
-	public JDBCConnectionPool getPool() {
-		return pool;
-	}
-
 	private String tableName;
 	private int queryPeriod = DEFAULT_QUERY_PERIOD;
 	private int errorTextMaxLength;

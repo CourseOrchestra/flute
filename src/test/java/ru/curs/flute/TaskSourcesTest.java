@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Scope;
 
 import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
-import ru.curs.flute.CRONTasksSupplier;
+import ru.curs.flute.ScheduledTaskSupplier;
 import ru.curs.flute.CommonParameters;
 import ru.curs.flute.EFluteCritical;
 import ru.curs.flute.GlobalParams;
@@ -39,7 +39,7 @@ public class TaskSourcesTest {
 	public void testTaskSources() {
 		TaskSources ts = ctx.getBean(TaskSources.class);
 		List<TaskSource> ss = ts.getSources();
-		assertEquals(4, ss.size());
+		assertEquals(5, ss.size());
 
 		assertEquals("flute.tasks", ((SQLTablePoller) ss.get(0)).getTableName());
 		assertEquals(6000, ((SQLTablePoller) ss.get(0)).getQueryPeriod());
@@ -49,10 +49,13 @@ public class TaskSourcesTest {
 
 		assertEquals("q2", ((RedisQueue) ss.get(2)).getQueueName());
 
-		assertEquals("5 * * * *", ((CRONTasksSupplier) ss.get(3)).getSchedule());
-		assertEquals("foo.module.script", ((CRONTasksSupplier) ss.get(3)).getScript());
-		assertEquals("234", ((CRONTasksSupplier) ss.get(3)).getParams());
-
+		assertEquals("5 * * * *", ((ScheduledTaskSupplier) ss.get(3)).getSchedule());
+		assertEquals("foo.module.script", ((ScheduledTaskSupplier) ss.get(3)).getScript());
+		assertEquals("234", ((ScheduledTaskSupplier) ss.get(3)).getParams());
+		
+		assertEquals("foo.hello.run", ((LoopTaskSupplier) ss.get(4)).getScript());
+		assertEquals(1000, ((LoopTaskSupplier) ss.get(4)).getWaitOnSuccess());
+		assertEquals(30000, ((LoopTaskSupplier) ss.get(4)).getWaitOnFailure());
 	}
 
 }

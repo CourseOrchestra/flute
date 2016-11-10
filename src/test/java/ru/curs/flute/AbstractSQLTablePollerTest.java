@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -137,24 +138,23 @@ public abstract class AbstractSQLTablePollerTest {
 
 		poller.setMaxThreads(2);
 		poller.setTableName("\"tasks\"");
-		final Set<String> expected = new HashSet<String>(Arrays.asList("param1", "param2", "param3"));
+		final Set<String> expected = Collections
+				.synchronizedSet(new HashSet<String>(Arrays.asList("param1", "param2", "param3")));
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		poller.log = s -> {
 			expected.remove(s);
 		};
 		es.submit(poller);
-		es.awaitTermination(1, TimeUnit.SECONDS);
+		while (!expected.isEmpty()) {
+			es.awaitTermination(10, TimeUnit.MILLISECONDS);
+		}
 		es.shutdown();
 		assertTrue(expected.isEmpty());
-
 		IDataSet actual = conn.createDataSet();
 		InputStream is = AbstractSQLTablePollerTest.class.getResourceAsStream("expectedTasksDataset3.xml");
 		IDataSet expectedDs = new XmlDataSet(is);
-
 		Assertion.assertEquals(expectedDs.getTable("tasks"), actual.getTable("tasks"));
-
 		conn.close();
-
 	}
 
 	protected IDatabaseConnection initData() throws DataSetException, DatabaseUnitException, Exception, SQLException {
