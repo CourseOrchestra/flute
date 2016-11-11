@@ -6,7 +6,7 @@ public abstract class SingleTaskSupplier extends TaskSource {
 	private String params;
 
 	@Override
-	FluteTask getTask() {
+	FluteTask getTask() throws InterruptedException {
 		return new FluteTask(this, 0, script, params);
 	}
 

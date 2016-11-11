@@ -47,7 +47,7 @@ public class LoopTaskSupplierTest {
 		while (s.result.size() < 10) {
 			Thread.sleep(10);
 		}
-		es.shutdown();
+		es.shutdownNow();
 		s.result.forEach(msg -> {
 			assertEquals("barfoo", msg);
 		});
@@ -64,7 +64,10 @@ public class LoopTaskSupplierTest {
 		while (s.result.size() < 10) {
 			Thread.sleep(10);
 		}
-		es.shutdown();
+		es.shutdownNow();
+		int a = s.result.size();
+		Thread.sleep(100);
+		assertEquals(a, s.result.size());
 		s.result.forEach(msg -> {
 			assertEquals("FAIL", msg);
 		});
