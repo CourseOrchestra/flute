@@ -3,6 +3,7 @@ package ru.curs.flute;
 import java.sql.Connection;
 import java.util.Properties;
 
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Protocol;
 import ru.curs.celesta.AppSettings;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
@@ -109,7 +111,13 @@ class BeansFactory {
 	@Bean
 	@Scope("singleton")
 	public JedisPool getJedisPool() {
-		JedisPool p = new JedisPool(params.getRedisHost(), params.getRedisPort());
+		JedisPool p;
+		if (params.getRedisPassword() != null) {
+			p = new JedisPool(new GenericObjectPoolConfig(), params.getRedisHost(), params.getRedisPort(),
+					Protocol.DEFAULT_TIMEOUT, params.getRedisPassword());
+		} else {
+			p = new JedisPool(params.getRedisHost(), params.getRedisPort());
+		}
 		return p;
 	}
 

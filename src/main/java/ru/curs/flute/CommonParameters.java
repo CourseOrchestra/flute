@@ -27,6 +27,7 @@ class CommonParameters extends XMLParamsParser {
 	// Redis
 	private String redisHost = "localhost";
 	private int redisPort = 6379;
+	private String redisPassword = null;
 
 	// Celesta
 	private String scorePath;
@@ -164,6 +165,7 @@ class CommonParameters extends XMLParamsParser {
 		textActions.put("redisport", (s) -> {
 			processInt(s, "redisport", false, this::setRedisPort);
 		});
+		textActions.put("redispassword", this::setRedisPassword);
 		textActions.put("scorepath", this::setScorePath);
 		textActions.put("pylibpath", this::setPylibPath);
 		textActions.put("fluteuserid", this::setFluteUserId);
@@ -207,6 +209,14 @@ class CommonParameters extends XMLParamsParser {
 	@Override
 	ContentHandler getSAXHandler() {
 		return new SAXHandler();
+	}
+
+	String getRedisPassword() {
+		return redisPassword;
+	}
+
+	void setRedisPassword(String redisPassword) {
+		this.redisPassword = redisPassword;
 	}
 
 }
