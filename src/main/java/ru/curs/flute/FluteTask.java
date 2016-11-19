@@ -88,6 +88,7 @@ public class FluteTask implements Runnable {
 			setState(FluteTaskState.FAIL);
 			error = e;
 			message = e.getMessage();
+			System.err.printf("Task failed: %s%n", e.getMessage());
 		} finally {
 			ts.release();
 		}
