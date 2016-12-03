@@ -3,7 +3,6 @@ package ru.curs.flute;
 import java.sql.Connection;
 import java.util.Properties;
 
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
 import ru.curs.celesta.AppSettings;
 import ru.curs.celesta.Celesta;
@@ -20,6 +20,7 @@ import ru.curs.celesta.ConnectionPool;
 @Configuration
 @Import({ CommonParameters.class, TaskSources.class })
 class BeansFactory {
+	private static final int MAX_REDIS_CONN = 32;
 	private final CommonParameters params;
 
 	public BeansFactory(@Autowired CommonParameters params) throws EFluteCritical {
@@ -112,9 +113,11 @@ class BeansFactory {
 	@Scope("singleton")
 	public JedisPool getJedisPool() {
 		JedisPool p;
+		JedisPoolConfig poolConfig = new JedisPoolConfig();
+		poolConfig.setMaxTotal(MAX_REDIS_CONN);
 		if (params.getRedisPassword() != null) {
-			p = new JedisPool(new GenericObjectPoolConfig(), params.getRedisHost(), params.getRedisPort(),
-					Protocol.DEFAULT_TIMEOUT, params.getRedisPassword());
+			p = new JedisPool(poolConfig, params.getRedisHost(), params.getRedisPort(), Protocol.DEFAULT_TIMEOUT,
+					params.getRedisPassword());
 		} else {
 			p = new JedisPool(params.getRedisHost(), params.getRedisPort());
 		}
@@ -141,6 +144,11 @@ class BeansFactory {
 			@Override
 			public String getFluteUserId() {
 				return params.getFluteUserId();
+			}
+
+			@Override
+			public boolean isExposeRedis() {
+				return params.isExposeRedis();
 			}
 		};
 	}

@@ -2,6 +2,7 @@ package ru.curs.flute;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -43,6 +44,7 @@ public class RedisQueueTest {
 			assertEquals(2, j.llen("fookey").intValue());
 
 			RedisQueue q = ctx.getBean(RedisQueue.class);
+			assertNotNull(q.getJedisPool());
 
 			q.setMaxThreads(2);
 			q.setQueueName("fookey");
@@ -183,6 +185,11 @@ class TestRedisConf {
 			@Override
 			public String getFluteUserId() {
 				return "flute";
+			}
+
+			@Override
+			public boolean isExposeRedis() {
+				return true;
 			}
 
 		};

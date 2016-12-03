@@ -28,6 +28,7 @@ class CommonParameters extends XMLParamsParser {
 	private String redisHost = "localhost";
 	private int redisPort = 6379;
 	private String redisPassword = null;
+	private boolean exposeRedis = false;
 
 	// Celesta
 	private String scorePath;
@@ -166,6 +167,10 @@ class CommonParameters extends XMLParamsParser {
 			processInt(s, "redisport", false, this::setRedisPort);
 		});
 		textActions.put("redispassword", this::setRedisPassword);
+		textActions.put("exposeredis", (s) -> {
+			setExposeRedis(Boolean.parseBoolean(s));
+		});
+
 		textActions.put("scorepath", this::setScorePath);
 		textActions.put("pylibpath", this::setPylibPath);
 		textActions.put("fluteuserid", this::setFluteUserId);
@@ -217,6 +222,14 @@ class CommonParameters extends XMLParamsParser {
 
 	void setRedisPassword(String redisPassword) {
 		this.redisPassword = redisPassword;
+	}
+
+	boolean isExposeRedis() {
+		return exposeRedis;
+	}
+
+	void setExposeRedis(boolean exposeRedis) {
+		this.exposeRedis = exposeRedis;
 	}
 
 }

@@ -12,6 +12,7 @@
                 <xs:element name="redishost"/>
                 <xs:element name="redisport" type="xs:int"/>
                 <xs:element name="redispassword"/>
+                <xs:element name="exposeredis" type="xs:boolean"/>
                 <xs:element name="scorepath"/>
                 <xs:element name="pylibpath"/>
                 <xs:element name="fluteuserid"/>

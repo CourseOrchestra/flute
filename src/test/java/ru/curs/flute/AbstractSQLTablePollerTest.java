@@ -3,6 +3,7 @@ package ru.curs.flute;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -60,6 +61,9 @@ public abstract class AbstractSQLTablePollerTest {
 		IDatabaseConnection conn = initData();
 
 		SQLTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
+
+		assertNull(poller.getJedisPool());
+
 		poller.setTableName("\"tasks\"");
 		poller.setQueryPeriod(500);
 		FluteTask t = poller.getTask();
@@ -204,6 +208,11 @@ class TestSQLConf {
 			@Override
 			public String getFluteUserId() {
 				return "flute";
+			}
+
+			@Override
+			public boolean isExposeRedis() {
+				return false;
 			}
 
 		};

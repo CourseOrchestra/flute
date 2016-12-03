@@ -18,4 +18,8 @@ public interface GlobalParams {
 	 */
 	String getFluteUserId();
 
+	/**
+	 * Do we need JedisPool to be exposed to Flute tasks.
+	 */
+	boolean isExposeRedis();
 }

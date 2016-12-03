@@ -87,6 +87,11 @@ class TestBeansProvider {
 				return "flute";
 			}
 
+			@Override
+			public boolean isExposeRedis() {
+				return false;
+			}
+
 		};
 	}
 

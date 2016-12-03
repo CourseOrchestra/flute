@@ -8,7 +8,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
+import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
 
@@ -26,6 +28,9 @@ public abstract class TaskSource implements Runnable {
 
 	@Autowired
 	private Celesta celesta;
+
+	@Autowired
+	ApplicationContext ctx;
 
 	private final ResizeableSemaphore semaphore = new ResizeableSemaphore();
 	private int terminationTimeout = DEFAULT_TERMINATION_TIMEOUT;
@@ -140,6 +145,13 @@ public abstract class TaskSource implements Runnable {
 		} catch (CelestaException e) {
 			throw new EFluteNonCritical(String.format("Celesta execution error: %s", e.getMessage()));
 		}
+	}
+
+	public JedisPool getJedisPool() {
+		if (params.isExposeRedis())
+			return ctx.getBean(JedisPool.class);
+		else
+			return null;
 	}
 
 }
