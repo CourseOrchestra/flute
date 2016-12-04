@@ -2,7 +2,7 @@ package ru.curs.flute;
 
 import java.io.OutputStream;
 
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Jedis;
 import ru.curs.celesta.dbutils.BLOB;
 
 /**
@@ -65,8 +65,8 @@ public class FluteTask implements Runnable {
 		return blob.getOutStream();
 	}
 
-	public JedisPool getJedisPool() {
-		return ts.getJedisPool();
+	public Jedis getJedis() {
+		return ts.getJedisPool().getResource();
 	}
 
 	BLOB getBLOB() {

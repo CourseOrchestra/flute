@@ -38,7 +38,7 @@ public class RedisQueueTest {
 	public void test1() throws InterruptedException, ExecutionException, EFluteCritical {
 		JedisPool jp = ctx.getBean(JedisPool.class);
 		try (Jedis j = jp.getResource()) {
-			j.del("fookey");
+			j.del("fookey"); 
 			j.lpush("fookey", "{script:a, params:b}");
 			j.lpush("fookey", "{script:b, params:c}");
 			assertEquals(2, j.llen("fookey").intValue());
