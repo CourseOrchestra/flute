@@ -33,6 +33,7 @@ class CommonParameters extends XMLParamsParser {
 	// Celesta
 	private String scorePath;
 	private String pylibPath;
+	private String javalibPath;
 	private String fluteUserId = "flute";
 	private boolean logLogins = false;
 	private boolean skipDBUpdate = false;
@@ -173,6 +174,7 @@ class CommonParameters extends XMLParamsParser {
 
 		textActions.put("scorepath", this::setScorePath);
 		textActions.put("pylibpath", this::setPylibPath);
+		textActions.put("javalibpath", this::setJavaLibPath);
 		textActions.put("fluteuserid", this::setFluteUserId);
 		textActions.put("loglogins", (s) -> {
 			setLogLogins(Boolean.parseBoolean(s));
@@ -230,6 +232,14 @@ class CommonParameters extends XMLParamsParser {
 
 	void setExposeRedis(boolean exposeRedis) {
 		this.exposeRedis = exposeRedis;
+	}
+
+	void setJavaLibPath(String javalibPath) {
+		this.javalibPath = javalibPath;
+	}
+
+	String getJavaLibPath() {
+		return javalibPath;
 	}
 
 }

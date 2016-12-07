@@ -33,6 +33,8 @@ class BeansFactory {
 		}
 		if (params.getPylibPath() != null)
 			p.setProperty("pylib.path", params.getPylibPath());
+		if (params.getJavaLibPath() != null)
+			p.setProperty("javalib.path", params.getJavaLibPath());
 
 		if (params.getConnString() == null || params.getConnString().isEmpty()) {
 			throw new EFluteCritical("dbconnstring setting is missing in configuration file!");
@@ -47,6 +49,7 @@ class BeansFactory {
 		p.setProperty("log.logins", Boolean.toString(params.isLogLogins()));
 		p.setProperty("skip.dbupdate", Boolean.toString(params.isSkipDBUpdate()));
 		p.setProperty("force.dbinitialize", Boolean.toString(params.isForceDBInitialize()));
+
 		try {
 			Celesta.initialize(p);
 		} catch (CelestaException e) {
