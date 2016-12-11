@@ -7,8 +7,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -94,8 +96,15 @@ class RedisQueue extends TaskSource {
 		}
 
 		try {
-			FluteTask result = new FluteTask(this, id, script.getAsString(),
-					params == null ? null : params.getAsString());
+			String taskParams;
+			if (params == null || params.isJsonNull()) {
+				taskParams = null;
+			} else if (params.isJsonPrimitive()) {
+				taskParams = params.getAsString();
+			} else {
+				taskParams = params.toString();
+			}
+			FluteTask result = new FluteTask(this, id, script.getAsString(), taskParams);
 			return result;
 		} catch (RuntimeException e) {
 			throw new EFluteNonCritical(String.format("Message parse error: script and params should be strings."));

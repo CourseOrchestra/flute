@@ -3,6 +3,7 @@ package ru.curs.flute;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -35,10 +36,10 @@ public class RedisQueueTest {
 	}
 
 	@Test
-	public void test1() throws InterruptedException, ExecutionException, EFluteCritical {
+	public void parsesJSON() throws InterruptedException, ExecutionException, EFluteCritical {
 		JedisPool jp = ctx.getBean(JedisPool.class);
 		try (Jedis j = jp.getResource()) {
-			j.del("fookey"); 
+			j.del("fookey");
 			j.lpush("fookey", "{script:a, params:b}");
 			j.lpush("fookey", "{script:b, params:c}");
 			assertEquals(2, j.llen("fookey").intValue());
@@ -59,14 +60,7 @@ public class RedisQueueTest {
 			assertEquals("c", t.getParams());
 			assertSame(q, t.getSource());
 
-			CompletableFuture<FluteTask> f = CompletableFuture.supplyAsync(() -> {
-				try {
-					return q.getTask();
-				} catch (Exception e) {
-					e.printStackTrace();
-					return null;
-				}
-			});
+			CompletableFuture<FluteTask> f = getSupplierFuture(q);
 			Thread.sleep(10);
 
 			assertFalse(f.isDone());
@@ -80,26 +74,51 @@ public class RedisQueueTest {
 
 			j.lpush("fookey", "{s{");
 			j.lpush("fookey", "{s:123}");
-			f = CompletableFuture.supplyAsync(() -> {
-				try {
-					return q.getTask();
-				} catch (Exception e) {
-					e.printStackTrace();
-					return null;
-				}
-			});
+			f = getSupplierFuture(q);
 			j.lpush("fookey", "{script:cccc, params:dddd}");
 			t = f.get();
 			assertEquals("cccc", t.getScript());
 			assertEquals("dddd", t.getParams());
 			assertSame(q, t.getSource());
 
+			f = getSupplierFuture(q);
+			j.lpush("fookey", "{script:cccc, params:{command:aaa, data:bbb}}");
+			t = f.get();
+			assertEquals("cccc", t.getScript());
+			assertEquals("{\"command\":\"aaa\",\"data\":\"bbb\"}", t.getParams());
+			assertSame(q, t.getSource());
+
+			
+			f = getSupplierFuture(q);
+			j.lpush("fookey", "{script:cccc, params: null}");
+			t = f.get();
+			assertEquals("cccc", t.getScript());
+			assertNull(t.getParams());
+			assertSame(q, t.getSource());
+			
+			f = getSupplierFuture(q);
+			j.lpush("fookey", "{script:cccc}");
+			t = f.get();
+			assertEquals("cccc", t.getScript());
+			assertNull(t.getParams());
+			assertSame(q, t.getSource());
 		}
 
 	}
 
+	private CompletableFuture<FluteTask> getSupplierFuture(final RedisQueue q) {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				return q.getTask();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		});
+	}
+
 	@Test
-	public void testInterruption() throws InterruptedException, ExecutionException {
+	public void interruptsDecently() throws InterruptedException, ExecutionException {
 		RedisQueue q = ctx.getBean(RedisQueue.class);
 		q.setQueueName(String.format("emptyQueue%08X", (new Random()).nextInt()));
 		ExecutorService s = Executors.newSingleThreadExecutor();
@@ -113,7 +132,7 @@ public class RedisQueueTest {
 	}
 
 	@Test
-	public void jsontest() throws EFluteNonCritical {
+	public void handlesBrokenJSON() throws EFluteNonCritical {
 		FluteTask t = new FluteTask(null, 1, "foo.bar", "param1");
 		assertEquals("{\"script\":\"foo.bar\",\"params\":\"param1\"}", RedisQueue.toJSON(t));
 
