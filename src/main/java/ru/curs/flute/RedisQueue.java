@@ -39,7 +39,7 @@ class RedisQueue extends TaskSource {
 			List<String> val;
 			try (Jedis j = pool.getResource()) {
 				// val = j.brpop(0, queueName);
-				while ((val = j.brpop(INTERRUPTION_CHECK_PERIOD, queueName)) == null)
+				while ((val = j.brpop(INTERRUPTION_CHECK_PERIOD, queueName)) == null || val.isEmpty())
 					if (Thread.interrupted()) {
 						System.out.println("Shutting down Redis queue.");
 						throw new InterruptedException();
