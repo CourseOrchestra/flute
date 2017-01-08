@@ -1,6 +1,8 @@
 package ru.curs.flute;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.util.List;
@@ -41,6 +43,19 @@ public class TaskSourcesTest {
 		List<TaskSource> ss = ts.getSources();
 		assertEquals(5, ss.size());
 
+		String id0 = ss.get(0).getId();
+		String id1 = ss.get(1).getId();
+		String id2 = ss.get(3).getId();
+		assertNotNull(id0);
+		assertNotNull(id1);
+		assertNotNull(id2);
+		assertFalse(id0.equals(id1));
+		assertFalse(id1.equals(id2));
+		assertFalse(id2.equals(id0));
+		assertEquals(id0, ss.get(0).getId());
+		assertEquals(id1, ss.get(1).getId());
+		assertEquals(id2, ss.get(3).getId());
+
 		assertEquals("flute.tasks", ((SQLTablePoller) ss.get(0)).getTableName());
 		assertEquals(6000, ((SQLTablePoller) ss.get(0)).getQueryPeriod());
 		assertEquals(10000, ((SQLTablePoller) ss.get(0)).getTerminationTimeout());
@@ -52,7 +67,7 @@ public class TaskSourcesTest {
 		assertEquals("5 * * * *", ((ScheduledTaskSupplier) ss.get(3)).getSchedule());
 		assertEquals("foo.module.script", ((ScheduledTaskSupplier) ss.get(3)).getScript());
 		assertEquals("234", ((ScheduledTaskSupplier) ss.get(3)).getParams());
-		
+
 		assertEquals("foo.hello.run", ((LoopTaskSupplier) ss.get(4)).getScript());
 		assertEquals(1000, ((LoopTaskSupplier) ss.get(4)).getWaitOnSuccess());
 		assertEquals(30000, ((LoopTaskSupplier) ss.get(4)).getWaitOnFailure());

@@ -1,6 +1,7 @@
 package ru.curs.flute;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -35,6 +36,7 @@ public abstract class TaskSource implements Runnable {
 	private final ResizeableSemaphore semaphore = new ResizeableSemaphore();
 	private int terminationTimeout = DEFAULT_TERMINATION_TIMEOUT;
 	private int maxThreads = DEFAULT_MAX_THREADS;
+	private String id = null;
 
 	private static final class ResizeableSemaphore extends Semaphore {
 		private static final long serialVersionUID = 1L;
@@ -152,6 +154,13 @@ public abstract class TaskSource implements Runnable {
 			return ctx.getBean(JedisPool.class);
 		else
 			return null;
+	}
+
+	public String getId() {
+		if (id == null) {
+			id = UUID.randomUUID().toString();
+		}
+		return id;
 	}
 
 }

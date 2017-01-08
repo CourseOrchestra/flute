@@ -32,6 +32,10 @@ public class FluteTask implements Runnable {
 		return ts;
 	}
 
+	public String getSourceId() {
+		return ts.getId();
+	}
+
 	public FluteTaskState getState() {
 		return state;
 	}
