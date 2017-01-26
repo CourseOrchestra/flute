@@ -118,16 +118,13 @@ class BeansFactory {
 		JedisPool p;
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxTotal(MAX_REDIS_CONN);
-		
-		//TODO: make these settings configurable via flute.xml
 		poolConfig.setTestOnBorrow(true);
 		poolConfig.setTestOnCreate(true);
-		
 		if (params.getRedisPassword() != null) {
 			p = new JedisPool(poolConfig, params.getRedisHost(), params.getRedisPort(), Protocol.DEFAULT_TIMEOUT,
 					params.getRedisPassword());
 		} else {
-			p = new JedisPool(params.getRedisHost(), params.getRedisPort());
+			p = new JedisPool(poolConfig, params.getRedisHost(), params.getRedisPort());
 		}
 		return p;
 	}

@@ -36,7 +36,9 @@ public abstract class TaskSource implements Runnable {
 	private final ResizeableSemaphore semaphore = new ResizeableSemaphore();
 	private int terminationTimeout = DEFAULT_TERMINATION_TIMEOUT;
 	private int maxThreads = DEFAULT_MAX_THREADS;
-	private String id = null;
+
+	private final String id = UUID.randomUUID().toString();
+	private JedisPool jedisPool;
 
 	private static final class ResizeableSemaphore extends Semaphore {
 		private static final long serialVersionUID = 1L;
@@ -140,26 +142,26 @@ public abstract class TaskSource implements Runnable {
 
 	void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
 		try {
+			// [Jedis problem debug
+			String threadName = String.format("%08X-%s", getId().hashCode(), task.getScript());
+			Thread.currentThread().setName(threadName);
+			// ]
 			String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
 			celesta.login(sesId, params.getFluteUserId());
 			celesta.runPython(sesId, task.getScript(), task);
-			Celesta.getInstance().logout(sesId, false);
+			celesta.logout(sesId, false);
 		} catch (CelestaException e) {
 			throw new EFluteNonCritical(String.format("Celesta execution error: %s", e.getMessage()));
 		}
 	}
 
 	public JedisPool getJedisPool() {
-		if (params.isExposeRedis())
-			return ctx.getBean(JedisPool.class);
-		else
-			return null;
+		if (jedisPool == null && params.isExposeRedis())
+			jedisPool = ctx.getBean(JedisPool.class);
+		return jedisPool;
 	}
 
 	public String getId() {
-		if (id == null) {
-			id = UUID.randomUUID().toString();
-		}
 		return id;
 	}
 
