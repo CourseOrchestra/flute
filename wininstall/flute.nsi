@@ -163,7 +163,7 @@ Function .onMouseOverSection
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Система вывода Excel-файлов на печать и в формат PDF."
     
     StrCmp $0 5 "" +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотеки для работы с JSON."
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотеки для работы с JDBC."
 FunctionEnd
 
 
@@ -254,7 +254,7 @@ Section "FastXL" SEC02
   File flute\fastxl.py
 SectionEnd
 
-Section "XML2Spreadsheet and Apache POI" SEC03
+Section "Apache POI-ooxml" SEC03
   SetOutPath $INSTDIR\lib
   File "..\lib\poi-3.11.jar"
   File "..\lib\poi-ooxml-3.14.jar"
@@ -271,7 +271,7 @@ Section "Python library" SEC04
   File /r /x .svn pylib 
 SectionEnd
 
-Section "Xylophone" SEC05
+Section "Xylophone, Excel2print, Apache POI-Scratchpad" SEC05
     SetOutPath $INSTDIR\lib
 	File "..\lib\batik-anim-1.8.jar" 
 	File "..\lib\batik-awt-util-1.8.jar" 
@@ -310,7 +310,7 @@ Section "Xylophone" SEC05
 	File "..\lib\stax-api-1.0.1.jar"
 	SectionEnd
 
-Section "Celesta JSON utilities" SEC06
+Section "Celesta, JDBC-utils, Spring-context" SEC06
     SetOutPath $INSTDIR\lib
 	File "..\lib\celesta-6.0u1.jar"
     File "..\lib\gson-2.8.0.jar"
