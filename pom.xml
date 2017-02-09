@@ -12,7 +12,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version>${project.version}</version>
 	</properties>
 	
 	<repositories>
@@ -31,6 +30,13 @@
 	</repositories>
 
 	<build>
+	<finalName>${project.artifactId}-${project.version}.${revision.number}_build${build.number}</finalName>
+	<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -42,10 +48,6 @@
 					<encoding>utf-8</encoding>
 				</configuration>
 			</plugin>
-
-
-
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -114,8 +116,6 @@
 							<outputDirectory>wininstall/</outputDirectory>
 						</configuration>
 					</execution>
-
-
 				</executions>
 			</plugin>
 			<plugin>
@@ -135,25 +135,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.0.0</version>
-				<executions>
-					<execution>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>write-project-properties</goal>
-						</goals>
-						<configuration>
-							<outputFile>
-								target/version.properties
-							</outputFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+			</plugin>			
 		</plugins>
 	</build>
 
