@@ -7,11 +7,14 @@
 	<formats>
 		<format>zip</format>
 	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
 	<dependencySets>
 		<dependencySet>
+			<outputDirectory>/</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
-		<!-- 	<outputDirectory>lib</outputDirectory> -->
+			<!-- <outputDirectory>lib</outputDirectory> -->
 		</dependencySet>
 	</dependencySets>
 	<fileSets>
