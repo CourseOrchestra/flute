@@ -1,2 +1,0 @@
-!define PRODUCT_VERSION "3"
-!define BUILD_VERSION "${SVN_REVISION}"
