@@ -1,2 +1,2 @@
-!define PRODUCT_VERSION "3"
-!define BUILD_VERSION "${revision.number}"
+!define PRODUCT_VERSION "${project.version}"
+!define BUILD_VERSION "${project.version}.${revision.number}_build${build.number}"

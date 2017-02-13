@@ -22,9 +22,9 @@
 !include "TextFunc.nsh"
 !define PRODUCT_PUBLISHER "ŒŒŒ ´ ”–—ª"
 !define PRODUCT_WEB_SITE "http://www.curs.ru"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}${PRODUCT_VERSION}"
-!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}${PRODUCT_VERSION}"
-!define PRODUCT_SETUP_KEY "Software\CURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}-${PRODUCT_VERSION}"
+!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}-${PRODUCT_VERSION}"
+!define PRODUCT_SETUP_KEY "Software\CURS\${PRODUCT_NAME}-${PRODUCT_VERSION}"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
@@ -80,7 +80,7 @@ Page custom pageChooseJVM pageChooseJVMLeave "$(TEXT_JVM_PAGETITLE)"
 ;¬€¡Œ– œ¿œ » ƒÀﬂ Ã≈Õﬁ œ”— 
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${PRODUCT_SETUP_KEY}
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER " ”–—\${PRODUCT_NAME}${PRODUCT_VERSION}"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER " ”–—\${PRODUCT_NAME}-${PRODUCT_VERSION}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "StartMenuFolder"
 !insertmacro MUI_PAGE_STARTMENU APPLICATION $StartMenuFolder
 
@@ -136,10 +136,10 @@ Function .onInit
   StrCpy $ResetInstDir "$INSTDIR"
   ;Initialize default values
   StrCpy $JavaHome ""
-  StrCpy $FluteServiceDefaultName "${PRODUCT_NAME}${PRODUCT_VERSION}"
+  StrCpy $FluteServiceDefaultName "${PRODUCT_NAME}-${PRODUCT_VERSION}"
   StrCpy $FluteServiceName $FluteServiceDefaultName
-  StrCpy $FluteServiceFileName "${PRODUCT_NAME}${PRODUCT_VERSION}.exe"
-  StrCpy $FluteServiceManagerFileName "${PRODUCT_NAME}${PRODUCT_VERSION}w.exe"
+  StrCpy $FluteServiceFileName "${PRODUCT_NAME}-${PRODUCT_VERSION}.exe"
+  StrCpy $FluteServiceManagerFileName "${PRODUCT_NAME}-${PRODUCT_VERSION}w.exe"
 
 FunctionEnd
 
@@ -167,7 +167,7 @@ Function .onMouseOverSection
 FunctionEnd
 
 
-Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
+Name "${PRODUCT_NAME}-${PRODUCT_VERSION}"
 OutFile "flute-setup.exe"
 
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
@@ -185,7 +185,7 @@ Section "Flute" SEC01
   DetailPrint "-----------------------------"
   
   SetOutPath "$INSTDIR"
-  File flute-6.0.0.jar
+  File flute-6.0.jar
   SetOverwrite off
   File flute.xml
   SetOverwrite on
@@ -223,7 +223,7 @@ Section "Flute" SEC01
   
   InstallRetry:
   DetailPrint "Installing $FluteServiceName service"
-  nsExec::ExecToStack '"$INSTDIR\bin\$FluteServiceFileName" //IS//$FluteServiceName --DisplayName "$FluteServiceName" --Description "${PRODUCT_PUBLISHER}: ${PRODUCT_NAME} ${PRODUCT_VERSION} build ${BUILD_VERSION}, http://www.curs.ru/" --LogPath "$INSTDIR\logs" --Install "$INSTDIR\bin\$FluteServiceFileName" --Jvm "$JvmDll" --StartMode=jvm --StartClass=ru.curs.flute.Main --StartParams=start --StopMode=jvm --StopClass=ru.curs.flute.Main --StopParams=stop --Classpath="$INSTDIR\flute-6.0.0.jar"  --StdOutput=auto --StdError=auto'
+  nsExec::ExecToStack '"$INSTDIR\bin\$FluteServiceFileName" //IS//$FluteServiceName --DisplayName "$FluteServiceName" --Description "${PRODUCT_PUBLISHER}: ${BUILD_VERSION}, http://www.curs.ru/" --LogPath "$INSTDIR\logs" --Install "$INSTDIR\bin\$FluteServiceFileName" --Jvm "$JvmDll" --StartMode=jvm --StartClass=ru.curs.flute.Main --StartParams=start --StopMode=jvm --StopClass=ru.curs.flute.Main --StopParams=stop --Classpath="$INSTDIR\flute-6.0.jar"  --StdOutput=auto --StdError=auto'
   Pop $0
   Pop $1
   StrCmp $0 "0" InstallOk
@@ -334,7 +334,7 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\flute-6.0.0.jar"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\flute-6.0.jar"
 
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$\"$INSTDIR\uninst.exe$\" -ServiceName=$\"$FluteServiceName$\""
@@ -378,7 +378,7 @@ Section Uninstall
   ClearErrors
 
   ;”‰‡ÎˇÂÏ ÔÓ„‡ÏÏÌ˚Â Ë ‚ÒÔÓÏÓ„‡ÚÂÎ¸Ì˚Â Ù‡ÈÎ˚
-  Delete "$INSTDIR\flute-6.0.0.jar"
+  Delete "$INSTDIR\flute-6.0.jar"
   Delete "$INSTDIR\flute.xml"
 
   Delete "$INSTDIR\curs.url"
@@ -695,13 +695,13 @@ DonePEHeader:
   ${If} "$INSTDIR" == ""
     ${If} $Arch == "x86"
       ${If} $FluteServiceName == $FluteServiceDefaultName
-        StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
+        StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}-${PRODUCT_VERSION}"
       ${Else}
         StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}_$FluteServiceName"
       ${EndIf}
     ${Else}
       ${If} $FluteServiceName == $FluteServiceDefaultName
-        StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
+        StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}-${PRODUCT_VERSION}"
       ${Else}
         StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}_$FluteServiceName"
       ${EndIf}

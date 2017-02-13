@@ -9,7 +9,7 @@
 	<neverstop>false</neverstop>
 	<retrywait>50000</retrywait>
 	<scorepath>C:/score</scorepath>
-	<pylibpath>C:/Program Files/KURS/Flute3/pylib</pylibpath>
+	<pylibpath>C:/Program Files/KURS/Flute-6.0/pylib</pylibpath>
 	<dbtable>
 		<tablename>flute.tasks</tablename>
 		<pollingperiod>6000</pollingperiod>
