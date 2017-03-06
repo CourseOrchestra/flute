@@ -2,6 +2,7 @@ package ru.curs.flute;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ class CommonParameters extends XMLParamsParser {
 	private boolean logLogins = false;
 	private boolean skipDBUpdate = false;
 	private boolean forceDBInitialize = false;
+	private final Properties p = new Properties();
 
 	// Common
 	private boolean neverStop = true;
@@ -209,7 +211,13 @@ class CommonParameters extends XMLParamsParser {
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 			level++;
-			charactersAction = textActions.get(localName);
+			if ("celestaproperties".equals(localName)) {
+				for (int i = 0; i < attributes.getLength(); i++) {
+					p.setProperty(attributes.getLocalName(i), attributes.getValue(i));
+				}
+			} else
+
+				charactersAction = textActions.get(localName);
 		}
 	}
 
@@ -240,6 +248,10 @@ class CommonParameters extends XMLParamsParser {
 
 	String getJavaLibPath() {
 		return javalibPath;
+	}
+
+	public Properties getSetupProperties() {
+		return p;
 	}
 
 }

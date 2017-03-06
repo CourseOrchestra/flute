@@ -3,6 +3,7 @@ package ru.curs.flute;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
+import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +31,9 @@ public class CommonParametersTest {
 		assertEquals(50000, c.getRetryWait());
 		assertEquals("postgres", c.getDBUser());
 		assertEquals("123", c.getDBPassword());
+		Properties p = c.getSetupProperties();
+		assertEquals("bar", p.getProperty("foo"));
+		assertEquals("bar2", p.getProperty("foo2"));
 	}
 
 }

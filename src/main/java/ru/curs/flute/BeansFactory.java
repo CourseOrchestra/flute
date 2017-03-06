@@ -50,6 +50,11 @@ class BeansFactory {
 		p.setProperty("skip.dbupdate", Boolean.toString(params.isSkipDBUpdate()));
 		p.setProperty("force.dbinitialize", Boolean.toString(params.isForceDBInitialize()));
 
+		Properties additionalProps = params.getSetupProperties();
+		additionalProps.stringPropertyNames().forEach((s) -> {
+			p.setProperty(s, additionalProps.getProperty(s));
+		});
+
 		try {
 			Celesta.initialize(p);
 		} catch (CelestaException e) {

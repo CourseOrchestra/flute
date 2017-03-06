@@ -15,7 +15,7 @@
 		<pollingperiod>6000</pollingperiod>
 		<terminationtimeout>10000</terminationtimeout>
 	</dbtable>
-
+	<celestaproperties foo="bar" foo2="bar2" />
 	<redisqueue>
 		<queuename>q1</queuename>
 	</redisqueue>

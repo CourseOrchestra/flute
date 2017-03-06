@@ -16,10 +16,11 @@
                 <xs:element name="scorepath"/>
                 <xs:element name="pylibpath"/>
                 <xs:element name="javalibpath"/>
-                <xs:element name="fluteuserid"/>
                 <xs:element name="loglogins" type="xs:boolean"/>
+                <xs:element name="fluteuserid"/>
                 <xs:element name="skipdbupdate" type="xs:boolean"/>
                 <xs:element name="forcedbinitialize" type="xs:boolean"/>
+                <xs:element name="celestaproperties"/>
                 <xs:element name="dbtable">
                     <xs:complexType>
                         <xs:choice maxOccurs="unbounded" minOccurs="0">
