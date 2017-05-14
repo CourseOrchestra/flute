@@ -110,7 +110,7 @@ public abstract class TaskSource implements Runnable {
 					break retrycycle;
 				} else if (params.getRetryWait() > 0) {
 					try {
-						System.out.print("Restarting in %d milliseconds...");
+						System.out.printf("Restarting in %d milliseconds...%n", params.getRetryWait());
 						Thread.sleep(params.getRetryWait());
 					} catch (InterruptedException e1) {
 						// do nothing, return
