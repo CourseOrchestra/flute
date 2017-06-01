@@ -38,7 +38,7 @@ class SQLTablePoller extends TaskSource {
 		case Oracle:
 			return "SELECT * FROM (SELECT \"id\", \"script\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\") WHERE ROWNUM <=1";
 		case PostgreSQL:
-		case MySQL:
+		case H2:
 		default:
 			return "SELECT \"id\", \"script\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\" LIMIT 1";
 		}

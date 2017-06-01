@@ -6,7 +6,7 @@ public interface JDBCConnectionPool {
 
 	public enum DBType {
 		// these types are equal to H2 compatibility modes
-		PostgreSQL, MSSQLServer, Oracle, MySQL
+		PostgreSQL, MSSQLServer, Oracle, H2
 	}
 
 	Connection get() throws Exception;

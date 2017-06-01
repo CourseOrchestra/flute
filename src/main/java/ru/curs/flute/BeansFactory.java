@@ -91,8 +91,8 @@ class BeansFactory {
 					return DBType.MSSQLServer;
 				case ORACLE:
 					return DBType.Oracle;
-				case MYSQL:
-					return DBType.MySQL;
+				case H2:
+					return DBType.H2;
 				case POSTGRES:
 				default:
 					return DBType.PostgreSQL;
