@@ -313,12 +313,12 @@ Section "Xylophone, Excel2print, Apache POI-Scratchpad" SEC05
 Section "Celesta, JDBC-utils, Spring-context" SEC06
     SetOutPath $INSTDIR\lib
 	File "..\lib\celesta-6.0u1.jar"
-    File "..\lib\gson-2.8.0.jar"
-    File "..\lib\json-20160810.jar"
+    File "..\lib\gson-2.8.1.jar"
+    File "..\lib\json-20170516.jar"
     File "..\lib\sqljdbc4-4.0.jar"
     File "..\lib\ojdbc6-11.2.0.jar"
     File "..\lib\mysql-connector-java-5.1.39.jar"
-    File "..\lib\postgresql-9.4.1212.jre7.jar"
+    File "..\lib\postgresql-42.1.1.jre7.jar"
     File "..\lib\slf4j-api-1.7.21.jar"
 	File "..\lib\h2-1.4.193.jar"
 	File "..\lib\jedis-2.9.0.jar"
