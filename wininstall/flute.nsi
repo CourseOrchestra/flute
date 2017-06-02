@@ -254,14 +254,7 @@ Section "FastXL" SEC02
   File flute\fastxl.py
 SectionEnd
 
-Section "Apache POI-ooxml" SEC03
-  SetOutPath $INSTDIR\lib
-  File "..\lib\poi-3.11.jar"
-  File "..\lib\poi-ooxml-3.14.jar"
-  File "..\lib\poi-ooxml-schemas-3.14.jar"
-  File "..\lib\xmlbeans-2.6.0.jar"
-  File "..\lib\xmlgraphics-commons-2.1.jar"	  
-
+Section "Apache POI-ooxml" SEC03 
   SetOutPath $ScorePath\flute
   File flute\xml2spreadsheet.py
 SectionEnd
@@ -273,60 +266,7 @@ SectionEnd
 
 Section "Xylophone, Excel2print, Apache POI-Scratchpad" SEC05
     SetOutPath $INSTDIR\lib
-	File "..\lib\batik-anim-1.8.jar" 
-	File "..\lib\batik-awt-util-1.8.jar" 
-	File "..\lib\batik-bridge-1.8.jar" 
-	File "..\lib\batik-css-1.8.jar" 
-	File "..\lib\batik-dom-1.8.jar" 
-	File "..\lib\batik-ext-1.8.jar" 
-	File "..\lib\batik-extension-1.8.jar" 
-	File "..\lib\batik-gvt-1.8.jar" 
-	File "..\lib\batik-parser-1.8.jar" 
-	File "..\lib\batik-script-1.8.jar" 
-	File "..\lib\batik-svg-dom-1.8.jar" 
-	File "..\lib\batik-svggen-1.8.jar" 
-	File "..\lib\batik-transcoder-1.8.jar" 
-	File "..\lib\batik-util-1.8.jar" 
-	File "..\lib\batik-xml-1.8.jar" 
-	File "..\lib\commons-io-1.3.1.jar" 
-	File "..\lib\Saxon-HE-9.7.0-10.jar" 
-	File "..\lib\xalan-2.7.0.jar" 
-	File "..\lib\xml-apis-1.3.04.jar" 
-	File "..\lib\xml-apis-ext-1.3.04.jar"
-	File "..\lib\avalon-framework-api-4.3.1.jar"
-	File "..\lib\avalon-framework-impl-4.3.1.jar"
-	File "..\lib\fop-2.1.jar"
-	File "..\lib\cron4j-2.2.5.jar"
-	File "..\lib\curvesapi-1.03.jar"
-	File "..\lib\dbunit-2.5.3.jar"
-	File "..\lib\hamcrest-core-1.3.jar"
-    File "..\lib\junit-4.12.jar"
-    File "..\lib\jython-2.7.1b3.jar"
-    File "..\lib\commons-logging-1.2.jar"
-	File "..\lib\commons-codec-1.9.jar"
-	File "..\lib\commons-collections-3.2.2.jar"
-	File "..\lib\commons-pool2-2.4.2.jar"
-	File "..\lib\xylophone-6.0.jar"
-	File "..\lib\stax-api-1.0.1.jar"
-	SectionEnd
-
-Section "Celesta, JDBC-utils, Spring-context" SEC06
-    SetOutPath $INSTDIR\lib
-	File "..\lib\celesta-6.0u1.jar"
-    File "..\lib\gson-2.8.1.jar"
-    File "..\lib\json-20170516.jar"
-    File "..\lib\sqljdbc4-4.0.jar"
-    File "..\lib\ojdbc6-11.2.0.jar"
-    File "..\lib\mysql-connector-java-5.1.39.jar"
-    File "..\lib\postgresql-42.1.1.jre7.jar"
-    File "..\lib\slf4j-api-1.7.21.jar"
-	File "..\lib\h2-1.4.193.jar"
-	File "..\lib\jedis-2.9.0.jar"
-	File "..\lib\spring-aop-4.3.3.RELEASE.jar"
-	File "..\lib\spring-beans-4.3.3.RELEASE.jar"
-	File "..\lib\spring-context-4.3.3.RELEASE.jar"
-	File "..\lib\spring-core-4.3.3.RELEASE.jar"
-	File "..\lib\spring-expression-4.3.3.RELEASE.jar"
+    File /r "..\lib\*.*"
 SectionEnd
 
 Section -AdditionalIcons
