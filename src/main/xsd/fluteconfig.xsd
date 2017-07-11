@@ -43,7 +43,7 @@
                         <xs:choice maxOccurs="unbounded" minOccurs="0">
                             <xs:group ref="taskSourceElements"/>
                             <xs:element name="schedule"/>
-                            <xs:element name="script"/>
+                            <xs:element name="script" type="scriptName"/>
                             <xs:element name="params"/>
                         </xs:choice>
                     </xs:complexType>
@@ -51,7 +51,7 @@
                 <xs:element name="looptask">
                     <xs:complexType>
                         <xs:choice maxOccurs="unbounded" minOccurs="0">
-                            <xs:element name="script"/>
+                            <xs:element name="script" type="scriptName"/>
                             <xs:element name="params"/>
                             <xs:element name="waitonsuccess" type="xs:int"/>
                             <xs:element name="waitonfailure" type="xs:int"/>
@@ -65,6 +65,12 @@
         <xs:choice>
             <xs:element name="maxthreads" type="xs:int"/>
             <xs:element name="terminationtimeout" type="xs:int"/>
+            <xs:element name="finalizer" type="scriptName"/>
         </xs:choice>
     </xs:group>
+    <xs:simpleType name="scriptName">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([A-Za-z][A-Za-z0-9]*)(\.[A-Za-z_]\w*)+"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

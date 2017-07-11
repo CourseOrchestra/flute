@@ -34,7 +34,7 @@ class TaskSources extends XMLParamsParser {
 			tsList.add(currentSource);
 			initTextActions();
 			textActions.put("tablename", ((SQLTablePoller) currentSource)::setTableName);
-			textActions.put("pollingperiod", (s) -> {
+			textActions.put("pollingperiod", s -> {
 				processInt(s, "pollingperiod", true, ((SQLTablePoller) currentSource)::setQueryPeriod);
 			});
 		});
@@ -58,10 +58,10 @@ class TaskSources extends XMLParamsParser {
 			initTextActions();
 			textActions.put("script", ((LoopTaskSupplier) currentSource)::setScript);
 			textActions.put("params", ((LoopTaskSupplier) currentSource)::setParams);
-			textActions.put("waitonsuccess", (s) -> {
+			textActions.put("waitonsuccess", s -> {
 				processInt(s, "waitonsuccess", true, ((LoopTaskSupplier) currentSource)::setWaitOnSuccess);
 			});
-			textActions.put("waitonfailure", (s) -> {
+			textActions.put("waitonfailure", s -> {
 				processInt(s, "waitonfailure", true, ((LoopTaskSupplier) currentSource)::setWaitOnFailure);
 			});
 
@@ -72,12 +72,13 @@ class TaskSources extends XMLParamsParser {
 
 	private void initTextActions() {
 		textActions.clear();
-		textActions.put("maxthreads", (s) -> {
+		textActions.put("maxthreads", s -> {
 			processInt(s, "maxthreads", false, currentSource::setMaxThreads);
 		});
-		textActions.put("terminationtimeout", (s) -> {
+		textActions.put("terminationtimeout", s -> {
 			processInt(s, "terminationtimeout", true, currentSource::setTerminationTimeout);
 		});
+		textActions.put("finalizer", currentSource::setFinalizer);
 	}
 
 	public List<TaskSource> getSources() {

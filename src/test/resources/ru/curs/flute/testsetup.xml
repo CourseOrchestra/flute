@@ -14,6 +14,8 @@
 		<tablename>flute.tasks</tablename>
 		<pollingperiod>6000</pollingperiod>
 		<terminationtimeout>10000</terminationtimeout>
+		<maxthreads>4</maxthreads>
+		<finalizer>foo.bar.baz</finalizer>
 	</dbtable>
 	<celestaproperties foo="bar" foo2="bar2" />
 	<redisqueue>

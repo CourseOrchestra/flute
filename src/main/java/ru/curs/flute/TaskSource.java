@@ -36,6 +36,7 @@ public abstract class TaskSource implements Runnable {
 	private final ResizeableSemaphore semaphore = new ResizeableSemaphore();
 	private int terminationTimeout = DEFAULT_TERMINATION_TIMEOUT;
 	private int maxThreads = DEFAULT_MAX_THREADS;
+	private String finalizer;
 
 	private final String id = UUID.randomUUID().toString();
 	private JedisPool jedisPool;
@@ -76,6 +77,14 @@ public abstract class TaskSource implements Runnable {
 
 	public int getMaxThreads() {
 		return maxThreads;
+	}
+
+	public void setFinalizer(String finalizer) {
+		this.finalizer = finalizer;
+	}
+
+	public String getFinalizer() {
+		return finalizer;
 	}
 
 	@Override
@@ -163,6 +172,20 @@ public abstract class TaskSource implements Runnable {
 
 	public String getId() {
 		return id;
+	}
+
+	public void tearDown() {
+		if (finalizer != null) {
+			try {
+				String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
+				FluteTask task = new FluteTask(this, 0, finalizer, null);
+				celesta.login(sesId, params.getFluteUserId());
+				celesta.runPython(sesId, finalizer, task);
+				celesta.logout(sesId, false);
+			} catch (CelestaException e) {
+				System.out.printf("Celesta execution error during finalization: %s%n", e.getMessage());
+			}
+		}
 	}
 
 }
