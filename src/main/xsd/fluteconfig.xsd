@@ -55,6 +55,7 @@
                             <xs:element name="params"/>
                             <xs:element name="waitonsuccess" type="xs:int"/>
                             <xs:element name="waitonfailure" type="xs:int"/>
+                            <xs:element name="finalizer" type="scriptName"/>
                         </xs:choice>
                     </xs:complexType>
                 </xs:element>
