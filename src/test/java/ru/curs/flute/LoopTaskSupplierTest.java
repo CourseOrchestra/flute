@@ -62,7 +62,7 @@ public class LoopTaskSupplierTest {
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		es.submit(s);
 		while (s.result.size() < 10) {
-			Thread.sleep(10);
+			Thread.sleep(5);
 		}
 		es.shutdownNow();
 		int a = s.result.size();
