@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://corchestra.ru/schema/fluteconfig.xsd">
+	<dbconnstring>jdbc:postgresql://127.0.0.1:5432/celesta</dbconnstring>
+	<dbuser>postgres</dbuser>
+	<dbpassword>123</dbpassword>
+	<redishost>localhost</redishost>
+	<redisport>6379</redisport>
+	<neverstop>false</neverstop>
+	<retrywait>50000</retrywait>
+	<scorepath>D:/score</scorepath>
+	<pylibpath>D:/jython2.7.0/Lib</pylibpath>
+	<dbtable>
+		<tablename>flute.tasks</tablename>
+		<pollingperiod>6000</pollingperiod>
+		<terminationtimeout>10000</terminationtimeout>
+		<maxthreads>4</maxthreads>
+		<finalizer>foo.bar.baz</finalizer>
+	</dbtable>
+	<celestaproperties foo="bar" foo2="bar2" />
+	<redisqueue>
+		<queuename>q1</queuename>
+	</redisqueue>
+
+	<redisqueue>
+		<queuename>q2</queuename>
+	</redisqueue>
+
+	<scheduledtask>
+		<schedule>5 * * * *</schedule>
+		<script>foo.module.script</script>
+		<params>234</params>
+	</scheduledtask>
+
+	<looptask>
+		<script>foo.hello.run</script>
+		<waitonsuccess>1000</waitonsuccess>
+		<waitonfailure>30000</waitonfailure>
+	</looptask>
+</config>

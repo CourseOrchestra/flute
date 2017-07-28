@@ -20,11 +20,12 @@
 ;Строка с версией продукта генерируется автоматически Ant-скриптом!
 !include "prodversion.nsh"
 !include "TextFunc.nsh"
+!include "nsisXML.nsh"
 !define PRODUCT_PUBLISHER "ООО «КУРС»"
 !define PRODUCT_WEB_SITE "http://www.curs.ru"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}${PRODUCT_VERSION}"
-!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}${PRODUCT_VERSION}"
-!define PRODUCT_SETUP_KEY "Software\CURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}-${PRODUCT_VERSION}"
+!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}-${PRODUCT_VERSION}"
+!define PRODUCT_SETUP_KEY "Software\CURS\${PRODUCT_NAME}-${PRODUCT_VERSION}"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
@@ -80,7 +81,7 @@ Page custom pageChooseJVM pageChooseJVMLeave "$(TEXT_JVM_PAGETITLE)"
 ;ВЫБОР ПАПКИ ДЛЯ МЕНЮ ПУСК
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${PRODUCT_SETUP_KEY}
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "КУРС\${PRODUCT_NAME}${PRODUCT_VERSION}"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "КУРС\${PRODUCT_NAME}-${PRODUCT_VERSION}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "StartMenuFolder"
 !insertmacro MUI_PAGE_STARTMENU APPLICATION $StartMenuFolder
 
@@ -136,10 +137,10 @@ Function .onInit
   StrCpy $ResetInstDir "$INSTDIR"
   ;Initialize default values
   StrCpy $JavaHome ""
-  StrCpy $FluteServiceDefaultName "${PRODUCT_NAME}${PRODUCT_VERSION}"
+  StrCpy $FluteServiceDefaultName "${PRODUCT_NAME}-${PRODUCT_VERSION}"
   StrCpy $FluteServiceName $FluteServiceDefaultName
-  StrCpy $FluteServiceFileName "${PRODUCT_NAME}${PRODUCT_VERSION}.exe"
-  StrCpy $FluteServiceManagerFileName "${PRODUCT_NAME}${PRODUCT_VERSION}w.exe"
+  StrCpy $FluteServiceFileName "${PRODUCT_NAME}-${PRODUCT_VERSION}.exe"
+  StrCpy $FluteServiceManagerFileName "${PRODUCT_NAME}-${PRODUCT_VERSION}w.exe"
 
 FunctionEnd
 
@@ -163,11 +164,11 @@ Function .onMouseOverSection
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:Система вывода Excel-файлов на печать и в формат PDF."
     
     StrCmp $0 5 "" +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотеки для работы с JSON."
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:Библиотеки для работы с JDBC."
 FunctionEnd
 
 
-Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
+Name "${PRODUCT_NAME}-${PRODUCT_VERSION}"
 OutFile "flute-setup.exe"
 
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
@@ -185,24 +186,27 @@ Section "Flute" SEC01
   DetailPrint "-----------------------------"
   
   SetOutPath "$INSTDIR"
-  File flute.jar
+  File flute-6.0.jar
   SetOverwrite off
-  File flute.properties
+  File flute.xml
   SetOverwrite on
-  File webflute.war
-
+  
   Push $ScorePath
   Push "\"
   Call StrSlash
   Pop $R0
-  ${ConfigWrite} "flute.properties" "score.path=" $R0 $R0
-
+  ${nsisXML->OpenXML} "$INSTDIR\flute.xml"
+  ${nsisXML->SetElementText} "//scorepath" $R0 $R0
+  ${nsisXML->CloseXML}
+  
   Push "$INSTDIR\pylib"
   Push "\"
   Call StrSlash
   Pop $R0
-  ${ConfigWrite} "flute.properties" "pylib.path=" $R0 $R0
-
+  ${nsisXML->OpenXML} "$INSTDIR\flute.xml"
+  ${nsisXML->SetElementText} "//pylibpath" $R0 $R0
+  ${nsisXML->CloseXML}
+  
   ;Link to website
   WriteIniStr "$INSTDIR\curs.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   
@@ -236,7 +240,7 @@ Section "Flute" SEC01
   
   InstallRetry:
   DetailPrint "Installing $FluteServiceName service"
-  nsExec::ExecToStack '"$INSTDIR\bin\$FluteServiceFileName" //IS//$FluteServiceName --DisplayName "$FluteServiceName" --Description "${PRODUCT_PUBLISHER}: ${PRODUCT_NAME} ${PRODUCT_VERSION} build ${BUILD_VERSION}, http://www.curs.ru/" --LogPath "$INSTDIR\logs" --Install "$INSTDIR\bin\$FluteServiceFileName" --Jvm "$JvmDll" --StartMode=jvm --StartClass=ru.curs.flute.Main --StartParams=start --StopMode=jvm --StopClass=ru.curs.flute.Main --StopParams=stop --Classpath="$INSTDIR\flute.jar"  --StdOutput=auto --StdError=auto'
+  nsExec::ExecToStack '"$INSTDIR\bin\$FluteServiceFileName" //IS//$FluteServiceName --DisplayName "$FluteServiceName" --Description "${PRODUCT_PUBLISHER}: ${BUILD_VERSION}, http://www.curs.ru/" --LogPath "$INSTDIR\logs" --Install "$INSTDIR\bin\$FluteServiceFileName" --Jvm "$JvmDll" --StartMode=jvm --StartClass=ru.curs.flute.Main --StartParams=start --StopMode=jvm --StopClass=ru.curs.flute.Main --StopParams=stop --Classpath="$INSTDIR\flute-6.0.jar"  --StdOutput=auto --StdError=auto'
   Pop $0
   Pop $1
   StrCmp $0 "0" InstallOk
@@ -263,22 +267,11 @@ Section "Flute" SEC01
 SectionEnd
 
 Section "FastXL" SEC02
-  SetOutPath $INSTDIR\lib
-  File fastxl.jar
   SetOutPath $ScorePath\flute
   File flute\fastxl.py
 SectionEnd
 
-Section "XML2Spreadsheet and Apache POI" SEC03
-  SetOutPath $INSTDIR\lib
-  File xml2spreadsheet.jar
-  File "..\lib\poi-3.11-20141221.jar"
-  File "..\lib\poi-ooxml-3.11-20141221.jar" 
-  File "..\lib\poi-ooxml-schemas-3.11-20141221.jar" 
-  File "..\lib\geronimo-stax-api_1.0_spec-1.0.jar"
-  File "..\lib\xmlbeans-2.6.0.jar" 
-  File "..\lib\dom4j-1.6.1.jar"
-
+Section "Apache POI-ooxml" SEC03 
   SetOutPath $ScorePath\flute
   File flute\xml2spreadsheet.py
 SectionEnd
@@ -288,29 +281,9 @@ Section "Python library" SEC04
   File /r /x .svn pylib 
 SectionEnd
 
-Section "Excel2Print and Apache FOP" SEC05
+Section "Xylophone, Excel2print, Apache POI-Scratchpad" SEC05
     SetOutPath $INSTDIR\lib
-    File poi-scratchpad.jar
-    File excel2print.jar
-    File fop.xconf
-    File "..\lib\avalon-framework-4.2.0.jar"
-    File "..\lib\batik-all-1.7.jar"
-    File "..\lib\commons-io-1.3.1.jar"
-    File "..\lib\commons-logging-1.0.4.jar"
-    File "..\lib\fop.jar"
-    File "..\lib\xmlgraphics-commons-1.5.jar"
-SectionEnd
-
-Section "Celesta JSON utilities" SEC06
-    SetOutPath $INSTDIR\lib
-    File showcaseutils.jar
-    File "..\lib\gson-1.7.1.jar"
-    File "..\lib\java-json.jar"
-    File "..\lib\asm-1.0.2.jar"
-    File "..\lib\asm-3.3.1.jar"
-    File "..\lib\json-path-2.0.0.jar"
-    File "..\lib\json-smart-2.1.1.jar"
-    File "..\lib\slf4j-api-1.7.10.jar"
+    File /r "..\lib\*.*"
 SectionEnd
 
 Section -AdditionalIcons
@@ -318,7 +291,7 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\flute.jar"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\flute-6.0.jar"
 
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$\"$INSTDIR\uninst.exe$\" -ServiceName=$\"$FluteServiceName$\""
@@ -362,9 +335,8 @@ Section Uninstall
   ClearErrors
 
   ;Удаляем программные и вспомогательные файлы
-  Delete "$INSTDIR\flute.jar"
-  Delete "$INSTDIR\webflute.war"
-  Delete "$INSTDIR\flute.properties"
+  Delete "$INSTDIR\flute-6.0.jar"
+  Delete "$INSTDIR\flute.xml"
 
   Delete "$INSTDIR\curs.url"
   Delete "$INSTDIR\install.log"
@@ -376,7 +348,7 @@ Section Uninstall
   RMDir  /r "$INSTDIR\pylib"
   RMDir  /r "$INSTDIR\cachedir"
     
-  ;Удаляем директорию bin с сервисраннером
+  ;Удаляем директорию bin с сервис-раннером
   Delete "$INSTDIR\bin\$FluteServiceManagerFileName"
   Delete "$INSTDIR\bin\$FluteServiceFileName"
   RMDir  "$INSTDIR\bin"
@@ -680,13 +652,13 @@ DonePEHeader:
   ${If} "$INSTDIR" == ""
     ${If} $Arch == "x86"
       ${If} $FluteServiceName == $FluteServiceDefaultName
-        StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
+        StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}-${PRODUCT_VERSION}"
       ${Else}
         StrCpy $INSTDIR "$PROGRAMFILES32\KURS\${PRODUCT_NAME}_$FluteServiceName"
       ${EndIf}
     ${Else}
       ${If} $FluteServiceName == $FluteServiceDefaultName
-        StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}${PRODUCT_VERSION}"
+        StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}-${PRODUCT_VERSION}"
       ${Else}
         StrCpy $INSTDIR "$PROGRAMFILES64\KURS\${PRODUCT_NAME}_$FluteServiceName"
       ${EndIf}
