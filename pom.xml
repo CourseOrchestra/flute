@@ -72,7 +72,7 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<attach>false</attach> <!-- do not deploy the zip -->
+							<attach>false</attach> <!-- do not deploy the zip - -->
 						</configuration>
 					</execution>
 				</executions>
