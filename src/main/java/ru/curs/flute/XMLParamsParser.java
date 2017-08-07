@@ -11,9 +11,9 @@ import javax.xml.transform.stream.StreamSource;
 import org.xml.sax.ContentHandler;
 
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
-import ru.curs.flute.EFluteCritical;
+import ru.curs.flute.exception.EFluteCritical;
 
-abstract class XMLParamsParser {
+public abstract class XMLParamsParser {
 
 	private final StringBuilder errorBuilder = new StringBuilder();
 
@@ -39,7 +39,7 @@ abstract class XMLParamsParser {
 		System.out.printf("done.%n");
 	}
 
-	abstract ContentHandler getSAXHandler();
+	protected abstract ContentHandler getSAXHandler();
 
 	protected void processInt(String buf, String paramName, boolean zeroAllowed, IntConsumer setter) {
 		try {

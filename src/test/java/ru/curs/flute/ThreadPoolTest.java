@@ -10,13 +10,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.Test;
+import ru.curs.flute.source.QueueSource;
+import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTaskState;
+import ru.curs.flute.task.QueueTask;
 
-import ru.curs.flute.FluteTask;
-import ru.curs.flute.FluteTaskState;
-import ru.curs.flute.TaskSource;
-
-class DummyFluteTask extends FluteTask {
-	public DummyFluteTask(TaskSource ts1) {
+class DummyFluteTask extends QueueTask {
+	public DummyFluteTask(QueueSource ts1) {
 		super(ts1, 0, "", "");
 	}
 
@@ -26,8 +26,8 @@ class DummyFluteTask extends FluteTask {
 	}
 }
 
-class DummyFluteTask2 extends FluteTask {
-	public DummyFluteTask2(TaskSource ts1) {
+class DummyFluteTask2 extends QueueTask {
+	public DummyFluteTask2(QueueSource ts1) {
 		super(ts1, 0, "", "");
 	}
 
@@ -38,15 +38,15 @@ class DummyFluteTask2 extends FluteTask {
 	}
 }
 
-class DummyFluteSource extends TaskSource {
-	private final BlockingQueue<FluteTask> q = new LinkedBlockingQueue<>();
+class DummyFluteSource extends QueueSource {
+	private final BlockingQueue<QueueTask> q = new LinkedBlockingQueue<>();
 
-	void addTask(FluteTask t) {
+	void addTask(QueueTask t) {
 		q.add(t);
 	}
 
 	@Override
-	FluteTask getTask() {
+	public QueueTask getTask() {
 		try {
 			return q.take();
 		} catch (InterruptedException e) {
@@ -55,6 +55,9 @@ class DummyFluteSource extends TaskSource {
 			return null;
 		}
 	}
+
+	@Override
+	public void changeTaskState(AbstractFluteTask t) {}
 }
 
 public class ThreadPoolTest {
@@ -66,7 +69,7 @@ public class ThreadPoolTest {
 		DummyFluteSource ts1 = new DummyFluteSource();
 		ts1.setMaxThreads(2);
 
-		FluteTask[] tasks = new FluteTask[3];
+		QueueTask[] tasks = new QueueTask[3];
 		initTasks(ts1, tasks);
 
 		for (int i = 0; i < tasks.length; i++)
@@ -115,7 +118,7 @@ public class ThreadPoolTest {
 
 	}
 
-	private void initTasks(DummyFluteSource ts1, FluteTask[] tasks) {
+	private void initTasks(DummyFluteSource ts1, QueueTask[] tasks) {
 		for (int i = 0; i < tasks.length; i++) {
 			tasks[i] = new DummyFluteTask(ts1);
 			ts1.addTask(tasks[i]);
@@ -129,7 +132,7 @@ public class ThreadPoolTest {
 		ts1.setMaxThreads(2);
 		ts1.setTerminationTimeout(800);
 
-		FluteTask[] tasks = new FluteTask[3];
+		QueueTask[] tasks = new QueueTask[3];
 		initTasks(ts1, tasks);
 		ExecutorService es = Executors.newCachedThreadPool();
 		es.execute(ts1);
@@ -153,7 +156,7 @@ public class ThreadPoolTest {
 		ts1.setMaxThreads(2);
 		ts1.setTerminationTimeout(50);
 
-		FluteTask[] tasks = new FluteTask[3];
+		QueueTask[] tasks = new QueueTask[3];
 		initTasks(ts1, tasks);
 		ExecutorService es = Executors.newCachedThreadPool();
 		es.execute(ts1);

@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.exception;
 
 public class EFluteNonCritical extends Exception {
 	private static final long serialVersionUID = 1L;

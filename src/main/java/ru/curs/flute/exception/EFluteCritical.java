@@ -32,7 +32,7 @@
    along with this program.  If not, see http://www.gnu.org/licenses/.
 
 */
-package ru.curs.flute;
+package ru.curs.flute.exception;
 
 /**
  * Критическое исключение, приводящее к остановке работы приложения.

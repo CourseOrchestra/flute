@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.source;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -16,10 +16,15 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import ru.curs.flute.exception.EFluteCritical;
+import ru.curs.flute.XMLParamsParser;
 
 @Component
-@Import({ SQLTablePoller.class, RedisQueue.class, ScheduledTaskSupplier.class, LoopTaskSupplier.class })
-class TaskSources extends XMLParamsParser {
+@Import({
+		SqlTablePoller.class, RedisQueue.class,
+		ScheduledTaskSupplier.class, LoopTaskSupplier.class
+})
+public class TaskSources extends XMLParamsParser {
 	private final List<TaskSource> tsList = new ArrayList<>();
 	private final Map<String, Runnable> startActions = new HashMap<>();
 	private final Map<String, Consumer<String>> textActions = new HashMap<>();
@@ -30,12 +35,12 @@ class TaskSources extends XMLParamsParser {
 			throws EFluteCritical {
 
 		startActions.put("dbtable", () -> {
-			currentSource = ctx.getBean(SQLTablePoller.class);
+			currentSource = ctx.getBean(SqlTablePoller.class);
 			tsList.add(currentSource);
 			initTextActions();
-			textActions.put("tablename", ((SQLTablePoller) currentSource)::setTableName);
+			textActions.put("tablename", ((SqlTablePoller) currentSource)::setTableName);
 			textActions.put("pollingperiod", s -> {
-				processInt(s, "pollingperiod", true, ((SQLTablePoller) currentSource)::setQueryPeriod);
+				processInt(s, "pollingperiod", true, ((SqlTablePoller) currentSource)::setQueryPeriod);
 			});
 		});
 		startActions.put("redisqueue", () -> {
@@ -73,10 +78,10 @@ class TaskSources extends XMLParamsParser {
 	private void initTextActions() {
 		textActions.clear();
 		textActions.put("maxthreads", s -> {
-			processInt(s, "maxthreads", false, currentSource::setMaxThreads);
+			processInt(s, "maxthreads", false, ((QueueSource)currentSource)::setMaxThreads);
 		});
 		textActions.put("terminationtimeout", s -> {
-			processInt(s, "terminationtimeout", true, currentSource::setTerminationTimeout);
+			processInt(s, "terminationtimeout", true, ((QueueSource)currentSource)::setTerminationTimeout);
 		});
 		textActions.put("finalizer", currentSource::setFinalizer);
 	}
@@ -117,7 +122,7 @@ class TaskSources extends XMLParamsParser {
 	}
 
 	@Override
-	ContentHandler getSAXHandler() {
+	public ContentHandler getSAXHandler() {
 		return new SAXHandler();
 	}
 }

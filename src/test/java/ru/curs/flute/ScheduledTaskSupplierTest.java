@@ -10,6 +10,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.junit.Test;
+import ru.curs.flute.exception.EFluteNonCritical;
+import ru.curs.flute.source.ScheduledTaskSupplier;
+import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.QueueTask;
 
 public class ScheduledTaskSupplierTest {
 	@Test
@@ -25,7 +29,7 @@ public class ScheduledTaskSupplierTest {
 
 		ScheduledTaskSupplier sts = new ScheduledTaskSupplier() {
 			@Override
-			void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
+			public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
 				expected.add(task.getParams());
 			}
 		};
@@ -35,7 +39,7 @@ public class ScheduledTaskSupplierTest {
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		es.submit(sts);
 		t.forEach(s -> {
-			FluteTask ft = new FluteTask(sts, 0, "ss", s);
+			QueueTask ft = new QueueTask(sts, 0, "ss", s);
 			try {
 				sts.internalAdd(ft);
 			} catch (Exception e) {
@@ -43,12 +47,10 @@ public class ScheduledTaskSupplierTest {
 			}
 		});
 
-		Thread.sleep(100);
+		Thread.sleep(150);
 		es.shutdownNow();
 
-		t.forEach(s -> {
-			assertTrue(expected.contains(s));
-		});
+		t.forEach(s -> assertTrue(expected.contains(s)));
 	}
 
 }

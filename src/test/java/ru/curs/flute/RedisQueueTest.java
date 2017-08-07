@@ -26,6 +26,11 @@ import org.springframework.context.annotation.Import;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
+import ru.curs.flute.exception.EFluteCritical;
+import ru.curs.flute.exception.EFluteNonCritical;
+import ru.curs.flute.source.RedisQueue;
+import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.QueueTask;
 
 public class RedisQueueTest {
 	private static ApplicationContext ctx;
@@ -45,12 +50,12 @@ public class RedisQueueTest {
 			assertEquals(2, j.llen("fookey").intValue());
 
 			RedisQueue q = ctx.getBean(RedisQueue.class);
-			assertNotNull(q.getJedisPool());
+			assertNotNull(q.getPool());
 
 			q.setMaxThreads(2);
 			q.setQueueName("fookey");
 
-			FluteTask t = q.getTask();
+			AbstractFluteTask t = q.getTask();
 			assertEquals("a", t.getScript());
 			assertEquals("b", t.getParams());
 			assertSame(q, t.getSource());
@@ -60,7 +65,7 @@ public class RedisQueueTest {
 			assertEquals("c", t.getParams());
 			assertSame(q, t.getSource());
 
-			CompletableFuture<FluteTask> f = getSupplierFuture(q);
+			CompletableFuture<AbstractFluteTask> f = getSupplierFuture(q);
 			Thread.sleep(10);
 
 			assertFalse(f.isDone());
@@ -106,7 +111,7 @@ public class RedisQueueTest {
 
 	}
 
-	private CompletableFuture<FluteTask> getSupplierFuture(final RedisQueue q) {
+	private CompletableFuture<AbstractFluteTask> getSupplierFuture(final RedisQueue q) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				return q.getTask();
@@ -133,7 +138,7 @@ public class RedisQueueTest {
 
 	@Test
 	public void handlesBrokenJSON() throws EFluteNonCritical {
-		FluteTask t = new FluteTask(null, 1, "foo.bar", "param1");
+		QueueTask t = new QueueTask(null, 1, "foo.bar", "param1");
 		assertEquals("{\"script\":\"foo.bar\",\"params\":\"param1\"}", RedisQueue.toJSON(t));
 
 		RedisQueue q = ctx.getBean(RedisQueue.class);

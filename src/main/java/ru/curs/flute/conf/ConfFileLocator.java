@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.conf;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,22 +8,23 @@ import java.io.InputStream;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import ru.curs.flute.exception.EFluteCritical;
 
 /**
  * Configuration file locator.
  */
 @Configuration
-class ConfFileLocator {
+public class ConfFileLocator {
 	private static File overridenFile = null;
 
-	static File getConfFile() {
+	public static File getConfFile() {
 		String path = getMyPath();
 		File f = new File(path + "flute.xml");
 		System.out.println();
 		return f;
 	}
 
-	static void setFile(File f) {
+	public static void setFile(File f) {
 		overridenFile = f;
 	}
 

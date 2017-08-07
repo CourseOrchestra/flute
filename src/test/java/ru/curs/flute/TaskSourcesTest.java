@@ -18,15 +18,9 @@ import org.springframework.context.annotation.Scope;
 
 import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
-import ru.curs.flute.ScheduledTaskSupplier;
-import ru.curs.flute.CommonParameters;
-import ru.curs.flute.EFluteCritical;
-import ru.curs.flute.GlobalParams;
-import ru.curs.flute.JDBCConnectionPool;
-import ru.curs.flute.RedisQueue;
-import ru.curs.flute.SQLTablePoller;
-import ru.curs.flute.TaskSource;
-import ru.curs.flute.TaskSources;
+import ru.curs.flute.conf.CommonParameters;
+import ru.curs.flute.exception.EFluteCritical;
+import ru.curs.flute.source.*;
 
 public class TaskSourcesTest {
 	private static ApplicationContext ctx;
@@ -56,11 +50,11 @@ public class TaskSourcesTest {
 		assertEquals(id1, ss.get(1).getId());
 		assertEquals(id2, ss.get(3).getId());
 
-		assertEquals("flute.tasks", ((SQLTablePoller) ss.get(0)).getTableName());
-		assertEquals(6000, ((SQLTablePoller) ss.get(0)).getQueryPeriod());
-		assertEquals(10000, ((SQLTablePoller) ss.get(0)).getTerminationTimeout());
-		assertEquals(4, ((SQLTablePoller) ss.get(0)).getMaxThreads());
-		assertEquals("foo.bar.baz", ((SQLTablePoller) ss.get(0)).getFinalizer());
+		assertEquals("flute.tasks", ((SqlTablePoller) ss.get(0)).getTableName());
+		assertEquals(6000, ((SqlTablePoller) ss.get(0)).getQueryPeriod());
+		assertEquals(10000, ((SqlTablePoller) ss.get(0)).getTerminationTimeout());
+		assertEquals(4, ((SqlTablePoller) ss.get(0)).getMaxThreads());
+		assertEquals("foo.bar.baz", ((SqlTablePoller) ss.get(0)).getFinalizer());
 
 		assertEquals("q1", ((RedisQueue) ss.get(1)).getQueueName());
 

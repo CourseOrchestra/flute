@@ -11,8 +11,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import ru.curs.flute.CommonParameters;
-import ru.curs.flute.EFluteCritical;
+import ru.curs.flute.conf.CommonParameters;
+import ru.curs.flute.exception.EFluteCritical;
 
 public class CommonParametersTest {
 

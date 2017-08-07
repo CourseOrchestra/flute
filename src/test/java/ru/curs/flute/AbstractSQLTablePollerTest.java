@@ -42,6 +42,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import ru.curs.celesta.Celesta;
+import ru.curs.flute.exception.EFluteNonCritical;
+import ru.curs.flute.source.SqlTablePoller;
+import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTaskState;
+import ru.curs.flute.task.QueueTask;
 
 public abstract class AbstractSQLTablePollerTest {
 
@@ -60,13 +65,11 @@ public abstract class AbstractSQLTablePollerTest {
 
 		IDatabaseConnection conn = initData();
 
-		SQLTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
-
-		assertNull(poller.getJedisPool());
+		SqlTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
 
 		poller.setTableName("\"tasks\"");
 		poller.setQueryPeriod(500);
-		FluteTask t = poller.getTask();
+		QueueTask t = poller.getTask();
 		assertNotNull(t);
 		assertEquals(1, t.getId());
 		assertEquals("hello", t.getScript());
@@ -88,7 +91,7 @@ public abstract class AbstractSQLTablePollerTest {
 		assertEquals("hello", t.getScript());
 		assertEquals("param3", t.getParams());
 
-		CompletableFuture<FluteTask> f = CompletableFuture.supplyAsync(() -> {
+		CompletableFuture<QueueTask> f = CompletableFuture.supplyAsync(() -> {
 			try {
 				return poller.getTask();
 			} catch (Exception e) {
@@ -111,18 +114,18 @@ public abstract class AbstractSQLTablePollerTest {
 	@Test
 	public void taskStateIsStoredInDB() throws DataSetException, DatabaseUnitException, SQLException, Exception {
 		IDatabaseConnection conn = initData();
-		SQLTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
+		SqlTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
 		poller.setTableName("\"tasks\"");
 		poller.setQueryPeriod(500);
 
-		FluteTask t1 = poller.getTask();
+		QueueTask t1 = poller.getTask();
 		t1.setMessage("foo");
 		t1.setState(FluteTaskState.SUCCESS);
 
-		FluteTask t2 = poller.getTask();
+		QueueTask t2 = poller.getTask();
 		t2.setState(FluteTaskState.INTERRUPTED);
 
-		FluteTask t3 = poller.getTask();
+		QueueTask t3 = poller.getTask();
 		t3.setMessage("error message");
 		t3.setState(FluteTaskState.FAIL);
 
@@ -176,12 +179,12 @@ public abstract class AbstractSQLTablePollerTest {
 
 @Component
 @Scope("prototype")
-class TestSQLTablePoller extends SQLTablePoller {
+class TestSQLTablePoller extends SqlTablePoller {
 	Consumer<String> log = s -> {
 	};
 
 	@Override
-	void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
+	public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
 		log.accept(task.getParams());
 		task.setMessage("!" + task.getParams());
 	}
@@ -189,7 +192,7 @@ class TestSQLTablePoller extends SQLTablePoller {
 }
 
 @Configuration
-@Import({ SQLTablePoller.class, TestSQLTablePoller.class })
+@Import({ SqlTablePoller.class, TestSQLTablePoller.class })
 class TestSQLConf {
 
 	@Bean

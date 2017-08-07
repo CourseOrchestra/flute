@@ -8,8 +8,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ru.curs.flute.ConfFileLocator;
-import ru.curs.flute.EFluteCritical;
+import ru.curs.flute.conf.ConfFileLocator;
+import ru.curs.flute.exception.EFluteCritical;
 
 public class ConfFileLocatorTest {
 

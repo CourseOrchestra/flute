@@ -41,119 +41,138 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ExitCodeGenerator;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import ru.curs.flute.conf.ConfFileLocator;
+import ru.curs.flute.source.TaskSource;
+import ru.curs.flute.source.TaskSources;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * Запускаемый из консоли или из Apache Commons Service Runner класс приложения.
- * 
  */
-public final class Main {
+@SpringBootApplication
+public class Main {
 
-	private static final ApplicationContext ctx;
+  private static final ExecutorService svc = Executors.newCachedThreadPool();
 
-	private static final ExecutorService svc = Executors.newCachedThreadPool();
+  private List<TaskSource> taskSources;
 
-	private static List<TaskSource> taskSources;
+  @Autowired
+  private TaskSources taskSourcesBean;
 
-	static {
-		ApplicationContext c = null;
-		try {
-			c = new AnnotationConfigApplicationContext(BeansFactory.class, ConfFileLocator.class);
-		} catch (NestedRuntimeException e) {
-			System.out.println("ERROR: " + e.getRootCause().getMessage());
-			System.exit(1);
-		}
-		ctx = c;
-	}
 
-	/**
-	 * Точка запуска приложения из консоли.
-	 * 
-	 * @param args
-	 *            аргументы.
-	 */
-	public static void main(String[] args) {
+  @PostConstruct
+  public void postConstruct() {
+    System.out.printf("Flute (3rd generation) is starting.%n");
+    taskSources = taskSourcesBean.getSources();
+    taskSources.forEach(svc::execute);
 
-		if (args.length > 1) {
-			File f = new File(args[1]);
-			ConfFileLocator.setFile(f);
-		}
+    if (taskSources.size() == 1) {
+      System.out.printf("Flute started. One queue is being processed.%n", taskSources.size());
+    } else {
+      System.out.printf("Flute started. %d queues are being processed.%n", taskSources.size());
+    }
+  }
 
-		String cmd = "start";
-		if (args.length > 0)
-			cmd = args[0];
+  @PreDestroy
+  public void preDestroy() {
+    try {
+      System.out.println("Flute stopping...");
+      svc.shutdownNow();
+      svc.awaitTermination(1, TimeUnit.MINUTES);
+      taskSources.forEach(t -> {
+        t.tearDown();
+      });
+      System.out.println("Flute stopped.");
+    } catch (InterruptedException e) {
+      return;
+    }
+  }
 
-		if ("start".equals(cmd)) {
-			startService();
-		} else {
-			stopService();
-		}
-	}
+  @Bean
+  public ExitCodeGenerator exitCodeGenerator() {
+    return () -> 42;
+  }
 
-	private static synchronized void startService() {
-		System.out.printf("Flute (3rd generation) is starting.%n");
-		taskSources = ctx.getBean(TaskSources.class).getSources();
-		taskSources.forEach(svc::execute);
-		if (taskSources.size() == 1) {
-			System.out.printf("Flute started. One queue is being processed.%n", taskSources.size());
-		} else {
-			System.out.printf("Flute started. %d queues are being processed.%n", taskSources.size());
-		}
-	}
+  /**
+   * Точка запуска приложения из консоли.
+   *
+   * @param args аргументы.
+   */
+  public static void main(String[] args) {
 
-	private static synchronized void stopService() {
-		try {
-			System.out.println("Flute stopping...");
-			svc.shutdownNow();
-			svc.awaitTermination(1, TimeUnit.MINUTES);
-			taskSources.forEach(t -> {
-				t.tearDown();
-			});
-			System.out.println("Flute stopped.");
-		} catch (InterruptedException e) {
-			return;
-		}
-	}
+    if (args.length > 1) {
+      File f = new File(args[1]);
+      ConfFileLocator.setFile(f);
+    }
 
-	/**
-	 * init-метод Apache Commons Daemon: Here open configuration files, create a
-	 * trace file, create ServerSockets, Threads.
-	 * 
-	 * @param arguments
-	 *            параметры (в нашем случае игнорируются).
-	 */
-	public void init(String[] arguments) {
+    String cmd = "start";
+    if (args.length > 0)
+      cmd = args[0];
 
-	}
+    if ("start".equals(cmd)) {
+      startService(args);
+    } else {
+      stopService(args);
+    }
+  }
 
-	/**
-	 * start-метод Apache Commons Daemon: Start the Thread, accept incoming
-	 * connections.
-	 */
-	public void start() {
-		System.err.println("Flute starting...");
-		startService();
-		System.err.println("Flute started.");
-	}
+  private static synchronized void startService(String[] args) {
+    SpringApplication app = new SpringApplication(Main.class);
+    app.setWebApplicationType(WebApplicationType.NONE);
+    app.run(args);
+  }
 
-	/**
-	 * stop-метод Apache Commons Daemon: Inform the Thread to terminate the
-	 * run(), close the ServerSockets.
-	 */
-	public void stop() {
-		System.err.println("Flute stopping...");
-		stopService();
-		System.err.println("Flute stopped");
-	}
+  private static synchronized void stopService(String[] args) {
+    int result = SpringApplication.exit(SpringApplication.run(Main.class, args));
 
-	/**
-	 * destroy-метод Apache Commons Daemon: Destroy any object created in
-	 * init().
-	 */
-	public void destroy() {
+    if (result != 0)
+      System.exit(result);
+  }
 
-	}
+  /**
+   * init-метод Apache Commons Daemon: Here open configuration files, create a
+   * trace file, create ServerSockets, Threads.
+   *
+   * @param arguments параметры (в нашем случае игнорируются).
+   */
+  public void init(String[] arguments) {
+
+  }
+
+  /**
+   * start-метод Apache Commons Daemon: Start the Thread, accept incoming
+   * connections.
+   */
+  public void start() {
+    System.err.println("Flute starting...");
+    startService(new String[0]);
+    System.err.println("Flute started.");
+  }
+
+  /**
+   * stop-метод Apache Commons Daemon: Inform the Thread to terminate the
+   * run(), close the ServerSockets.
+   */
+  public void stop() {
+    System.err.println("Flute stopping...");
+    stopService(new String[0]);
+    System.err.println("Flute stopped");
+  }
+
+  /**
+   * destroy-метод Apache Commons Daemon: Destroy any object created in
+   * init().
+   */
+  public void destroy() {
+
+  }
 
 }
