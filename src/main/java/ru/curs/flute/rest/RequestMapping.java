@@ -7,13 +7,13 @@ import java.util.Objects;
 /**
  * Created by ioann on 04.08.2017.
  */
-public class Mapping {
+public class RequestMapping {
 
   private String url;
   private String func;
   private String method = HttpMethod.GET.toString();
 
-  public Mapping(String url, String func, String method) {
+  public RequestMapping(String url, String func, String method) {
     this.url = url;
     this.func = func;
     this.method = method;
@@ -37,8 +37,8 @@ public class Mapping {
     if (this == obj) return true;
     if (obj == null) return false;
 
-    if (obj instanceof Mapping) {
-      Mapping that = (Mapping) obj;
+    if (obj instanceof RequestMapping) {
+      RequestMapping that = (RequestMapping) obj;
 
       return Objects.equals(url, that.url)
           && Objects.equals(method, that.method);

@@ -1,6 +1,7 @@
 #   coding=utf-8
-from flute.mappingbuilder import mapping
+from flute.mappingbuilder import mapping, filter
 from ru.curs.flute.rest import FluteResponse
+from java.lang import System
 
 @mapping('/foo')
 def foo(context, request):
@@ -44,3 +45,20 @@ def postWithJsonBody(context, request):
     dto = request.body
     dto['numb'] = dto['numb'] + 1
     return dto
+
+#TODO: Маппинги ниже нужно будет усложнить и передавать между ними актуальные request/response
+@filter('/beforeTest')
+def beforeFilter(context, request):
+    System.out.println('before filter')
+    return {
+        "foo": 1,
+        "bar": 2
+    }
+
+@mapping('/beforeTest')
+def handlerForBeforeFilter(context, request):
+    System.out.println('handler')
+    return {
+        "foo": 1,
+        "bar": 2
+    }

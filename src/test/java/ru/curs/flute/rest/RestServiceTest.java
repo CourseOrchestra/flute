@@ -1,4 +1,4 @@
-package ru.curs.flute;
+package ru.curs.flute.rest;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
 import ru.curs.flute.exception.EFluteCritical;
-import ru.curs.flute.rest.Mapping;
+import ru.curs.flute.rest.RequestMapping;
 import ru.curs.flute.rest.RestMappingBuilder;
 
 import java.io.File;
@@ -22,6 +22,7 @@ public class RestServiceTest {
   private static WebTestClient fooClient;
   private static WebTestClient paramsClient;
   private static WebTestClient jsonPostClient;
+  private static WebTestClient beforeFilterClient;
 
   @BeforeClass
   public static void setUp() throws Exception {
@@ -41,19 +42,24 @@ public class RestServiceTest {
 
     RestMappingBuilder.getInstance().initRouters(Celesta.getInstance(), "flute");
 
-    Mapping fooMapping = new Mapping("/foo", "", "GET");
+    RequestMapping fooMapping = new RequestMapping("/foo", "", "GET");
     fooClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(fooMapping)
     ).build();
 
-    Mapping paramsMapping = new Mapping("/params", "", "GET");
+    RequestMapping paramsMapping = new RequestMapping("/params", "", "GET");
     paramsClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(paramsMapping)
     ).build();
 
-    Mapping jsonPostMapping = new Mapping("/jsonPost", "", "POST");
+    RequestMapping jsonPostMapping = new RequestMapping("/jsonPost", "", "POST");
     jsonPostClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(jsonPostMapping)
+    ).build();
+
+    RequestMapping beforeTestMapping = new RequestMapping("/beforeTest", "", "GET");
+    beforeFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(beforeTestMapping)
     ).build();
   }
 
@@ -92,6 +98,12 @@ public class RestServiceTest {
         .expectStatus().is2xxSuccessful()
         .expectBody(String.class)
         .isEqualTo("{\"numb\":2}");
+  }
+
+  @Test
+  public void testBeforeFilter() {
+    beforeFilterClient.get().uri("/beforeTest")
+        .exchange();
   }
 }
 
