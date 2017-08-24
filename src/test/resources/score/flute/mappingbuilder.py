@@ -16,15 +16,28 @@ class mapping(Object):
         builder.addRequestMapping(requestMapping)
         return func
 
-class filter(Object):
-    def __init__(self, urlPattern, type="BEFORE"):
+class filterBefore(Object):
+    def __init__(self, *urlPatterns):
 
-        self.urlPattern = urlPattern
+        self.urlPatterns = urlPatterns
         self.type = type
 
     def __call__(self, func):
         builder = RestMappingBuilder.getInstance()
         funcName = func.__module__  + "." + func.__name__
-        filterMapping = FilterMapping(self.urlPattern, funcName, self.type)
+        filterMapping = FilterMapping(set(self.urlPatterns), funcName, "BEFORE")
+        builder.addFilterMapping(filterMapping)
+        return func
+
+class filterAfter(Object):
+    def __init__(self, *urlPatterns):
+
+        self.urlPatterns = urlPatterns
+        self.type = type
+
+    def __call__(self, func):
+        builder = RestMappingBuilder.getInstance()
+        funcName = func.__module__  + "." + func.__name__
+        filterMapping = FilterMapping(set(self.urlPatterns), funcName, "AFTER")
         builder.addFilterMapping(filterMapping)
         return func

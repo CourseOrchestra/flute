@@ -5,13 +5,12 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-import ru.curs.celesta.Celesta;
-import ru.curs.celesta.CelestaException;
+import ru.curs.celesta.*;
+import ru.curs.celesta.syscursors.UserRolesCursor;
 import ru.curs.flute.exception.EFluteCritical;
-import ru.curs.flute.rest.RequestMapping;
-import ru.curs.flute.rest.RestMappingBuilder;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.Properties;
 
 /**
@@ -19,10 +18,23 @@ import java.util.Properties;
  */
 public class RestServiceTest {
 
+  private final static String GLOBAL_USER_ID = "flute";
+
   private static WebTestClient fooClient;
   private static WebTestClient paramsClient;
   private static WebTestClient jsonPostClient;
   private static WebTestClient beforeFilterClient;
+  private static WebTestClient doubleBeforeFilterClient;
+  private static WebTestClient afterFilterClient;
+  private static WebTestClient doubleAfterFilterClient;
+  private static WebTestClient afterAndBeforeFilterClient;
+  private static WebTestClient globalCelestaUserIdClient;
+  private static WebTestClient customCelestaUserIdClient;
+  private static WebTestClient returnFromBeforeFilterClient;
+  private static WebTestClient returnFromHandlerClient;
+  private static WebTestClient returnFromAfterFilterClient;
+  private static WebTestClient noResultForHandlerClient;
+  private static WebTestClient noResultForAfterFilterClient;
 
   @BeforeClass
   public static void setUp() throws Exception {
@@ -40,7 +52,21 @@ public class RestServiceTest {
       throw new EFluteCritical(e.getMessage());
     }
 
-    RestMappingBuilder.getInstance().initRouters(Celesta.getInstance(), "flute");
+
+
+    SessionContext scontext = new SessionContext("super", "celesta_init");
+    Connection conn = ConnectionPool.get();
+    CallContext context = new CallContext(conn, scontext);
+
+    UserRolesCursor urCursor = new UserRolesCursor(context);
+    urCursor.setUserid("testUser");
+    urCursor.setRoleid("editor");
+    urCursor.insert();
+
+    context.closeCursors();
+    ConnectionPool.putBack(conn);
+
+    RestMappingBuilder.getInstance().initRouters(Celesta.getInstance(), GLOBAL_USER_ID);
 
     RequestMapping fooMapping = new RequestMapping("/foo", "", "GET");
     fooClient = WebTestClient.bindToRouterFunction(
@@ -60,6 +86,61 @@ public class RestServiceTest {
     RequestMapping beforeTestMapping = new RequestMapping("/beforeTest", "", "GET");
     beforeFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(beforeTestMapping)
+    ).build();
+
+    RequestMapping doubleBeforeTestMapping = new RequestMapping("/doubleBeforeTest", "", "GET");
+    doubleBeforeFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(doubleBeforeTestMapping)
+    ).build();
+
+    RequestMapping afterTestMapping = new RequestMapping("/afterTest", "", "GET");
+    afterFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(afterTestMapping)
+    ).build();
+
+    RequestMapping doubleAfterTestMapping = new RequestMapping("/doubleAfterTest", "", "GET");
+    doubleAfterFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(doubleAfterTestMapping)
+    ).build();
+
+    RequestMapping afterAndBeforeFilterTestMapping = new RequestMapping("/afterAndBeforeTest", "", "GET");
+    afterAndBeforeFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(afterAndBeforeFilterTestMapping)
+    ).build();
+
+    RequestMapping globalCelestaUserIdTestMapping = new RequestMapping("/globalCelestaUserIdTest", "", "GET");
+    globalCelestaUserIdClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(globalCelestaUserIdTestMapping)
+    ).build();
+
+    RequestMapping customCelestaUserIdTestMapping = new RequestMapping("/customCelestaUserIdTest", "", "GET");
+    customCelestaUserIdClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(customCelestaUserIdTestMapping)
+    ).build();
+
+    RequestMapping testReturnFromBeforeMapping = new RequestMapping("/testReturnFromBefore", "", "GET");
+    returnFromBeforeFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(testReturnFromBeforeMapping)
+    ).build();
+
+    RequestMapping testReturnFromHandlerMapping = new RequestMapping("/testReturnFromHandler", "", "GET");
+    returnFromHandlerClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(testReturnFromHandlerMapping)
+    ).build();
+
+    RequestMapping testReturnFromAfterMapping = new RequestMapping("/testReturnFromAfter", "", "GET");
+    returnFromAfterFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(testReturnFromAfterMapping)
+    ).build();
+
+    RequestMapping testNoResultForHandlerMapping = new RequestMapping("/testNoResultForHandler", "", "GET");
+    noResultForHandlerClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(testNoResultForHandlerMapping)
+    ).build();
+
+    RequestMapping testNoResultForAfterFilterMapping = new RequestMapping("/testNoResultForAfterFilter", "", "GET");
+    noResultForAfterFilterClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(testNoResultForAfterFilterMapping)
     ).build();
   }
 
@@ -103,7 +184,110 @@ public class RestServiceTest {
   @Test
   public void testBeforeFilter() {
     beforeFilterClient.get().uri("/beforeTest")
-        .exchange();
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"foo\":2}");
+  }
+
+  @Test
+  public void testDoubleBeforeFilter() {
+    doubleBeforeFilterClient.get().uri("/doubleBeforeTest")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("[1,2,3]");
+  }
+
+  @Test
+  public void testAfterFilter() {
+    afterFilterClient.get().uri("/afterTest")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"foo\":2}");
+  }
+
+  @Test
+  public void testDoubleAfterFilter() {
+    doubleAfterFilterClient.get().uri("/doubleAfterTest")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("[1,2,3]");
+  }
+
+  @Test
+  public void testAfterAndBeforeTestFilter() {
+    afterAndBeforeFilterClient.get().uri("/afterAndBeforeTest")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("[1,2,3]");
+  }
+
+  @Test
+  public void testGlobalCelestaUserId() {
+    globalCelestaUserIdClient.get().uri("/globalCelestaUserIdTest")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"userId\":\"" + GLOBAL_USER_ID +"\"}");
+  }
+
+  @Test
+  public void testCustomCelestaUserId() {
+    customCelestaUserIdClient.get().uri("/customCelestaUserIdTest")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"userId\":\"testUser\"}");
+  }
+
+
+  @Test
+  public void testReturnFromBeforeFilter() {
+    returnFromBeforeFilterClient.get().uri("/testReturnFromBefore")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"foo\":1}");
+  }
+
+  @Test
+  public void testReturnFromHandler() {
+    returnFromHandlerClient.get().uri("/testReturnFromHandler")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"foo\":1}");
+  }
+
+  @Test
+  public void testReturnFromAfterFilter() {
+    returnFromAfterFilterClient.get().uri("/testReturnFromAfter")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("{\"foo\":1}");
+  }
+
+  @Test
+  public void testNoResultForHandler() {
+    noResultForHandlerClient.get().uri("/testNoResultForHandler")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("");
+  }
+
+  @Test
+  public void testNoResultForAfterFilter() {
+    noResultForAfterFilterClient.get().uri("/testNoResultForAfterFilter")
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBody(String.class)
+        .isEqualTo("");
   }
 }
 

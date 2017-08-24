@@ -1,7 +1,6 @@
 package ru.curs.flute.rest;
 
-import java.util.Objects;
-import java.util.regex.Matcher;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -9,29 +8,32 @@ import java.util.regex.Pattern;
  */
 public class FilterMapping {
 
-  private String urlPattern;
+  private Set<String> urlPatterns = new HashSet<>();
   private String func;
   private String type = Type.BEFORE;
 
-  private final Pattern regexPattern;
+  private final List<Pattern> regexPatterns = new ArrayList<>();
 
-  public FilterMapping(String urlPattern, String func, String type) {
-    this.urlPattern = urlPattern;
+  public FilterMapping(Set<String> urlPatterns, String func, String type) {
+    this.urlPatterns = urlPatterns;
     this.func = func;
     this.type = type;
-    this.regexPattern = resolveRegexPattern(urlPattern);
+    resolveRegexPattern(urlPatterns);
   }
 
-  private Pattern resolveRegexPattern(String urlPattern) {
-    StringBuilder regexBuilder = new StringBuilder("^")
-        .append(urlPattern.replace("*", "[a-zA-Z0-9_.-/]*"))
-        .append("$");
-    Pattern p = Pattern.compile(regexBuilder.toString());
-    return p;
+  private void resolveRegexPattern(Set<String> urlPatterns) {
+    urlPatterns.forEach(urlPattern -> {
+          StringBuilder regexBuilder = new StringBuilder("^")
+              .append(urlPattern.replace("*", "[a-zA-Z0-9_.-/]*"))
+              .append("$");
+          Pattern p = Pattern.compile(regexBuilder.toString());
+          regexPatterns.add(p);
+        }
+    );
   }
 
-  public String getUrlPattern() {
-    return urlPattern;
+  public Set<String> getUrlPatterns() {
+    return urlPatterns;
   }
 
   public String getFunc() {
@@ -43,33 +45,9 @@ public class FilterMapping {
   }
 
   public boolean matchesWithUrl(String url) {
-    Matcher m = regexPattern.matcher(url);
-    return m.matches();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-
-    if (obj instanceof FilterMapping) {
-      FilterMapping that = (FilterMapping) obj;
-
-      return Objects.equals(urlPattern, that.urlPattern)
-          && Objects.equals(type, that.type);
-    }
-
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = 17;
-
-    result = 31 * result + urlPattern.hashCode();
-    result = 31 * result + type.hashCode();
-
-    return result;
+    return regexPatterns.stream()
+        .filter(regexPattern -> regexPattern.matcher(url).matches())
+        .findFirst().isPresent();
   }
 
   public static class Type {

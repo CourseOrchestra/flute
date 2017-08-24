@@ -2,6 +2,9 @@ package ru.curs.flute.rest;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import static org.junit.Assert.*;
 
 /**
@@ -12,7 +15,7 @@ public class FilterMappingTest {
   @Test
   public void testMatchingWithSimpleUrl() {
     FilterMapping filterMapping = new FilterMapping(
-        "/foo/bar",
+        new HashSet<>(Arrays.asList("/foo/bar")),
         "",
         FilterMapping.Type.BEFORE
     );
@@ -26,7 +29,7 @@ public class FilterMappingTest {
   @Test
   public void testMatchingWithRandomUrl() {
     FilterMapping filterMapping = new FilterMapping(
-        "*",
+        new HashSet<>(Arrays.asList("*")),
         "",
         FilterMapping.Type.BEFORE
     );
@@ -40,7 +43,7 @@ public class FilterMappingTest {
   @Test
   public void testMatchingWithPartialRandomUrl() {
     FilterMapping filterMapping = new FilterMapping(
-        "/foo/*/bar",
+        new HashSet<>(Arrays.asList("/foo/*/bar")),
         "",
         FilterMapping.Type.BEFORE
     );
@@ -55,7 +58,7 @@ public class FilterMappingTest {
   @Test
   public void testMatchingWithPartialRandomCompexUrl() {
     FilterMapping filterMapping = new FilterMapping(
-        "/foo/*/bar/*/q.json",
+        new HashSet<>(Arrays.asList("/foo/*/bar/*/q.json")),
         "",
         FilterMapping.Type.BEFORE
     );
