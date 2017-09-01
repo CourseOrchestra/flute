@@ -130,11 +130,9 @@ public class BeansFactory {
             .getRouters()
             .values();
 
-        routers.stream()
-            .forEach(r -> {
-              HttpHandler httpHandler = RouterFunctions.toHttpHandler(r);
-              httpServer.newHandler(new ReactorHttpHandlerAdapter(httpHandler)).block();
-            });
+        RouterFunction router = routers.stream().reduce((r, r2) -> r == null ? r : r.and(r2)).get();
+        HttpHandler httpHandler = RouterFunctions.toHttpHandler(router);
+        httpServer.newHandler(new ReactorHttpHandlerAdapter(httpHandler)).block();
 
         System.out.println("Rest service is started.");
       }

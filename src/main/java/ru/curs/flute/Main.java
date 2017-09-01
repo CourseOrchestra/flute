@@ -131,6 +131,8 @@ public class Main {
   }
 
   private static synchronized void stopService(String[] args) {
+    SpringApplication app = new SpringApplication(Main.class);
+    app.setWebApplicationType(WebApplicationType.NONE);
     int result = SpringApplication.exit(SpringApplication.run(Main.class, args));
 
     if (result != 0)
