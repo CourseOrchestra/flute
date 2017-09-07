@@ -1,12 +1,12 @@
 #   coding=utf-8
-from flute.mappingbuilder import mapping, filterBefore, filterAfter
 from java.lang import String
 from java.util import ArrayList, LinkedHashMap
 from org.springframework.web.reactive.function.server import ServerResponse
 from org.springframework.http import HttpStatus, MediaType
 from reactor.core.publisher import Mono
+from ru.curs.flute.rest.decorator import Mapping, FilterBefore, FilterAfter
 
-@mapping('/foo')
+@Mapping('/foo')
 def foo(context, request):
     dto = {
         "foo": 1,
@@ -14,8 +14,8 @@ def foo(context, request):
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@mapping('/params')
-def params(context, request):
+@Mapping('/params')
+def pRarams(context, request):
 
     response = LinkedHashMap()
     text = request.path()
@@ -45,97 +45,97 @@ def params(context, request):
         .body(Mono.just(text), String)
 
 
-@mapping('/jsonPost', "POST")
+@Mapping('/jsonPost', "POST")
 def postWithJsonBody(context, request):
     dto = request.bodyToMono(dict).block()
     dto['numb'] = dto['numb'] + 1
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@filterBefore('/beforeTest')
+@FilterBefore('/beforeTest')
 def beforeFilter(context, request):
     request.attributes().put('data', {'foo': 1})
 
-@mapping('/beforeTest')
+@Mapping('/beforeTest')
 def handlerForBeforeFilter(context, request):
     data = request.attributes().get('data')
     data['foo'] = data['foo'] + 1
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
 
-@filterBefore('/doubleBeforeTest')
+@FilterBefore('/doubleBeforeTest')
 def doubleBeforeFilter1(context, request):
     request.attributes().put('data', ArrayList())
     data = request.attributes().get('data')
     data.add(1)
 
-@filterBefore('/doubleBeforeTes*')
+@FilterBefore('/doubleBeforeTes*')
 def doubleBeforeFilter2(context, request):
     data = request.attributes().get('data')
     data.add(2)
 
-@mapping('/doubleBeforeTest')
+@Mapping('/doubleBeforeTest')
 def handlerForDoubleBeforeFilter(context, request):
     data = request.attributes().get('data')
     data.add(3)
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
-@filterAfter('/afterTest')
+@FilterAfter('/afterTest')
 def afterFilter(context, request):
     data = request.attributes().get('data')
     data['foo'] = data['foo'] + 1
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
-@mapping('/afterTest')
+@Mapping('/afterTest')
 def handlerForAfterFilter(context, request):
     request.attributes().put('data', {'foo': 1})
 
-@filterAfter('/doubleAfterTest')
+@FilterAfter('/doubleAfterTest')
 def doubleAfterFilter1(context, request):
     data = request.attributes().get('data')
     data.add(2)
 
-@filterAfter('/doubleAfterTes*')
+@FilterAfter('/doubleAfterTes*')
 def doubleAfterFilter2(context, request):
     data = request.attributes().get('data')
     data.add(3)
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
-@mapping('/doubleAfterTest')
+@Mapping('/doubleAfterTest')
 def handlerForDoubleAfterFilter(context, request):
     request.attributes().put('data', ArrayList())
     data = request.attributes().get('data')
     data.add(1)
 
-@filterAfter('/afterAndBeforeTest')
+@FilterAfter('/afterAndBeforeTest')
 def afterAndBeforeAfterFilter(context, request):
     data = request.attributes().get('data')
     data.add(3)
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
-@filterBefore('/afterAndBeforeTest')
+@FilterBefore('/afterAndBeforeTest')
 def afterAndBeforeBeforeFilter(context, request):
     request.attributes().put('data', ArrayList())
     data = request.attributes().get('data')
     data.add(1)
 
-@mapping('/afterAndBeforeTest')
+@Mapping('/afterAndBeforeTest')
 def handlerForAfterAndBeforeFilter(context, request):
     data = request.attributes().get('data')
     data.add(2)
 
 
-@mapping('/globalCelestaUserIdTest')
+@Mapping('/globalCelestaUserIdTest')
 def handlerForGlobalCelestaUserId(context, request):
     dto = {
         "userId": context.getUserId()
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@filterBefore('/customCelestaUserIdTest')
+@FilterBefore('/customCelestaUserIdTest')
 def customCelestaUserIdFilterTest(context, request):
     request.attributes().put('userId', 'testUser')
 
-@mapping('/customCelestaUserIdTest')
+@Mapping('/customCelestaUserIdTest')
 def handlerForCustomCelestaUserIdFilter(context, request):
     dto = {
         "userId": context.getUserId()
@@ -143,35 +143,35 @@ def handlerForCustomCelestaUserIdFilter(context, request):
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 
-@filterBefore('/testReturnFromBefore')
+@FilterBefore('/testReturnFromBefore')
 def beforeTestReturnFromBefore(context, request):
     dto = {
         "foo": 1
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@mapping('/testReturnFromBefore')
+@Mapping('/testReturnFromBefore')
 def handlerForTestReturnFromBefore(context, request):
     dto = {
         "foo": 2
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@filterAfter('/testReturnFromBefore')
+@FilterAfter('/testReturnFromBefore')
 def afterTestReturnFromBefore(context, request):
     dto = {
         "foo": 3
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@mapping('/testReturnFromHandler')
+@Mapping('/testReturnFromHandler')
 def handlerForTestReturnFromHandler(context, request):
     dto = {
         "foo": 1
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@filterAfter('/testReturnFromHandler')
+@FilterAfter('/testReturnFromHandler')
 def afterTestReturnFromHandler(context, request):
     dto = {
         "foo": 2
@@ -179,32 +179,32 @@ def afterTestReturnFromHandler(context, request):
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 
-@mapping('/testReturnFromAfter')
+@Mapping('/testReturnFromAfter')
 def handlerForTestReturnFromAfter(context, request):
     foo = 'bar'
 
-@filterAfter('/testReturnFromAfter')
+@FilterAfter('/testReturnFromAfter')
 def after1TestReturnFromAfter(context, request):
     dto = {
         "foo": 1
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@filterAfter('/testReturnFromAfter')
+@FilterAfter('/testReturnFromAfter')
 def after2TestReturnFromAfter(context, request):
     dto = {
         "foo": 2
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
-@mapping('/testNoResultForHandler')
+@Mapping('/testNoResultForHandler')
 def handlerForTestNoResultForHandler(context, request):
     foo = 'bar'
 
-@mapping('/testNoResultForAfterFilter')
+@Mapping('/testNoResultForAfterFilter')
 def handlerForTestNoResultForAfterFilter(context, request):
     foo = 'bar'
 
-@filterAfter('/testNoResultForAfterFilter')
+@FilterAfter('/testNoResultForAfterFilter')
 def afterForTestNoResultForAfterFilter(context, request):
     foo = 'bar'
