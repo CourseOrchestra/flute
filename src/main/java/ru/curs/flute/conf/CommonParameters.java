@@ -197,8 +197,8 @@ public class CommonParameters extends XMLParamsParser {
     textActions.put("forcedbinitialize", (s) ->
         setForceDBInitialize(Boolean.parseBoolean(s))
     );
-    textActions.put("restPort", (s) ->
-        processInt(s, "restPort", false, this::setRestPort)
+    textActions.put("restport", (s) ->
+        processInt(s, "restport", false, this::setRestPort)
     );
 
   }
