@@ -60,7 +60,6 @@ public class BeansFactory {
     additionalProps.stringPropertyNames().forEach((s) -> {
       p.setProperty(s, additionalProps.getProperty(s));
     });
-
     try {
       Celesta.initialize(p);
     } catch (CelestaException e) {
@@ -91,18 +90,26 @@ public class BeansFactory {
 
       @Override
       public DBType getDBType() {
-        switch (AppSettings.getDBType()) {
-          case MSSQL:
-            return DBType.MSSQLServer;
-          case ORACLE:
-            return DBType.Oracle;
-          case H2:
-            return DBType.H2;
-          case POSTGRES:
-          default:
-            return DBType.PostgreSQL;
+        final Properties properties;
+        try {
+          properties = Celesta.getInstance().getSetupProperties();
+
+          switch (new AppSettings(properties).getDBType()) {
+            case MSSQL:
+              return DBType.MSSQLServer;
+            case ORACLE:
+              return DBType.Oracle;
+              case H2:
+                return DBType.H2;
+                case POSTGRES:
+                  default:
+                    return DBType.PostgreSQL;
+          }
+        } catch (CelestaException e) {
+          throw new RuntimeException(e);
         }
       }
+
     };
   }
 
