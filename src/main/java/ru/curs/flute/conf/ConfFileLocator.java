@@ -18,7 +18,7 @@ public class ConfFileLocator {
 	private static File overridenFile = null;
 
 	public static File getConfFile() {
-		String path = getMyPath();
+		String path = getJarPath();
 		File f = new File(path + "flute.xml");
 		System.out.println();
 		return f;
@@ -42,13 +42,25 @@ public class ConfFileLocator {
 		return result;
 	}
 
-	private static String getMyPath() {
-		String path = ConfFileLocator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		File f = new File(path.replace("%20", " "));
-		if (f.getAbsolutePath().toLowerCase().endsWith(".jar")) {
-			return f.getParent() + File.separator;
+	private static String getJarPath() {
+		final String result;
+
+		String path = ConfFileLocator.class.getResource(ConfFileLocator.class.getSimpleName() + ".class").getPath();
+		path = path.replace("%20", " ");
+
+		if (path.contains(".jar")) {
+			if (path.startsWith("file:")) {
+				path = path.replace("file:", "");
+			}
+			path = path.substring(0, path.indexOf("jar!"));
+
+			File f = new File(path).getParentFile();
+			result = f.getPath() + File.separator;
 		} else {
-			return f.getAbsolutePath() + File.separator;
+			File f = new File(path).getParentFile();
+			result = f.getParent() + File.separator;
 		}
+
+		return result;
 	}
 }
