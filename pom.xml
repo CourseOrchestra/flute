@@ -209,10 +209,13 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.20</version>
             </plugin>
-            <plugin>
+           <!-- <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
+                <configuration>
+                    <executable>true</executable>
+                </configuration>
+            </plugin>-->
         </plugins>
     </build>
 
