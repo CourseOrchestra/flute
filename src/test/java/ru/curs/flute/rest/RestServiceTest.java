@@ -54,17 +54,15 @@ public class RestServiceTest {
 
 
 
-    SessionContext scontext = new SessionContext("super", "celesta_init");
-    Connection conn = ConnectionPool.get();
-    CallContext context = new CallContext(conn, scontext);
+    SessionContext sc = new SessionContext("super", "celesta_init");
 
-    UserRolesCursor urCursor = new UserRolesCursor(context);
-    urCursor.setUserid("testUser");
-    urCursor.setRoleid("editor");
-    urCursor.insert();
+    try (CallContext context = Celesta.getInstance().callContext(sc)) {
+      UserRolesCursor urCursor = new UserRolesCursor(context);
+      urCursor.setUserid("testUser");
+      urCursor.setRoleid("editor");
+      urCursor.insert();
+    }
 
-    context.closeCursors();
-    ConnectionPool.putBack(conn);
 
     RestMappingBuilder.getInstance().initRouters(Celesta.getInstance(), GLOBAL_USER_ID);
 

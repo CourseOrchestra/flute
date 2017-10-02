@@ -1,6 +1,7 @@
 package ru.curs.flute.conf;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -14,10 +15,7 @@ import reactor.ipc.netty.http.server.HttpServer;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
-import ru.curs.celesta.AppSettings;
-import ru.curs.celesta.Celesta;
-import ru.curs.celesta.CelestaException;
-import ru.curs.celesta.ConnectionPool;
+import ru.curs.celesta.*;
 import ru.curs.flute.GlobalParams;
 import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.exception.EFluteCritical;
@@ -71,21 +69,41 @@ public class BeansFactory {
    * A pool with JDBC connections.
    */
   @Bean
-  public JDBCConnectionPool getJDBCConnectionPool() {
+  public JDBCConnectionPool getJDBCConnectionPool(@Autowired CommonParameters params) throws EFluteCritical {
+
+    ConnectionPoolConfiguration cpConf = new ConnectionPoolConfiguration();
+    String jdbcConnectionUrl = params.getConnString();
+    cpConf.setJdbcConnectionUrl(jdbcConnectionUrl);
+    cpConf.setDriverClassName(AppSettings.resolveDbType(jdbcConnectionUrl).getDriverClassName());
+    cpConf.setLogin(params.getDBUser());
+    cpConf.setPassword(params.getDBPassword());
+
+    final ConnectionPool connectionPool;
+    try {
+      connectionPool = ConnectionPool.create(cpConf);
+    } catch (CelestaException e) {
+      throw new EFluteCritical(e.getMessage());
+    }
+
+
     return new JDBCConnectionPool() {
       @Override
       public Connection get() throws Exception {
-        return ConnectionPool.get();
+        return connectionPool.get();
       }
 
       @Override
       public void putBack(Connection conn) {
-        ConnectionPool.putBack(conn);
+        try {
+          conn.close();
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
       }
 
       @Override
       public void commit(Connection conn) {
-        ConnectionPool.commit(conn);
+        connectionPool.commit(conn);
       }
 
       @Override

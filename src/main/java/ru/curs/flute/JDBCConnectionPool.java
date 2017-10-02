@@ -4,7 +4,7 @@ import java.sql.Connection;
 
 public interface JDBCConnectionPool {
 
-	public enum DBType {
+	enum DBType {
 		// these types are equal to H2 compatibility modes
 		PostgreSQL, MSSQLServer, Oracle, H2
 	}

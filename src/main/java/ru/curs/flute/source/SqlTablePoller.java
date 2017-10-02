@@ -128,8 +128,6 @@ public class SqlTablePoller extends QueueSource {
     }
 
     try {
-      Connection conn = pool.get();
-
       PreparedStatement finalizeTaskStmt = mainConn.prepareStatement(String.format(
           "UPDATE %s SET \"status\" = ?, \"result\" = ?, \"errortext\" = ? WHERE \"id\" = ?", tableName));
 
@@ -149,8 +147,6 @@ public class SqlTablePoller extends QueueSource {
 
       finalizeTaskStmt.setInt(4, task.getId());
       finalizeTaskStmt.executeUpdate();
-      pool.commit(conn);
-      pool.putBack(conn);
     } catch (Exception e) {
       System.out.printf("System could not finalize task %s.%d properly%n", this.getTableName(), task.getId());
       e.printStackTrace();
