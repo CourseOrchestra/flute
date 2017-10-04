@@ -1,5 +1,6 @@
 package ru.curs.flute.rest;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import java.util.Properties;
 public class RestServiceTest {
 
   private final static String GLOBAL_USER_ID = "flute";
+  private static Celesta celesta;
 
   private static WebTestClient fooClient;
   private static WebTestClient paramsClient;
@@ -47,7 +49,7 @@ public class RestServiceTest {
     p.setProperty("pylib.path", pyLib.getAbsolutePath());
 
     try {
-      Celesta.initialize(p);
+      celesta = Celesta.createInstance(p);
     } catch (CelestaException e) {
       throw new EFluteCritical(e.getMessage());
     }
@@ -56,7 +58,7 @@ public class RestServiceTest {
 
     SessionContext sc = new SessionContext("super", "celesta_init");
 
-    try (CallContext context = Celesta.getInstance().callContext(sc)) {
+    try (CallContext context = celesta.callContext(sc)) {
       UserRolesCursor urCursor = new UserRolesCursor(context);
       urCursor.setUserid("testUser");
       urCursor.setRoleid("editor");
@@ -64,7 +66,7 @@ public class RestServiceTest {
     }
 
 
-    RestMappingBuilder.getInstance().initRouters(Celesta.getInstance(), GLOBAL_USER_ID);
+    RestMappingBuilder.getInstance().initRouters(celesta, GLOBAL_USER_ID);
 
     RequestMapping fooMapping = new RequestMapping("/foo", "", "GET");
     fooClient = WebTestClient.bindToRouterFunction(
@@ -142,6 +144,11 @@ public class RestServiceTest {
     ).build();
   }
 
+
+  @AfterClass
+  public static void destroy() {
+    celesta.close();
+  }
 
   @Test
   public void testRestServiceGetJson() {

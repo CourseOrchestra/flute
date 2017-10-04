@@ -29,40 +29,6 @@ public class BeansFactory {
 
   public BeansFactory(@Autowired CommonParameters params) throws EFluteCritical {
     this.params = params;
-    Properties p = new Properties();
-    if (params.getScorePath() == null || params.getScorePath().isEmpty()) {
-      throw new EFluteCritical("Score path setting is missing in configuration file!");
-    } else {
-      p.setProperty("score.path", params.getScorePath());
-    }
-    if (params.getPylibPath() != null)
-      p.setProperty("pylib.path", params.getPylibPath());
-    if (params.getJavaLibPath() != null)
-      p.setProperty("javalib.path", params.getJavaLibPath());
-
-    if (params.getConnString() == null || params.getConnString().isEmpty()) {
-      throw new EFluteCritical("dbconnstring setting is missing in configuration file!");
-    } else {
-      p.setProperty("rdbms.connection.url", params.getConnString());
-    }
-
-    if (params.getDBUser() != null)
-      p.setProperty("rdbms.connection.username", params.getDBUser());
-    if (params.getDBPassword() != null)
-      p.setProperty("rdbms.connection.password", params.getDBPassword());
-    p.setProperty("log.logins", Boolean.toString(params.isLogLogins()));
-    p.setProperty("skip.dbupdate", Boolean.toString(params.isSkipDBUpdate()));
-    p.setProperty("force.dbinitialize", Boolean.toString(params.isForceDBInitialize()));
-
-    Properties additionalProps = params.getSetupProperties();
-    additionalProps.stringPropertyNames().forEach((s) -> {
-      p.setProperty(s, additionalProps.getProperty(s));
-    });
-    try {
-      Celesta.initialize(p);
-    } catch (CelestaException e) {
-      throw new EFluteCritical(e.getMessage());
-    }
   }
 
   /**
@@ -110,7 +76,7 @@ public class BeansFactory {
       public DBType getDBType() {
         final Properties properties;
         try {
-          properties = Celesta.getInstance().getSetupProperties();
+          properties = getCelesta().getSetupProperties();
 
           switch (new AppSettings(properties).getDBType()) {
             case MSSQL:
@@ -123,7 +89,7 @@ public class BeansFactory {
                   default:
                     return DBType.PostgreSQL;
           }
-        } catch (CelestaException e) {
+        } catch (EFluteCritical |CelestaException e) {
           throw new RuntimeException(e);
         }
       }
@@ -137,8 +103,41 @@ public class BeansFactory {
    * @throws CelestaException Celesta configuration exception.
    */
   @Bean
-  public Celesta getCelesta() throws CelestaException {
-    return Celesta.getInstance();
+  public Celesta getCelesta() throws EFluteCritical {
+    Properties p = new Properties();
+    if (params.getScorePath() == null || params.getScorePath().isEmpty()) {
+      throw new EFluteCritical("Score path setting is missing in configuration file!");
+    } else {
+      p.setProperty("score.path", params.getScorePath());
+    }
+    if (params.getPylibPath() != null)
+      p.setProperty("pylib.path", params.getPylibPath());
+    if (params.getJavaLibPath() != null)
+      p.setProperty("javalib.path", params.getJavaLibPath());
+
+    if (params.getConnString() == null || params.getConnString().isEmpty()) {
+      throw new EFluteCritical("dbconnstring setting is missing in configuration file!");
+    } else {
+      p.setProperty("rdbms.connection.url", params.getConnString());
+    }
+
+    if (params.getDBUser() != null)
+      p.setProperty("rdbms.connection.username", params.getDBUser());
+    if (params.getDBPassword() != null)
+      p.setProperty("rdbms.connection.password", params.getDBPassword());
+    p.setProperty("log.logins", Boolean.toString(params.isLogLogins()));
+    p.setProperty("skip.dbupdate", Boolean.toString(params.isSkipDBUpdate()));
+    p.setProperty("force.dbinitialize", Boolean.toString(params.isForceDBInitialize()));
+
+    Properties additionalProps = params.getSetupProperties();
+    additionalProps.stringPropertyNames().forEach((s) -> {
+      p.setProperty(s, additionalProps.getProperty(s));
+    });
+    try {
+      return Celesta.createInstance(p);
+    } catch (CelestaException e) {
+      throw new EFluteCritical(e.getMessage());
+    }
   }
 
   @Bean
