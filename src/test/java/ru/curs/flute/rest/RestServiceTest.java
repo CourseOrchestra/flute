@@ -9,6 +9,10 @@ import org.springframework.web.reactive.function.BodyInserters;
 import ru.curs.celesta.*;
 import ru.curs.celesta.syscursors.UserRolesCursor;
 import ru.curs.flute.exception.EFluteCritical;
+import ru.curs.flute.source.RestTaskSource;
+import ru.curs.flute.task.AbstractFluteTask;
+
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.sql.Connection;
@@ -23,6 +27,7 @@ public class RestServiceTest {
   private static Celesta celesta;
 
   private static WebTestClient fooClient;
+  private static WebTestClient fluteParamClient;
   private static WebTestClient paramsClient;
   private static WebTestClient jsonPostClient;
   private static WebTestClient beforeFilterClient;
@@ -73,6 +78,11 @@ public class RestServiceTest {
         RestMappingBuilder.getInstance().getRouters().get(fooMapping)
     ).build();
 
+    RequestMapping fluteParamMapping = new RequestMapping("/fluteparam", "", "GET");
+    fluteParamClient = WebTestClient.bindToRouterFunction(
+        RestMappingBuilder.getInstance().getRouters().get(fluteParamMapping)
+    ).build();
+    
     RequestMapping paramsMapping = new RequestMapping("/params", "", "GET");
     paramsClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(paramsMapping)
@@ -184,6 +194,20 @@ public class RestServiceTest {
         .expectStatus().is2xxSuccessful()
         .expectBody(String.class)
         .isEqualTo("{\"numb\":2}");
+  }
+  
+  
+  @Test
+  public void testFluteParam() throws InterruptedException, EFluteCritical {
+	String sourceId = RestMappingBuilder.getInstance().getTask().getSourceId();
+	assertFalse(sourceId.isEmpty());
+	  
+	fluteParamClient.get().uri("/fluteparam")
+    .exchange()
+    .expectStatus().is2xxSuccessful()
+    .expectBody(String.class)
+    .isEqualTo(sourceId);
+    
   }
 
   @Test

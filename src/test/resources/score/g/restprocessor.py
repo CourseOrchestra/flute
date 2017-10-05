@@ -7,15 +7,20 @@ from reactor.core.publisher import Mono
 from ru.curs.flute.rest.decorator import Mapping, FilterBefore, FilterAfter
 
 @Mapping('/foo')
-def foo(context, request):
+def foo(context, flute, request):
     dto = {
         "foo": 1,
         "bar": 2
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
+@Mapping('/fluteparam', "GET")
+def fluteparam(context, flute, request):
+    sid = flute.sourceId
+    return ServerResponse.ok().body(Mono.just(sid), sid.__class__)
+
 @Mapping('/params')
-def pRarams(context, request):
+def pRarams(context, flute, request):
 
     response = LinkedHashMap()
     text = request.path()
@@ -46,97 +51,97 @@ def pRarams(context, request):
 
 
 @Mapping('/jsonPost', "POST")
-def postWithJsonBody(context, request):
+def postWithJsonBody(context, flute, request):
     dto = request.bodyToMono(dict).block()
     dto['numb'] = dto['numb'] + 1
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @FilterBefore('/beforeTest')
-def beforeFilter(context, request):
+def beforeFilter(context, flute, request):
     request.attributes().put('data', {'foo': 1})
 
 @Mapping('/beforeTest')
-def handlerForBeforeFilter(context, request):
+def handlerForBeforeFilter(context, flute, request):
     data = request.attributes().get('data')
     data['foo'] = data['foo'] + 1
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
 
 @FilterBefore('/doubleBeforeTest')
-def doubleBeforeFilter1(context, request):
+def doubleBeforeFilter1(context, flute, request):
     request.attributes().put('data', ArrayList())
     data = request.attributes().get('data')
     data.add(1)
 
 @FilterBefore('/doubleBeforeTes*')
-def doubleBeforeFilter2(context, request):
+def doubleBeforeFilter2(context, flute, request):
     data = request.attributes().get('data')
     data.add(2)
 
 @Mapping('/doubleBeforeTest')
-def handlerForDoubleBeforeFilter(context, request):
+def handlerForDoubleBeforeFilter(context, flute, request):
     data = request.attributes().get('data')
     data.add(3)
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
 @FilterAfter('/afterTest')
-def afterFilter(context, request):
+def afterFilter(context, flute, request):
     data = request.attributes().get('data')
     data['foo'] = data['foo'] + 1
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
 @Mapping('/afterTest')
-def handlerForAfterFilter(context, request):
+def handlerForAfterFilter(context, flute, request):
     request.attributes().put('data', {'foo': 1})
 
 @FilterAfter('/doubleAfterTest')
-def doubleAfterFilter1(context, request):
+def doubleAfterFilter1(context, flute, request):
     data = request.attributes().get('data')
     data.add(2)
 
 @FilterAfter('/doubleAfterTes*')
-def doubleAfterFilter2(context, request):
+def doubleAfterFilter2(context, flute, request):
     data = request.attributes().get('data')
     data.add(3)
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
 @Mapping('/doubleAfterTest')
-def handlerForDoubleAfterFilter(context, request):
+def handlerForDoubleAfterFilter(context, flute, request):
     request.attributes().put('data', ArrayList())
     data = request.attributes().get('data')
     data.add(1)
 
 @FilterAfter('/afterAndBeforeTest')
-def afterAndBeforeAfterFilter(context, request):
+def afterAndBeforeAfterFilter(context, flute, request):
     data = request.attributes().get('data')
     data.add(3)
     return ServerResponse.ok().body(Mono.just(data), data.__class__)
 
 @FilterBefore('/afterAndBeforeTest')
-def afterAndBeforeBeforeFilter(context, request):
+def afterAndBeforeBeforeFilter(context, flute, request):
     request.attributes().put('data', ArrayList())
     data = request.attributes().get('data')
     data.add(1)
 
 @Mapping('/afterAndBeforeTest')
-def handlerForAfterAndBeforeFilter(context, request):
+def handlerForAfterAndBeforeFilter(context, flute, request):
     data = request.attributes().get('data')
     data.add(2)
 
 
 @Mapping('/globalCelestaUserIdTest')
-def handlerForGlobalCelestaUserId(context, request):
+def handlerForGlobalCelestaUserId(context, flute, request):
     dto = {
         "userId": context.getUserId()
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @FilterBefore('/customCelestaUserIdTest')
-def customCelestaUserIdFilterTest(context, request):
+def customCelestaUserIdFilterTest(context, flute, request):
     request.attributes().put('userId', 'testUser')
 
 @Mapping('/customCelestaUserIdTest')
-def handlerForCustomCelestaUserIdFilter(context, request):
+def handlerForCustomCelestaUserIdFilter(context, flute, request):
     dto = {
         "userId": context.getUserId()
     }
@@ -144,35 +149,35 @@ def handlerForCustomCelestaUserIdFilter(context, request):
 
 
 @FilterBefore('/testReturnFromBefore')
-def beforeTestReturnFromBefore(context, request):
+def beforeTestReturnFromBefore(context, flute, request):
     dto = {
         "foo": 1
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @Mapping('/testReturnFromBefore')
-def handlerForTestReturnFromBefore(context, request):
+def handlerForTestReturnFromBefore(context, flute, request):
     dto = {
         "foo": 2
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @FilterAfter('/testReturnFromBefore')
-def afterTestReturnFromBefore(context, request):
+def afterTestReturnFromBefore(context, flute, request):
     dto = {
         "foo": 3
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @Mapping('/testReturnFromHandler')
-def handlerForTestReturnFromHandler(context, request):
+def handlerForTestReturnFromHandler(context, flute, request):
     dto = {
         "foo": 1
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @FilterAfter('/testReturnFromHandler')
-def afterTestReturnFromHandler(context, request):
+def afterTestReturnFromHandler(context, flute, request):
     dto = {
         "foo": 2
     }
@@ -180,31 +185,31 @@ def afterTestReturnFromHandler(context, request):
 
 
 @Mapping('/testReturnFromAfter')
-def handlerForTestReturnFromAfter(context, request):
+def handlerForTestReturnFromAfter(context, flute, request):
     foo = 'bar'
 
 @FilterAfter('/testReturnFromAfter')
-def after1TestReturnFromAfter(context, request):
+def after1TestReturnFromAfter(context, flute, request):
     dto = {
         "foo": 1
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @FilterAfter('/testReturnFromAfter')
-def after2TestReturnFromAfter(context, request):
+def after2TestReturnFromAfter(context, flute, request):
     dto = {
         "foo": 2
     }
     return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
 
 @Mapping('/testNoResultForHandler')
-def handlerForTestNoResultForHandler(context, request):
+def handlerForTestNoResultForHandler(context, flute, request):
     foo = 'bar'
 
 @Mapping('/testNoResultForAfterFilter')
-def handlerForTestNoResultForAfterFilter(context, request):
+def handlerForTestNoResultForAfterFilter(context, flute, request):
     foo = 'bar'
 
 @FilterAfter('/testNoResultForAfterFilter')
-def afterForTestNoResultForAfterFilter(context, request):
+def afterForTestNoResultForAfterFilter(context, flute, request):
     foo = 'bar'

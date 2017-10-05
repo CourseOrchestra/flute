@@ -21,6 +21,7 @@
                 <xs:element name="skipdbupdate" type="xs:boolean"/>
                 <xs:element name="forcedbinitialize" type="xs:boolean"/>
                 <xs:element name="celestaproperties"/>
+                <xs:element name="restport" type="xs:int"/>
                 <xs:element name="dbtable">
                     <xs:complexType>
                         <xs:choice maxOccurs="unbounded" minOccurs="0">
