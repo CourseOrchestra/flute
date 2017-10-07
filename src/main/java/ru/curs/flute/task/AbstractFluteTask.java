@@ -6,13 +6,16 @@ import ru.curs.flute.source.TaskSource;
 
 import java.io.OutputStream;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 /**
  * Created by ioann on 02.08.2017.
  */
-public class AbstractFluteTask<T extends TaskSource> implements Runnable {
+public class AbstractFluteTask implements Runnable {
   //TODO::Runnable вынести в какой-нибудь TaskExecutor
 
-  private final T ts;
+  private final TaskSource ts;
   private final String script;
   private final String params;
   private final int id;
@@ -23,14 +26,14 @@ public class AbstractFluteTask<T extends TaskSource> implements Runnable {
 
   private final BLOB blob = new BLOB();
 
-  public AbstractFluteTask(T ts, int id, String script, String params) {
+  public AbstractFluteTask(TaskSource ts, int id, String script, String params) {
     this.ts = ts;
     this.id = id;
     this.script = script;
     this.params = params;
   }
 
-  public T getSource() {
+  public TaskSource getSource() {
     return ts;
   }
 
@@ -79,7 +82,11 @@ public class AbstractFluteTask<T extends TaskSource> implements Runnable {
   }
 
   protected void doJob() throws InterruptedException, EFluteNonCritical {
-    ts.process(this);
+	  ts.process(this);
+  }
+  
+  public Jedis getJedis() {
+	  return ts.getJedisPool().map(JedisPool::getResource).orElse(null);
   }
 
   @Override

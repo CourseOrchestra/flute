@@ -123,7 +123,7 @@ public class RestMappingBuilder {
 
   }
 
-  AbstractFluteTask<RestTaskSource> getTask() throws InterruptedException, EFluteCritical{
+  AbstractFluteTask getTask() throws InterruptedException, EFluteCritical{
 	  return dummyTaskSource.getTask();
   }
   

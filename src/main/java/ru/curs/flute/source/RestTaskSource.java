@@ -13,7 +13,7 @@ public final class RestTaskSource extends TaskSource {
 	}
 
 	@Override
-	public AbstractFluteTask<RestTaskSource> getTask() throws InterruptedException, EFluteCritical {
+	public AbstractFluteTask getTask() throws InterruptedException, EFluteCritical {
 		return taskInstance;
 	}
 
@@ -22,7 +22,7 @@ public final class RestTaskSource extends TaskSource {
 	}
 }
 
-final class RestFluteTask extends AbstractFluteTask<RestTaskSource> {
+final class RestFluteTask extends AbstractFluteTask {
 	public RestFluteTask(RestTaskSource ts, int id, String script, String params) {
 		super(ts, id, script, params);
 	}

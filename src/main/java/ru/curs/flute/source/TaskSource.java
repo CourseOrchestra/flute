@@ -1,6 +1,9 @@
 package ru.curs.flute.source;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+
+import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
 import ru.curs.flute.task.AbstractFluteTask;
@@ -8,6 +11,7 @@ import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.GlobalParams;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -24,9 +28,13 @@ public abstract class TaskSource implements Runnable {
   @Autowired
   private Celesta celesta;
 
+  @Autowired
+  private ApplicationContext ctx;
+
+  
   private String finalizer;
   private final String id = UUID.randomUUID().toString();
-
+  private Optional<JedisPool> jedisPool = Optional.empty();
 
   public abstract AbstractFluteTask getTask() throws InterruptedException, EFluteCritical;
 
@@ -45,6 +53,12 @@ public abstract class TaskSource implements Runnable {
     return finalizer;
   }
 
+
+  public Optional<JedisPool> getJedisPool() {
+	if (!jedisPool.isPresent() && params.isExposeRedis())
+		jedisPool = Optional.of(ctx.getBean(JedisPool.class));
+	return jedisPool;
+  }
 
   public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
     try {
