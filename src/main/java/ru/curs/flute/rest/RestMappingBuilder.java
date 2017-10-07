@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 import ru.curs.celesta.Celesta;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -123,7 +123,7 @@ public class RestMappingBuilder {
 
   }
 
-  AbstractFluteTask getTask() throws InterruptedException, EFluteCritical{
+  FluteTask getTask() throws InterruptedException, EFluteCritical{
 	  return dummyTaskSource.getTask();
   }
   

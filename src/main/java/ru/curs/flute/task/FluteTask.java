@@ -10,10 +10,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 /**
- * Created by ioann on 02.08.2017.
+ * Encapsulates Flute task in/out parameters.
  */
-public class AbstractFluteTask implements Runnable {
-  //TODO::Runnable вынести в какой-нибудь TaskExecutor
+public class FluteTask implements Runnable {
+  //TODO::Runnable вынести во вложенный класс TaskRunner
 
   private final TaskSource ts;
   private final String script;
@@ -26,7 +26,7 @@ public class AbstractFluteTask implements Runnable {
 
   private final BLOB blob = new BLOB();
 
-  public AbstractFluteTask(TaskSource ts, int id, String script, String params) {
+  public FluteTask(TaskSource ts, int id, String script, String params) {
     this.ts = ts;
     this.id = id;
     this.script = script;
@@ -106,5 +106,4 @@ public class AbstractFluteTask implements Runnable {
       ts.release();
     }
   }
-
 }

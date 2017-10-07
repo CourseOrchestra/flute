@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import org.junit.Test;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.ScheduledTaskSupplier;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.QueueTask;
 
 public class ScheduledTaskSupplierTest {
@@ -29,7 +29,7 @@ public class ScheduledTaskSupplierTest {
 
 		ScheduledTaskSupplier sts = new ScheduledTaskSupplier() {
 			@Override
-			public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
+			public void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
 				expected.add(task.getParams());
 			}
 		};

@@ -5,7 +5,7 @@ import ru.curs.flute.source.QueueSource;
 /**
  * Created by ioann on 02.08.2017.
  */
-public class QueueTask extends AbstractFluteTask {
+public class QueueTask extends FluteTask {
 
   private final QueueSource ts;
   

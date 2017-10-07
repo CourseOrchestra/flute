@@ -2,7 +2,7 @@ package ru.curs.flute.source;
 
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.TaskSource;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 
 public final class RestTaskSource extends TaskSource {
 	
@@ -13,7 +13,7 @@ public final class RestTaskSource extends TaskSource {
 	}
 
 	@Override
-	public AbstractFluteTask getTask() throws InterruptedException, EFluteCritical {
+	public FluteTask getTask() throws InterruptedException, EFluteCritical {
 		return taskInstance;
 	}
 
@@ -22,7 +22,7 @@ public final class RestTaskSource extends TaskSource {
 	}
 }
 
-final class RestFluteTask extends AbstractFluteTask {
+final class RestFluteTask extends FluteTask {
 	public RestFluteTask(RestTaskSource ts, int id, String script, String params) {
 		super(ts, id, script, params);
 	}

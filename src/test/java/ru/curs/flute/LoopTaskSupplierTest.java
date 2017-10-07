@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import org.junit.Test;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.LoopTaskSupplier;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.SingleTask;
 
 public class LoopTaskSupplierTest {
@@ -84,7 +84,7 @@ class TestLoopTaskSupplier extends LoopTaskSupplier {
 	LinkedList<String> result = new LinkedList<>();
 
 	@Override
-	public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
+	public void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
 		result.add(task.getParams());
 		if ("FAIL".equalsIgnoreCase(task.getParams()))
 			throw new EFluteNonCritical("fail");

@@ -10,7 +10,7 @@ import ru.curs.celesta.*;
 import ru.curs.celesta.syscursors.UserRolesCursor;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 
 import static org.junit.Assert.assertFalse;
 

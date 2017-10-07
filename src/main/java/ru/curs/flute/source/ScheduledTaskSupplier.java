@@ -3,7 +3,7 @@ package ru.curs.flute.source;
 import it.sauronsoftware.cron4j.Scheduler;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.QueueTask;
 
 import java.util.concurrent.BlockingQueue;
@@ -83,5 +83,5 @@ public class ScheduledTaskSupplier extends QueueSource {
   }
 
   @Override
-  public void changeTaskState(AbstractFluteTask t) { }
+  public void changeTaskState(FluteTask t) { }
 }

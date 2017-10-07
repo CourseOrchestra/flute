@@ -29,7 +29,7 @@ import ru.curs.celesta.Celesta;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.RedisQueue;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.QueueTask;
 
 public class RedisQueueTest {
@@ -55,7 +55,7 @@ public class RedisQueueTest {
 			q.setMaxThreads(2);
 			q.setQueueName("fookey");
 
-			AbstractFluteTask t = q.getTask();
+			FluteTask t = q.getTask();
 			assertEquals("a", t.getScript());
 			assertEquals("b", t.getParams());
 			assertSame(q, t.getSource());
@@ -65,7 +65,7 @@ public class RedisQueueTest {
 			assertEquals("c", t.getParams());
 			assertSame(q, t.getSource());
 
-			CompletableFuture<AbstractFluteTask> f = getSupplierFuture(q);
+			CompletableFuture<FluteTask> f = getSupplierFuture(q);
 			Thread.sleep(10);
 
 			assertFalse(f.isDone());
@@ -111,7 +111,7 @@ public class RedisQueueTest {
 
 	}
 
-	private CompletableFuture<AbstractFluteTask> getSupplierFuture(final RedisQueue q) {
+	private CompletableFuture<FluteTask> getSupplierFuture(final RedisQueue q) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				return q.getTask();

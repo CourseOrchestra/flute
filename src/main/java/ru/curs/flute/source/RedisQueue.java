@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.exceptions.JedisException;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.task.QueueTask;
@@ -34,7 +34,7 @@ public class RedisQueue extends QueueSource {
   }
 
   @Override
-  public void changeTaskState(AbstractFluteTask t) {}
+  public void changeTaskState(FluteTask t) {}
 
   @Override
   public QueueTask getTask() throws EFluteCritical, InterruptedException {

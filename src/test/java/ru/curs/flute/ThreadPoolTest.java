@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.Test;
 import ru.curs.flute.source.QueueSource;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.FluteTaskState;
 import ru.curs.flute.task.QueueTask;
 
@@ -57,7 +57,7 @@ class DummyFluteSource extends QueueSource {
 	}
 
 	@Override
-	public void changeTaskState(AbstractFluteTask t) {}
+	public void changeTaskState(FluteTask t) {}
 }
 
 public class ThreadPoolTest {

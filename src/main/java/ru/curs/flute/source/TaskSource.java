@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.JedisPool;
 import ru.curs.celesta.Celesta;
 import ru.curs.celesta.CelestaException;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.GlobalParams;
@@ -36,7 +36,7 @@ public abstract class TaskSource implements Runnable {
   private final String id = UUID.randomUUID().toString();
   private Optional<JedisPool> jedisPool = Optional.empty();
 
-  public abstract AbstractFluteTask getTask() throws InterruptedException, EFluteCritical;
+  public abstract FluteTask getTask() throws InterruptedException, EFluteCritical;
 
   public abstract void release();
 
@@ -60,7 +60,7 @@ public abstract class TaskSource implements Runnable {
 	return jedisPool;
   }
 
-  public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
+  public void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
     try {
       // [Jedis problem debug
       String threadName = String.format("%08X-%s", getId().hashCode(), task.getScript());
@@ -79,7 +79,7 @@ public abstract class TaskSource implements Runnable {
     if (finalizer != null) {
       try {
         String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
-        AbstractFluteTask task = new AbstractFluteTask(this, 0, finalizer, null);
+        FluteTask task = new FluteTask(this, 0, finalizer, null);
         celesta.login(sesId, params.getFluteUserId());
         celesta.runPython(sesId, finalizer, task);
         celesta.logout(sesId, false);

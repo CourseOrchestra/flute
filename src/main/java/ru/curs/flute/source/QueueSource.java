@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.exception.EFluteNonCritical;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.FluteTaskState;
 import ru.curs.flute.task.QueueTask;
 
@@ -31,7 +31,7 @@ public abstract class QueueSource extends TaskSource {
   private int terminationTimeout = DEFAULT_TERMINATION_TIMEOUT;
 
 
-  public abstract void changeTaskState(AbstractFluteTask t);
+  public abstract void changeTaskState(FluteTask t);
 
   @Override
   public void run() {
@@ -41,7 +41,7 @@ public abstract class QueueSource extends TaskSource {
       try {
         while (true) {
           semaphore.acquire();
-          AbstractFluteTask command = getTask();
+          FluteTask command = getTask();
           threads.execute(command);
         }
       } catch (InterruptedException e) {

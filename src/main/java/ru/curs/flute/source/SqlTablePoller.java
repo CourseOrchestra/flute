@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import ru.curs.celesta.dbutils.BLOB;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.task.QueueTask;
@@ -109,7 +109,7 @@ public class SqlTablePoller extends QueueSource {
   }
 
   @Override
-  public void changeTaskState(AbstractFluteTask task) {
+  public void changeTaskState(FluteTask task) {
 
     int newState;
 

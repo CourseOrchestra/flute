@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 import ru.curs.celesta.Celesta;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.SqlTablePoller;
-import ru.curs.flute.task.AbstractFluteTask;
+import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.FluteTaskState;
 import ru.curs.flute.task.QueueTask;
 
@@ -184,7 +184,7 @@ class TestSQLTablePoller extends SqlTablePoller {
 	};
 
 	@Override
-	public void process(AbstractFluteTask task) throws InterruptedException, EFluteNonCritical {
+	public void process(FluteTask task) throws InterruptedException, EFluteNonCritical {
 		log.accept(task.getParams());
 		task.setMessage("!" + task.getParams());
 	}
