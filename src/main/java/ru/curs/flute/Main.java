@@ -37,6 +37,7 @@ package ru.curs.flute;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +47,7 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import reactor.ipc.netty.http.server.HttpServer;
@@ -62,6 +64,7 @@ import javax.annotation.PreDestroy;
 @SpringBootApplication
 public class Main {
 
+  private static ApplicationContext applicationContext;
   private static final ExecutorService svc = Executors.newCachedThreadPool();
 
   private List<TaskSource> taskSources;
@@ -88,9 +91,9 @@ public class Main {
     }
 
     if (httpServer != null && httpHandlerAdapter != null) {
-      httpServer.startAndAwait(httpHandlerAdapter, null);
+      Executor singleThreadExecutor = Executors.newSingleThreadExecutor();
+      singleThreadExecutor.execute(() -> httpServer.startAndAwait(httpHandlerAdapter, null));
     }
-
   }
 
   @PreDestroy
@@ -136,14 +139,17 @@ public class Main {
     }
   }
 
-  private static void startService(String[] args) {
+  private synchronized static void startService(String[] args) {
     SpringApplication app = new SpringApplication(Main.class);
     app.setWebApplicationType(WebApplicationType.NONE);
-    app.run(args);
+    applicationContext = app.run(args);
   }
 
-  private static void stopService(String[] args) {
-      System.exit(0);
+  private synchronized static void stopService(String[] args) {
+    int result =SpringApplication.exit(applicationContext, applicationContext.getBean(ExitCodeGenerator.class));
+
+    if (result != 0)
+      System.exit(result);
   }
 
   /**
