@@ -146,23 +146,30 @@ public class BeansFactory {
 
     if (params.getRestPort() != null) {
       httpServer = HttpServer.create("localhost", params.getRestPort());
+    } else httpServer = null;
 
+
+    return httpServer;
+  }
+
+  @Bean
+  public ReactorHttpHandlerAdapter httpHandlerAdapter() throws Exception {
+    ReactorHttpHandlerAdapter adapter = null;
+
+    if (params.getRestPort() != null) {
       RestMappingBuilder.getInstance().initRouters(getCelesta(), getGlobalParams().getFluteUserId());
-
       if (!RestMappingBuilder.getInstance().getRouters().isEmpty()) {
         Collection<RouterFunction> routers = RestMappingBuilder.getInstance()
-            .getRouters()
-            .values();
+                .getRouters()
+                .values();
 
         RouterFunction router = routers.stream().reduce((r, r2) -> r == null ? r : r.and(r2)).get();
         HttpHandler httpHandler = RouterFunctions.toHttpHandler(router);
-        httpServer.newHandler(new ReactorHttpHandlerAdapter(httpHandler)).block();
 
-        System.out.println("Rest service is started.");
+        adapter = new ReactorHttpHandlerAdapter(httpHandler);
       }
-    } else httpServer = null;
-
-    return httpServer;
+    }
+    return adapter;
   }
 
   /**

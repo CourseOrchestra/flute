@@ -47,6 +47,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
+import reactor.ipc.netty.http.server.HttpServer;
 import ru.curs.flute.conf.ConfFileLocator;
 import ru.curs.flute.source.TaskSource;
 import ru.curs.flute.source.TaskSources;
@@ -67,6 +69,11 @@ public class Main {
   @Autowired
   private TaskSources taskSourcesBean;
 
+  @Autowired
+  private HttpServer httpServer;
+
+  @Autowired
+  private ReactorHttpHandlerAdapter httpHandlerAdapter;
 
   @PostConstruct
   public void postConstruct() {
@@ -79,6 +86,11 @@ public class Main {
     } else {
       System.out.printf("Flute started. %d queues are being processed.%n", taskSources.size());
     }
+
+    if (httpServer != null && httpHandlerAdapter != null) {
+      httpServer.startAndAwait(httpHandlerAdapter, null);
+    }
+
   }
 
   @PreDestroy
@@ -124,19 +136,14 @@ public class Main {
     }
   }
 
-  private static synchronized void startService(String[] args) {
+  private static void startService(String[] args) {
     SpringApplication app = new SpringApplication(Main.class);
     app.setWebApplicationType(WebApplicationType.NONE);
     app.run(args);
   }
 
-  private static synchronized void stopService(String[] args) {
-    SpringApplication app = new SpringApplication(Main.class);
-    app.setWebApplicationType(WebApplicationType.NONE);
-    int result = SpringApplication.exit(SpringApplication.run(Main.class, args));
-
-    if (result != 0)
-      System.exit(result);
+  private static void stopService(String[] args) {
+      System.exit(0);
   }
 
   /**
