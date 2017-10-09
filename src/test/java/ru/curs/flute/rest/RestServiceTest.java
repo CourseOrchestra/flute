@@ -43,6 +43,9 @@ public class RestServiceTest {
   private static WebTestClient noResultForHandlerClient;
   private static WebTestClient noResultForAfterFilterClient;
 
+  
+  private static RestTaskSource taskSource = new RestTaskSource();
+  
   @BeforeClass
   public static void setUp() throws Exception {
 
@@ -71,7 +74,7 @@ public class RestServiceTest {
     }
 
 
-    RestMappingBuilder.getInstance().initRouters(celesta, GLOBAL_USER_ID);
+    RestMappingBuilder.getInstance().initRouters(celesta, taskSource, GLOBAL_USER_ID);
 
     RequestMapping fooMapping = new RequestMapping("/foo", "", "GET");
     fooClient = WebTestClient.bindToRouterFunction(
@@ -199,7 +202,7 @@ public class RestServiceTest {
   
   @Test
   public void testFluteParam() throws InterruptedException, EFluteCritical {
-	String sourceId = RestMappingBuilder.getInstance().getTask().getSourceId();
+	String sourceId = taskSource.getTask().getSourceId();
 	assertFalse(sourceId.isEmpty());
 	  
 	fluteParamClient.get().uri("/fluteparam")

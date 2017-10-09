@@ -23,11 +23,8 @@ public class RestMappingBuilder {
 
   private final Set<FilterMapping> filterMappings = new LinkedHashSet<>();
   private final Set<RequestMapping> requestMappings = new HashSet<>();
-
   
   private final Map<RequestMapping, RouterFunction> routers = new HashMap<>();
-  
-  private final RestTaskSource dummyTaskSource = new RestTaskSource();
 
   public static RestMappingBuilder getInstance() {
     return instance;
@@ -43,7 +40,7 @@ public class RestMappingBuilder {
   }
 
 
-  public void initRouters(Celesta celesta, String globalUserId) {
+  public void initRouters(Celesta celesta, RestTaskSource taskSource, String globalUserId) {
 
     if (!routers.isEmpty())
       return;
@@ -86,7 +83,7 @@ public class RestMappingBuilder {
           );
 
           celesta.login(sesId, userId);
-          PyObject pyResult = celesta.runPython(sesId, requestMappings.getFunc(), dummyTaskSource.getTask(), request);
+          PyObject pyResult = celesta.runPython(sesId, requestMappings.getFunc(), taskSource.getTask(), request);
           celesta.logout(sesId, false);
 
           if (pyResult != null && !pyResult.equals(Py.None)) {
@@ -110,10 +107,10 @@ public class RestMappingBuilder {
 
       //APPLY FILTERS
       for (FilterMapping beforeFilterMapping : beforeFilterMappings)
-        router = appendFilterToRouter(router, beforeFilterMapping, celesta, globalUserId, false);
+        router = appendFilterToRouter(router, beforeFilterMapping, celesta, taskSource, globalUserId, false);
       for (FilterMapping afterFilterMapping : afterFilterMappings)
         router = appendFilterToRouter(
-            router, afterFilterMapping, celesta,
+            router, afterFilterMapping, celesta, taskSource,
             globalUserId, afterFilterMapping == lastFilter
         );
 
@@ -122,15 +119,12 @@ public class RestMappingBuilder {
 
 
   }
-
-  FluteTask getTask() throws InterruptedException, EFluteCritical{
-	  return dummyTaskSource.getTask();
-  }
   
   private RouterFunction appendFilterToRouter(
       RouterFunction router,
       FilterMapping filterMapping,
       Celesta celesta,
+      RestTaskSource taskSource,
       String userId,
       boolean isLast
   ) {
@@ -141,7 +135,7 @@ public class RestMappingBuilder {
         try {
           String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
           celesta.login(sesId, userId);
-          PyObject pyResult = celesta.runPython(sesId, filterMapping.getFunc(), dummyTaskSource.getTask(), request);
+          PyObject pyResult = celesta.runPython(sesId, filterMapping.getFunc(), taskSource.getTask(), request);
           celesta.logout(sesId, false);
 
 
@@ -166,7 +160,7 @@ public class RestMappingBuilder {
         try {
           String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
           celesta.login(sesId, userId);
-          PyObject pyResult = celesta.runPython(sesId, filterMapping.getFunc(), dummyTaskSource.getTask(), request);
+          PyObject pyResult = celesta.runPython(sesId, filterMapping.getFunc(), taskSource.getTask(), request);
           celesta.logout(sesId, false);
 
 

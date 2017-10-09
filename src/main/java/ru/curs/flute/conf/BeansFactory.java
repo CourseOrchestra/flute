@@ -20,6 +20,7 @@ import ru.curs.flute.GlobalParams;
 import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.rest.RestMappingBuilder;
+import ru.curs.flute.source.RestTaskSource;
 
 @Configuration
 public class BeansFactory {
@@ -153,11 +154,11 @@ public class BeansFactory {
   }
 
   @Bean
-  public ReactorHttpHandlerAdapter httpHandlerAdapter() throws Exception {
+  public ReactorHttpHandlerAdapter httpHandlerAdapter(@Autowired RestTaskSource taskSource) throws Exception {
     ReactorHttpHandlerAdapter adapter = null;
 
     if (params.getRestPort() != null) {
-      RestMappingBuilder.getInstance().initRouters(getCelesta(), getGlobalParams().getFluteUserId());
+      RestMappingBuilder.getInstance().initRouters(getCelesta(), taskSource, getGlobalParams().getFluteUserId());
       if (!RestMappingBuilder.getInstance().getRouters().isEmpty()) {
         Collection<RouterFunction> routers = RestMappingBuilder.getInstance()
                 .getRouters()

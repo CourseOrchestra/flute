@@ -1,9 +1,12 @@
 package ru.curs.flute.source;
 
+import org.springframework.stereotype.Component;
+
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.TaskSource;
 import ru.curs.flute.task.FluteTask;
 
+@Component
 public final class RestTaskSource extends TaskSource {
 	
 	private final RestFluteTask taskInstance = new RestFluteTask(this, 0, "", "");
