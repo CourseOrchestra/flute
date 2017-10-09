@@ -82,9 +82,9 @@ public class Main {
     taskSources.forEach(svc::execute);
 
     if (taskSources.size() == 1) {
-      System.out.printf("Flute started. One queue is being processed.%n", taskSources.size());
+      System.out.printf("Flute started. One taskSource is being processed.%n", taskSources.size());
     } else {
-      System.out.printf("Flute started. %d queues are being processed.%n", taskSources.size());
+      System.out.printf("Flute started. %d taskSources are being processed.%n", taskSources.size());
     }
 
     if (httpServer != null && httpHandlerAdapter != null) {
