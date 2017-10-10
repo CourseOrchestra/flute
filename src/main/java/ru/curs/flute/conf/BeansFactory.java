@@ -146,7 +146,7 @@ public class BeansFactory {
     final HttpServer httpServer;
 
     if (params.getRestPort() != null) {
-      httpServer = HttpServer.create("localhost", params.getRestPort());
+      httpServer = HttpServer.create(params.getRestPort());
     } else httpServer = null;
 
 
