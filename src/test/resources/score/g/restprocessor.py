@@ -17,7 +17,7 @@ def foo(context, flute, request):
 @Mapping('/fluteparam', "GET")
 def fluteparam(context, flute, request):
     sid = flute.sourceId
-    return ServerResponse.ok().body(Mono.just(sid), sid.__class__)
+    return ServerResponse.ok().body(Mono.just(sid), String)
 
 @Mapping('/params')
 def pRarams(context, flute, request):
