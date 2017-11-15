@@ -88,6 +88,10 @@ public class FluteTask implements Runnable {
   public Jedis getJedis() {
 	  return ts.getJedisPool().map(JedisPool::getResource).orElse(null);
   }
+  
+  public JedisPool getJedisPool(){
+	  return ts.getJedisPool().orElse(null);
+  }
 
   @Override
   public void run() {
