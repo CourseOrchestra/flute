@@ -30,10 +30,9 @@
 			<src>
 				<pathelement path="src" />
 				<pathelement path="celesta" />
-				<pathelement path="celesta2" />
 			</src>
 		</javac>
-		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql" file="celesta3/ru/curs/celesta/score/celesta.sql" />
+		<copy tofile="build/flute/ru/curs/celesta/score/celesta.sql" file="celesta/ru/curs/celesta/score/celesta.sql" />
 		<echo>FASTXL</echo>
 		<mkdir dir="build/fastxl" />
 		<javac destdir="build/fastxl" encoding="UTF-8">
@@ -162,7 +161,6 @@
 			<zipfileset src="lib/jython.jar" />
 			<zipfileset src="lib/ojdbc6.jar" />
 			<zipfileset src="lib/jython.jar" />
-			<zipfileset src="lib/java-json.jar" />
 			<zipfileset src="lib/mysql-connector-java-5.1.27-bin.jar" />
 			<zipfileset src="lib/postgresql-9.3-1100.jdbc41.jar" />
 			<manifest>
