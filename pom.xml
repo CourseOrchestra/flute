@@ -4,7 +4,7 @@
 
     <groupId>ru.curs</groupId>
     <artifactId>flute</artifactId>
-    <version>6.0</version>
+    <version>6.1</version>
     <packaging>jar</packaging>
 
     <name>flute</name>
