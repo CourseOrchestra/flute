@@ -5,17 +5,20 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import ru.curs.celesta.*;
 import ru.curs.celesta.syscursors.UserRolesCursor;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
-import ru.curs.flute.task.FluteTask;
+import static org.springframework.web.reactive.function.BodyInserters.*;
 
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
-import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -42,6 +45,7 @@ public class RestServiceTest {
   private static WebTestClient returnFromAfterFilterClient;
   private static WebTestClient noResultForHandlerClient;
   private static WebTestClient noResultForAfterFilterClient;
+  private static WebTestClient applicationFormUrlencodedClient;
 
   
   private static RestTaskSource taskSource = new RestTaskSource();
@@ -76,84 +80,106 @@ public class RestServiceTest {
 
     RestMappingBuilder.getInstance().initRouters(celesta, taskSource, GLOBAL_USER_ID);
 
-    RequestMapping fooMapping = new RequestMapping("/foo", "", "GET");
+    RequestMapping fooMapping = new RequestMapping("/foo", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     fooClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(fooMapping)
     ).build();
 
-    RequestMapping fluteParamMapping = new RequestMapping("/fluteparam", "", "GET");
+    RequestMapping fluteParamMapping = new RequestMapping("/fluteparam", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     fluteParamClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(fluteParamMapping)
     ).build();
     
-    RequestMapping paramsMapping = new RequestMapping("/params", "", "GET");
+    RequestMapping paramsMapping = new RequestMapping("/params", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     paramsClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(paramsMapping)
     ).build();
 
-    RequestMapping jsonPostMapping = new RequestMapping("/jsonPost", "", "POST");
+    RequestMapping jsonPostMapping = new RequestMapping("/jsonPost", "", "POST",
+            MediaType.APPLICATION_JSON.getType());
     jsonPostClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(jsonPostMapping)
     ).build();
 
-    RequestMapping beforeTestMapping = new RequestMapping("/beforeTest", "", "GET");
+    RequestMapping beforeTestMapping = new RequestMapping("/beforeTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     beforeFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(beforeTestMapping)
     ).build();
 
-    RequestMapping doubleBeforeTestMapping = new RequestMapping("/doubleBeforeTest", "", "GET");
+    RequestMapping doubleBeforeTestMapping = new RequestMapping("/doubleBeforeTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     doubleBeforeFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(doubleBeforeTestMapping)
     ).build();
 
-    RequestMapping afterTestMapping = new RequestMapping("/afterTest", "", "GET");
+    RequestMapping afterTestMapping = new RequestMapping("/afterTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     afterFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(afterTestMapping)
     ).build();
 
-    RequestMapping doubleAfterTestMapping = new RequestMapping("/doubleAfterTest", "", "GET");
+    RequestMapping doubleAfterTestMapping = new RequestMapping("/doubleAfterTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     doubleAfterFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(doubleAfterTestMapping)
     ).build();
 
-    RequestMapping afterAndBeforeFilterTestMapping = new RequestMapping("/afterAndBeforeTest", "", "GET");
+    RequestMapping afterAndBeforeFilterTestMapping = new RequestMapping("/afterAndBeforeTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     afterAndBeforeFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(afterAndBeforeFilterTestMapping)
     ).build();
 
-    RequestMapping globalCelestaUserIdTestMapping = new RequestMapping("/globalCelestaUserIdTest", "", "GET");
+    RequestMapping globalCelestaUserIdTestMapping = new RequestMapping("/globalCelestaUserIdTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     globalCelestaUserIdClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(globalCelestaUserIdTestMapping)
     ).build();
 
-    RequestMapping customCelestaUserIdTestMapping = new RequestMapping("/customCelestaUserIdTest", "", "GET");
+    RequestMapping customCelestaUserIdTestMapping = new RequestMapping("/customCelestaUserIdTest", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     customCelestaUserIdClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(customCelestaUserIdTestMapping)
     ).build();
 
-    RequestMapping testReturnFromBeforeMapping = new RequestMapping("/testReturnFromBefore", "", "GET");
+    RequestMapping testReturnFromBeforeMapping = new RequestMapping("/testReturnFromBefore", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     returnFromBeforeFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(testReturnFromBeforeMapping)
     ).build();
 
-    RequestMapping testReturnFromHandlerMapping = new RequestMapping("/testReturnFromHandler", "", "GET");
+    RequestMapping testReturnFromHandlerMapping = new RequestMapping("/testReturnFromHandler", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     returnFromHandlerClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(testReturnFromHandlerMapping)
     ).build();
 
-    RequestMapping testReturnFromAfterMapping = new RequestMapping("/testReturnFromAfter", "", "GET");
+    RequestMapping testReturnFromAfterMapping = new RequestMapping("/testReturnFromAfter", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     returnFromAfterFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(testReturnFromAfterMapping)
     ).build();
 
-    RequestMapping testNoResultForHandlerMapping = new RequestMapping("/testNoResultForHandler", "", "GET");
+    RequestMapping testNoResultForHandlerMapping = new RequestMapping("/testNoResultForHandler", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     noResultForHandlerClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(testNoResultForHandlerMapping)
     ).build();
 
-    RequestMapping testNoResultForAfterFilterMapping = new RequestMapping("/testNoResultForAfterFilter", "", "GET");
+    RequestMapping testNoResultForAfterFilterMapping = new RequestMapping("/testNoResultForAfterFilter", "", "GET",
+            MediaType.APPLICATION_JSON.getType());
     noResultForAfterFilterClient = WebTestClient.bindToRouterFunction(
         RestMappingBuilder.getInstance().getRouters().get(testNoResultForAfterFilterMapping)
+    ).build();
+
+    RequestMapping applicationFormUrlencodedMapping = new RequestMapping("/applicationFormUrlencoded", "", "POST",
+            MediaType.APPLICATION_FORM_URLENCODED.getType());
+    applicationFormUrlencodedClient = WebTestClient.bindToRouterFunction(
+            RestMappingBuilder.getInstance().getRouters().get(applicationFormUrlencodedMapping)
     ).build();
   }
 
@@ -320,6 +346,24 @@ public class RestServiceTest {
         .expectStatus().is2xxSuccessful()
         .expectBody(String.class)
         .isEqualTo("");
+  }
+
+  @Test
+  public void testFormUrlencodedSupport() {
+    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+
+    List<String> param1Values = Arrays.asList("val1", "1");
+    formData.put("param1", param1Values);
+
+    List<String> param2Values = Arrays.asList("val2");
+    formData.put("param2", param2Values);
+
+    applicationFormUrlencodedClient.post().uri("/applicationFormUrlencoded")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(fromFormData(formData))
+            .exchange()
+            .expectBody(String.class)
+            .isEqualTo("param1=val1,1,param2=val2,");
   }
 }
 

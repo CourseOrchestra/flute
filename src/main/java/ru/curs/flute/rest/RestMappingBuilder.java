@@ -2,12 +2,11 @@ package ru.curs.flute.rest;
 
 import org.python.core.Py;
 import org.python.core.PyObject;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 import ru.curs.celesta.Celesta;
-import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
-import ru.curs.flute.task.FluteTask;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -99,11 +98,17 @@ public class RestMappingBuilder {
           throw new RuntimeException(ex);
         }
       };
-      RouterFunction router = RouterFunctions.route(
-          RequestPredicates.method(requestMappings.getMethod())
-              .and(RequestPredicates.path(requestMappings.getUrl())),
-          func);
 
+      RequestPredicate requestPredicate = RequestPredicates.method(requestMappings.getMethod())
+                      .and(RequestPredicates.path(requestMappings.getUrl()));
+
+      if (requestMappings.getContentType() != null) {
+        requestPredicate = requestPredicate.and(
+                RequestPredicates.contentType(MediaType.valueOf(requestMappings.getContentType()))
+        );
+      }
+
+      RouterFunction router = RouterFunctions.route(requestPredicate, func);
 
       //APPLY FILTERS
       for (FilterMapping beforeFilterMapping : beforeFilterMappings)

@@ -9,14 +9,16 @@ import java.util.Objects;
  */
 public class RequestMapping {
 
-  private String url;
-  private String func;
-  private String method = HttpMethod.GET.toString();
+  private final String url;
+  private final String func;
+  private final String method;
+  private final String contentType;
 
-  public RequestMapping(String url, String func, String method) {
+  public RequestMapping(String url, String func, String method, String contentType) {
     this.url = url;
     this.func = func;
     this.method = method;
+    this.contentType = contentType;
   }
 
   public String getUrl() {
@@ -27,9 +29,12 @@ public class RequestMapping {
     return func;
   }
 
-
   public HttpMethod getMethod() {
     return HttpMethod.resolve(method.toUpperCase());
+  }
+
+  public String getContentType() {
+    return contentType;
   }
 
   @Override

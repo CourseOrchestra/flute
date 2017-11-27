@@ -3,6 +3,7 @@ from java.lang import String
 from java.util import ArrayList, LinkedHashMap
 from org.springframework.web.reactive.function.server import ServerResponse
 from org.springframework.http import HttpStatus, MediaType
+from org.springframework.web.reactive.function import BodyExtractors
 from reactor.core.publisher import Mono
 from ru.curs.flute.rest.decorator import Mapping, FilterBefore, FilterAfter
 
@@ -213,3 +214,20 @@ def handlerForTestNoResultForAfterFilter(context, flute, request):
 @FilterAfter('/testNoResultForAfterFilter')
 def afterForTestNoResultForAfterFilter(context, flute, request):
     foo = 'bar'
+
+@Mapping('/applicationFormUrlencoded', 'POST', 'application/x-www-form-urlencoded')
+def handlerForApplicationFormUrlencoded(context, flute, request):
+    data = request.body(BodyExtractors.toFormData()).block()
+
+    result = 'param1=';
+
+    param1 = data['param1'];
+    for val in param1:
+        result = result + val + ","
+
+    result = result + 'param2=';
+    param2 = data['param2'];
+    for val in param2:
+        result = result + val + ","
+
+    return ServerResponse.ok().body(Mono.just(result), String)
