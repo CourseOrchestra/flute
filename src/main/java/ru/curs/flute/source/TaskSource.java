@@ -71,6 +71,7 @@ public abstract class TaskSource implements Runnable {
       celesta.runPython(sesId, task.getScript(), task);
       celesta.logout(sesId, false);
     } catch (CelestaException e) {
+      task.setMessage(e.getMessage());
       throw new EFluteNonCritical(String.format("Celesta execution error: %s", e.getMessage()));
     }
   }
