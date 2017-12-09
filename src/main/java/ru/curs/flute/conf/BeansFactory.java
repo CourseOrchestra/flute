@@ -143,7 +143,7 @@ public class BeansFactory {
 
     @Bean
     public HttpServer httpServer() {
-        return params.getRestPort().map(i -> HttpServer.create(i)).orElse(null);
+        return params.getRestPort().map(i -> HttpServer.create(params.getRestHost(), i)).orElse(null);
     }
 
     @Bean
