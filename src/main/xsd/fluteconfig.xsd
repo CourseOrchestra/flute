@@ -21,7 +21,9 @@
                 <xs:element name="skipdbupdate" type="xs:boolean"/>
                 <xs:element name="forcedbinitialize" type="xs:boolean"/>
                 <xs:element name="celestaproperties"/>
+                <xs:element name="resthost"/>
                 <xs:element name="restport" type="xs:int"/>
+                <xs:element name="resttimeout" type="xs:int"/>
                 <xs:element name="dbtable">
                     <xs:complexType>
                         <xs:choice maxOccurs="unbounded" minOccurs="0">
@@ -57,6 +59,7 @@
                             <xs:element name="waitonsuccess" type="xs:int"/>
                             <xs:element name="waitonfailure" type="xs:int"/>
                             <xs:element name="finalizer" type="scriptName"/>
+                            <xs:element name="count" type="xs:int"/>
                         </xs:choice>
                     </xs:complexType>
                 </xs:element>
