@@ -9,6 +9,9 @@
 	<neverstop>false</neverstop>
 	<retrywait>50000</retrywait>
 	<scorepath>D:/score</scorepath>
+	<resthost>127.0.0.1</resthost>
+	<restport>12345</restport>
+	<resttimeout>360</resttimeout>
 	<pylibpath>D:/jython2.7.0/Lib</pylibpath>
 	<dbtable>
 		<tablename>flute.tasks</tablename>
@@ -36,5 +39,7 @@
 		<script>foo.hello.run</script>
 		<waitonsuccess>1000</waitonsuccess>
 		<waitonfailure>30000</waitonfailure>
+		<count>2</count>
+        <finalizer>foo.hello.stop</finalizer>
 	</looptask>
 </config>

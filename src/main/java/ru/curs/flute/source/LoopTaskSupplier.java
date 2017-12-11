@@ -18,6 +18,7 @@ public class LoopTaskSupplier extends TaskSource {
 
   private String script;
   private String params;
+  private int count = 1;
 
   @Override
   public SingleTask getTask() throws InterruptedException {
@@ -82,4 +83,12 @@ public class LoopTaskSupplier extends TaskSource {
 
   @Override
   public void release() {}
+
+  public void setCount(int count) {
+    this.count = count;
+  }
+
+  int getCount() {
+    return count;
+  }
 }

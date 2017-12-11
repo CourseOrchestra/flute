@@ -31,6 +31,10 @@ public class CommonParametersTest {
 		assertEquals(50000, c.getRetryWait());
 		assertEquals("postgres", c.getDBUser());
 		assertEquals("123", c.getDBPassword());
+
+		assertEquals(12345, (int) c.getRestPort().get());
+		assertEquals("127.0.0.1", c.getRestHost());
+		assertEquals(360, c.getRestTimeout());
 		Properties p = c.getSetupProperties();
 		assertEquals("bar", p.getProperty("foo"));
 		assertEquals("bar2", p.getProperty("foo2"));

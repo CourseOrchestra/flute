@@ -35,7 +35,7 @@ public class TaskSourcesTest {
 	public void testTaskSources() {
 		TaskSources ts = ctx.getBean(TaskSources.class);
 		List<TaskSource> ss = ts.getSources();
-		assertEquals(5, ss.size());
+		assertEquals(6, ss.size());
 
 		String id0 = ss.get(0).getId();
 		String id1 = ss.get(1).getId();
@@ -64,9 +64,13 @@ public class TaskSourcesTest {
 		assertEquals("foo.module.script", ((ScheduledTaskSupplier) ss.get(3)).getScript());
 		assertEquals("234", ((ScheduledTaskSupplier) ss.get(3)).getParams());
 
-		assertEquals("foo.hello.run", ((LoopTaskSupplier) ss.get(4)).getScript());
-		assertEquals(1000, ((LoopTaskSupplier) ss.get(4)).getWaitOnSuccess());
-		assertEquals(30000, ((LoopTaskSupplier) ss.get(4)).getWaitOnFailure());
+		for (int i = 4; i < 6; i++) {
+			assertEquals("foo.hello.run", ((LoopTaskSupplier) ss.get(i)).getScript());
+			assertEquals(1000, ((LoopTaskSupplier) ss.get(i)).getWaitOnSuccess());
+			assertEquals(30000, ((LoopTaskSupplier) ss.get(i)).getWaitOnFailure());
+			assertEquals("foo.hello.stop", ((LoopTaskSupplier) ss.get(i)).getFinalizer());
+		}
+
 	}
 
 }
