@@ -4,11 +4,28 @@
 
     <groupId>ru.curs</groupId>
     <artifactId>flute</artifactId>
-    <version>6.1</version>
+    <version>6.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>flute</name>
-    <url>http://maven.apache.org</url>
+    <url>https://corchestra.ru/wiki/index.php?title=Flute</url>
+    
+    <organization>
+        <name>CURS</name>
+        <url>https://corchestra.ru</url>
+    </organization>
+    
+    <scm>
+        <url>https://github.com/CourseOrchestra/flute.git</url>
+    </scm>
+    
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -21,26 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>curs</id>
-            <url>http://nexus.curs.ru:8081/repository/curs</url>
-        </repository>
-    </distributionManagement>
-
     <repositories>
-        <repository>
-            <id>lib</id>
-            <name>lib</name>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <url>http://nexus.curs.ru:8081/repository/curs</url>
-        </repository>
         <repository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
@@ -206,13 +204,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.20</version>
             </plugin>
-            <!-- <plugin>
-                 <groupId>org.springframework.boot</groupId>
-                 <artifactId>spring-boot-maven-plugin</artifactId>
-                 <configuration>
-                     <executable>true</executable>
-                 </configuration>
-             </plugin>-->
         </plugins>
     </build>
 
