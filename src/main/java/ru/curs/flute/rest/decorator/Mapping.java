@@ -1,8 +1,8 @@
 package ru.curs.flute.rest.decorator;
 
+import org.eclipse.jetty.http.HttpMethod;
 import org.python.core.PyFunction;
 
-import org.springframework.http.HttpMethod;
 import ru.curs.flute.rest.RequestMapping;
 import ru.curs.flute.rest.RestMappingBuilder;
 
@@ -16,7 +16,7 @@ public class Mapping {
   private final String contentType;
 
   public Mapping(String url) {
-    this(url, HttpMethod.GET.toString(), null);
+    this(url, HttpMethod.GET.name(), null);
   }
 
   public Mapping(String url, String method) {

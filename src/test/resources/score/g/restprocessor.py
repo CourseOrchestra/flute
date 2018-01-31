@@ -1,11 +1,12 @@
 #   coding=utf-8
-from java.lang import String
-from java.util import ArrayList, LinkedHashMap
-from org.springframework.web.reactive.function.server import ServerResponse
-from org.springframework.http import HttpStatus, MediaType
-from org.springframework.web.reactive.function import BodyExtractors
-from reactor.core.publisher import Mono
+from java.util import ArrayList
+
+from ru.curs.flute.rest import FluteResponse
 from ru.curs.flute.rest.decorator import Mapping, FilterBefore, FilterAfter
+
+from _g_orm import table1Cursor
+
+import json
 
 @Mapping('/foo')
 def foo(context, flute, request):
@@ -13,120 +14,117 @@ def foo(context, flute, request):
         "foo": 1,
         "bar": 2
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @Mapping('/fluteparam', "GET")
 def fluteparam(context, flute, request):
     sid = flute.sourceId
-    return ServerResponse.ok().body(Mono.just(sid), String)
+    return sid
 
 @Mapping('/params')
-def pRarams(context, flute, request):
+def params(context, flute, request):
 
-    response = LinkedHashMap()
-    text = request.path()
+    text = request.pathInfo()
     status = None
 
-    if request.queryParams().size() != 0:
+    params = request.queryMap().toMap()
+
+    if params.size() != 0:
         text = text + "?"
 
-        params = request.queryParams().toSingleValueMap()
         theFirst = True
 
         for key in params.keySet():
-            if theFirst != True:
-                text = text + "&"
-            text = text + key + "=" + params.get(key)
-            theFirst = False
+
+            for val in params.get(key):
+                if theFirst != True:
+                    text = text + "&"
+                text = text + key + "=" + val
+                theFirst = False
 
         status = 200
     else:
         text = "there are no params received"
         status = 422
 
-    response.put('text', text)
-    response.put('status', status)
-
-    return ServerResponse.status(HttpStatus.valueOf(status))\
-        .body(Mono.just(text), String)
+    return FluteResponse.status(status).text(text)
 
 
 @Mapping('/jsonPost', "POST")
 def postWithJsonBody(context, flute, request):
-    dto = request.bodyToMono(dict).block()
+    dto = json.loads(request.body())
     dto['numb'] = dto['numb'] + 1
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @FilterBefore('/beforeTest')
 def beforeFilter(context, flute, request):
-    request.attributes().put('data', {'foo': 1})
+    request.attribute('data', {'foo': 1})
 
 @Mapping('/beforeTest')
 def handlerForBeforeFilter(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data['foo'] = data['foo'] + 1
-    return ServerResponse.ok().body(Mono.just(data), data.__class__)
+    return json.dumps(data)
 
-
-@FilterBefore('/doubleBeforeTest')
+@FilterBefore('/double/before/*')
 def doubleBeforeFilter1(context, flute, request):
-    request.attributes().put('data', ArrayList())
-    data = request.attributes().get('data')
+    request.attribute('data', ArrayList())
+    data = request.attribute('data')
     data.add(1)
 
-@FilterBefore('/doubleBeforeTes*')
+@FilterBefore('/double/before/test')
 def doubleBeforeFilter2(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data.add(2)
 
-@Mapping('/doubleBeforeTest')
+@Mapping('/double/before/test')
 def handlerForDoubleBeforeFilter(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data.add(3)
-    return ServerResponse.ok().body(Mono.just(data), data.__class__)
+    return data
 
 @FilterAfter('/afterTest')
 def afterFilter(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data['foo'] = data['foo'] + 1
-    return ServerResponse.ok().body(Mono.just(data), data.__class__)
+    return json.dumps(data)
 
 @Mapping('/afterTest')
 def handlerForAfterFilter(context, flute, request):
-    request.attributes().put('data', {'foo': 1})
+    request.attribute('data', {'foo': 1})
 
-@FilterAfter('/doubleAfterTest')
+@FilterAfter('/double/after/test')
 def doubleAfterFilter1(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data.add(2)
 
-@FilterAfter('/doubleAfterTes*')
+@FilterAfter('/double/after/*')
 def doubleAfterFilter2(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data.add(3)
-    return ServerResponse.ok().body(Mono.just(data), data.__class__)
+    return data
 
-@Mapping('/doubleAfterTest')
+@Mapping('/double/after/test')
 def handlerForDoubleAfterFilter(context, flute, request):
-    request.attributes().put('data', ArrayList())
-    data = request.attributes().get('data')
+    request.attribute('data', ArrayList())
+    data = request.attribute('data')
     data.add(1)
 
 @FilterAfter('/afterAndBeforeTest')
 def afterAndBeforeAfterFilter(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data.add(3)
-    return ServerResponse.ok().body(Mono.just(data), data.__class__)
+    return data
 
 @FilterBefore('/afterAndBeforeTest')
 def afterAndBeforeBeforeFilter(context, flute, request):
-    request.attributes().put('data', ArrayList())
-    data = request.attributes().get('data')
+    request.attribute('data', ArrayList())
+    data = request.attribute('data')
     data.add(1)
 
 @Mapping('/afterAndBeforeTest')
 def handlerForAfterAndBeforeFilter(context, flute, request):
-    data = request.attributes().get('data')
+    data = request.attribute('data')
     data.add(2)
 
 
@@ -135,18 +133,18 @@ def handlerForGlobalCelestaUserId(context, flute, request):
     dto = {
         "userId": context.getUserId()
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @FilterBefore('/customCelestaUserIdTest')
 def customCelestaUserIdFilterTest(context, flute, request):
-    request.attributes().put('userId', 'testUser')
+    request.attribute('userId', 'testUser')
 
 @Mapping('/customCelestaUserIdTest')
 def handlerForCustomCelestaUserIdFilter(context, flute, request):
     dto = {
         "userId": context.getUserId()
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 
 @FilterBefore('/testReturnFromBefore')
@@ -154,35 +152,35 @@ def beforeTestReturnFromBefore(context, flute, request):
     dto = {
         "foo": 1
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @Mapping('/testReturnFromBefore')
 def handlerForTestReturnFromBefore(context, flute, request):
     dto = {
         "foo": 2
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @FilterAfter('/testReturnFromBefore')
 def afterTestReturnFromBefore(context, flute, request):
     dto = {
         "foo": 3
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @Mapping('/testReturnFromHandler')
 def handlerForTestReturnFromHandler(context, flute, request):
     dto = {
         "foo": 1
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @FilterAfter('/testReturnFromHandler')
 def afterTestReturnFromHandler(context, flute, request):
     dto = {
         "foo": 2
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 
 @Mapping('/testReturnFromAfter')
@@ -194,14 +192,14 @@ def after1TestReturnFromAfter(context, flute, request):
     dto = {
         "foo": 1
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @FilterAfter('/testReturnFromAfter')
 def after2TestReturnFromAfter(context, flute, request):
     dto = {
         "foo": 2
     }
-    return ServerResponse.ok().body(Mono.just(dto), dto.__class__)
+    return json.dumps(dto)
 
 @Mapping('/testNoResultForHandler')
 def handlerForTestNoResultForHandler(context, flute, request):
@@ -217,17 +215,23 @@ def afterForTestNoResultForAfterFilter(context, flute, request):
 
 @Mapping('/applicationFormUrlencoded', 'POST', 'application/x-www-form-urlencoded')
 def handlerForApplicationFormUrlencoded(context, flute, request):
-    data = request.body(BodyExtractors.toFormData()).block()
+    queryMap = request.queryMap()
 
-    result = 'param1=';
+    result = 'param1='
 
-    param1 = data['param1'];
+    param1 = queryMap.get(['param1']).values()
     for val in param1:
         result = result + val + ","
 
-    result = result + 'param2=';
-    param2 = data['param2'];
+    result = result + 'param2='
+    param2 = queryMap.get(['param2']).values()
     for val in param2:
         result = result + val + ","
 
-    return ServerResponse.ok().body(Mono.just(result), String)
+    return result
+
+@Mapping('/count')
+def count(context, flute, request):
+    c = table1Cursor(context)
+    dto = {'count': c.count()}
+    return json.dumps(dto)

@@ -37,7 +37,6 @@ package ru.curs.flute;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,15 +44,14 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-import reactor.ipc.netty.http.server.HttpServer;
+import ru.curs.flute.conf.CommonParameters;
 import ru.curs.flute.conf.ConfFileLocator;
 import ru.curs.flute.source.TaskSource;
 import ru.curs.flute.source.TaskSources;
+import spark.Spark;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -73,10 +71,7 @@ public class Main {
   private TaskSources taskSourcesBean;
 
   @Autowired
-  private HttpServer httpServer;
-
-  @Autowired
-  private ReactorHttpHandlerAdapter httpHandlerAdapter;
+  private CommonParameters params;
 
   @PostConstruct
   public void postConstruct() {
@@ -90,9 +85,8 @@ public class Main {
       System.out.printf("Flute started. %d taskSources are being processed.%n", taskSources.size());
     }
 
-    if (httpServer != null && httpHandlerAdapter != null) {
-      Executor singleThreadExecutor = Executors.newSingleThreadExecutor();
-      singleThreadExecutor.execute(() -> httpServer.startAndAwait(httpHandlerAdapter, null));
+    if (params.getRestPort() != null) {
+      Spark.stop();
     }
   }
 
@@ -141,7 +135,6 @@ public class Main {
 
   private synchronized static void startService(String[] args) {
     SpringApplication app = new SpringApplication(Main.class);
-    app.setWebApplicationType(WebApplicationType.NONE);
     applicationContext = app.run(args);
   }
 

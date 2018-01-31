@@ -1,6 +1,6 @@
 package ru.curs.flute.rest;
 
-import org.springframework.http.HttpMethod;
+import org.eclipse.jetty.http.HttpMethod;
 
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ public class RequestMapping {
   }
 
   public HttpMethod getMethod() {
-    return HttpMethod.resolve(method.toUpperCase());
+    return HttpMethod.fromString(method.toUpperCase());
   }
 
   public String getContentType() {
