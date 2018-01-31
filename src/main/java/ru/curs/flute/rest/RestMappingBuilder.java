@@ -1,17 +1,14 @@
 package ru.curs.flute.rest;
 
+import org.eclipse.jetty.http.HttpMethod;
 import org.python.core.Py;
 import org.python.core.PyObject;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.server.*;
-import reactor.core.publisher.Mono;
 import ru.curs.celesta.Celesta;
 import ru.curs.flute.source.RestTaskSource;
+import spark.*;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Created by ioann on 01.08.2017.
@@ -22,8 +19,8 @@ public class RestMappingBuilder {
 
   private final Set<FilterMapping> filterMappings = new LinkedHashSet<>();
   private final Set<RequestMapping> requestMappings = new HashSet<>();
-  
-  private final Map<RequestMapping, RouterFunction> routers = new HashMap<>();
+
+  private boolean inited;
 
   public static RestMappingBuilder getInstance() {
     return instance;
@@ -39,153 +36,89 @@ public class RestMappingBuilder {
   }
 
 
-  public void initRouters(Celesta celesta, RestTaskSource taskSource, String globalUserId) {
+  public synchronized void initRouters(Celesta celesta, RestTaskSource taskSource, String globalUserId) {
 
-    if (!routers.isEmpty())
+    if (inited)
       return;
 
     for (RequestMapping requestMappings : requestMappings) {
-      //EXTRACT FILTERS
-      Predicate<FilterMapping> filterMappingMatchesWithUrl = f -> f.matchesWithUrl(requestMappings.getUrl());
-      Predicate<FilterMapping> isBeforeFilterMapping = f -> FilterMapping.Type.BEFORE.equalsIgnoreCase(f.getType());
-      Predicate<FilterMapping> isAfterFilterMapping = f -> FilterMapping.Type.AFTER.equalsIgnoreCase(f.getType());
-
-      List<FilterMapping> beforeFilterMappings = filterMappings.stream()
-          .filter(filterMappingMatchesWithUrl.and(isBeforeFilterMapping))
-          .collect(Collectors.toList());
-
-      /**
-       * В spring-webflux по умолчанию каждый новый before фильтр присоединяется к цепочке слева.
-       * Нам же нужно, чтобы фильтры выполнялись в порядке их определения пользователем.
-       * Поэтому разворачиваем список before фильтров
-       */
-      Collections.reverse(beforeFilterMappings);
-
-
-      List<FilterMapping> afterFilterMappings = filterMappings.stream()
-          .filter(filterMappingMatchesWithUrl.and(isAfterFilterMapping))
-          .collect(Collectors.toList());
-
-      FilterMapping lastFilter = null;
-      if (!afterFilterMappings.isEmpty()) {
-        lastFilter = afterFilterMappings.get(afterFilterMappings.size() - 1);
-      }
 
       //APPLY MAPPING
-      HandlerFunction func = request -> {
-        try {
-
+      Route func = (req, res) -> {
           String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
 
-          final String userId = String.valueOf(
-              request.attribute("userId").orElse(globalUserId)
-          );
+          String userIdAttribute = req.attribute("userId");
+
+          final String userId = userIdAttribute != null ? userIdAttribute : globalUserId;
 
           celesta.login(sesId, userId);
-          PyObject pyResult = celesta.runPython(sesId, requestMappings.getFunc(), taskSource.getTask(), request);
+          PyObject pyResult = celesta.runPython(sesId, requestMappings.getFunc(), taskSource.getTask(), req);
           celesta.logout(sesId, false);
 
           if (pyResult != null && !pyResult.equals(Py.None)) {
-            Mono result = (Mono)pyResult.__tojava__(Mono.class);
-            return result;
-          } else if (afterFilterMappings.isEmpty()) {
-            return ServerResponse.ok().body(Mono.just(""), String.class);
-          } else {
+
+            if (Py.NoConversion != pyResult.__tojava__(FluteResponse.class)) {
+              FluteResponse fr =  (FluteResponse)pyResult.__tojava__(FluteResponse.class);
+              Spark.halt(fr.getStatus(), fr.getText());
+            }
+
+            Spark.halt(200, pyResult.toString());
+            //return pyResult;
+
             return null;
+          } else {
+            return "";
           }
 
-        } catch (Exception ex) {
-          throw new RuntimeException(ex);
-        }
       };
 
-      RequestPredicate requestPredicate = RequestPredicates.method(requestMappings.getMethod())
-                      .and(RequestPredicates.path(requestMappings.getUrl()));
 
-      if (requestMappings.getContentType() != null) {
-        requestPredicate = requestPredicate.and(
-                RequestPredicates.contentType(MediaType.valueOf(requestMappings.getContentType()))
-        );
+      if (HttpMethod.GET.equals(requestMappings.getMethod())) {
+          Spark.get(requestMappings.getUrl(), func);
+      } else if (HttpMethod.POST.equals(requestMappings.getMethod())) {
+        if (requestMappings.getContentType() != null)
+          Spark.post(requestMappings.getUrl(), requestMappings.getContentType(), func);
+        else
+          Spark.post(requestMappings.getUrl(), func);
       }
 
-      RouterFunction router = RouterFunctions.route(requestPredicate, func);
-
-      //APPLY FILTERS
-      for (FilterMapping beforeFilterMapping : beforeFilterMappings)
-        router = appendFilterToRouter(router, beforeFilterMapping, celesta, taskSource, globalUserId, false);
-      for (FilterMapping afterFilterMapping : afterFilterMappings)
-        router = appendFilterToRouter(
-            router, afterFilterMapping, celesta, taskSource,
-            globalUserId, afterFilterMapping == lastFilter
-        );
-
-      routers.put(requestMappings, router);
     }
 
 
-  }
-  
-  private RouterFunction appendFilterToRouter(
-      RouterFunction router,
-      FilterMapping filterMapping,
-      Celesta celesta,
-      RestTaskSource taskSource,
-      String userId,
-      boolean isLast
-  ) {
-    return router.filter((request, next) -> {
-      //TODO:Сделать отдельный метод для вызова celesta-функций
-      final Mono<ServerResponse> response;
-      if (filterMapping.getType().equalsIgnoreCase(FilterMapping.Type.BEFORE)) {
-        try {
-          String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
-          celesta.login(sesId, userId);
-          PyObject pyResult = celesta.runPython(sesId, filterMapping.getFunc(), taskSource.getTask(), request);
-          celesta.logout(sesId, false);
-
-
-          //Если pyResult не null, то возвращаем его как ответ и прерываем цепочку хандлеров
-          if (pyResult != null && !pyResult.equals(Py.None)) {
-            response = (Mono)pyResult.__tojava__(Mono.class);
-            return response;
-          }
-
-        } catch (Exception ex) {
-          throw new RuntimeException(ex);
-        }
-
-        response = next.handle(request);
-      } else {
-        response = next.handle(request);
-
-        if (response != null) {
-          return response;
-        }
-
-        try {
-          String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
-          celesta.login(sesId, userId);
-          PyObject pyResult = celesta.runPython(sesId, filterMapping.getFunc(), taskSource.getTask(), request);
-          celesta.logout(sesId, false);
-
-
-          //Если pyResult не null, то возвращаем его как ответ и прерываем цепочку хандлеров
-          if (pyResult != null && !pyResult.equals(Py.None)) {
-            Mono<ServerResponse> javaResult = (Mono) pyResult.__tojava__(Mono.class);
-            return javaResult;
-          } else if (isLast) {
-            return ServerResponse.ok().body(Mono.just(""), String.class);
-          }
-        } catch (Exception ex) {
-          throw new RuntimeException(ex);
-        }
+    for (FilterMapping filterMapping: filterMappings) {
+      Filter filter = filter(filterMapping.getFunc(), celesta, taskSource, globalUserId);
+      for (String urlPattern: filterMapping.getUrlPatterns()) {
+        if (FilterMapping.Type.BEFORE.equals(filterMapping.getType()))
+          Spark.before(urlPattern, filter);
+        else
+          Spark.after(urlPattern, filter);
       }
-      return response;
-    });
+    }
+
+    inited = true;
   }
 
-  public Map<RequestMapping, RouterFunction> getRouters() {
-    return routers;
+
+  private Filter filter(String func, Celesta celesta, RestTaskSource taskSource, String userId) {
+    return (req, res) -> {
+      String sesId = String.format("FLUTE%08X", ThreadLocalRandom.current().nextInt());
+
+      celesta.login(sesId, userId);
+      PyObject pyResult = celesta.runPython(sesId, func, taskSource.getTask(), req);
+      celesta.logout(sesId, false);
+
+      if (pyResult != null && !pyResult.equals(Py.None)) {
+
+        if (Py.NoConversion != pyResult.__tojava__(FluteResponse.class)) {
+          FluteResponse fr = (FluteResponse) pyResult.__tojava__(FluteResponse.class);
+          Spark.halt(fr.getStatus(), fr.getText());
+        } else {
+          Spark.halt(200, pyResult.toString());
+        }
+
+      }
+
+    };
   }
 
 }

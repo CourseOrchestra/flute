@@ -1,25 +1,32 @@
 package ru.curs.flute.rest;
 
+import com.google.gson.Gson;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
+
 import ru.curs.celesta.*;
 import ru.curs.celesta.syscursors.UserRolesCursor;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
-import static org.springframework.web.reactive.function.BodyInserters.*;
+import spark.Spark;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by ioann on 01.08.2017.
@@ -29,27 +36,8 @@ public class RestServiceTest {
   private final static String GLOBAL_USER_ID = "flute";
   private static Celesta celesta;
 
-  private static WebTestClient fooClient;
-  private static WebTestClient fluteParamClient;
-  private static WebTestClient paramsClient;
-  private static WebTestClient jsonPostClient;
-  private static WebTestClient beforeFilterClient;
-  private static WebTestClient doubleBeforeFilterClient;
-  private static WebTestClient afterFilterClient;
-  private static WebTestClient doubleAfterFilterClient;
-  private static WebTestClient afterAndBeforeFilterClient;
-  private static WebTestClient globalCelestaUserIdClient;
-  private static WebTestClient customCelestaUserIdClient;
-  private static WebTestClient returnFromBeforeFilterClient;
-  private static WebTestClient returnFromHandlerClient;
-  private static WebTestClient returnFromAfterFilterClient;
-  private static WebTestClient noResultForHandlerClient;
-  private static WebTestClient noResultForAfterFilterClient;
-  private static WebTestClient applicationFormUrlencodedClient;
-
-  
   private static RestTaskSource taskSource = new RestTaskSource();
-  
+
   @BeforeClass
   public static void setUp() throws Exception {
 
@@ -67,7 +55,6 @@ public class RestServiceTest {
     }
 
 
-
     SessionContext sc = new SessionContext("super", "celesta_init");
 
     try (CallContext context = celesta.callContext(sc)) {
@@ -77,293 +64,214 @@ public class RestServiceTest {
       urCursor.insert();
     }
 
-
     RestMappingBuilder.getInstance().initRouters(celesta, taskSource, GLOBAL_USER_ID);
-
-    RequestMapping fooMapping = new RequestMapping("/foo", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    fooClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(fooMapping)
-    ).build();
-
-    RequestMapping fluteParamMapping = new RequestMapping("/fluteparam", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    fluteParamClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(fluteParamMapping)
-    ).build();
-    
-    RequestMapping paramsMapping = new RequestMapping("/params", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    paramsClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(paramsMapping)
-    ).build();
-
-    RequestMapping jsonPostMapping = new RequestMapping("/jsonPost", "", "POST",
-            MediaType.APPLICATION_JSON.getType());
-    jsonPostClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(jsonPostMapping)
-    ).build();
-
-    RequestMapping beforeTestMapping = new RequestMapping("/beforeTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    beforeFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(beforeTestMapping)
-    ).build();
-
-    RequestMapping doubleBeforeTestMapping = new RequestMapping("/doubleBeforeTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    doubleBeforeFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(doubleBeforeTestMapping)
-    ).build();
-
-    RequestMapping afterTestMapping = new RequestMapping("/afterTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    afterFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(afterTestMapping)
-    ).build();
-
-    RequestMapping doubleAfterTestMapping = new RequestMapping("/doubleAfterTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    doubleAfterFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(doubleAfterTestMapping)
-    ).build();
-
-    RequestMapping afterAndBeforeFilterTestMapping = new RequestMapping("/afterAndBeforeTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    afterAndBeforeFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(afterAndBeforeFilterTestMapping)
-    ).build();
-
-    RequestMapping globalCelestaUserIdTestMapping = new RequestMapping("/globalCelestaUserIdTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    globalCelestaUserIdClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(globalCelestaUserIdTestMapping)
-    ).build();
-
-    RequestMapping customCelestaUserIdTestMapping = new RequestMapping("/customCelestaUserIdTest", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    customCelestaUserIdClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(customCelestaUserIdTestMapping)
-    ).build();
-
-    RequestMapping testReturnFromBeforeMapping = new RequestMapping("/testReturnFromBefore", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    returnFromBeforeFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(testReturnFromBeforeMapping)
-    ).build();
-
-    RequestMapping testReturnFromHandlerMapping = new RequestMapping("/testReturnFromHandler", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    returnFromHandlerClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(testReturnFromHandlerMapping)
-    ).build();
-
-    RequestMapping testReturnFromAfterMapping = new RequestMapping("/testReturnFromAfter", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    returnFromAfterFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(testReturnFromAfterMapping)
-    ).build();
-
-    RequestMapping testNoResultForHandlerMapping = new RequestMapping("/testNoResultForHandler", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    noResultForHandlerClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(testNoResultForHandlerMapping)
-    ).build();
-
-    RequestMapping testNoResultForAfterFilterMapping = new RequestMapping("/testNoResultForAfterFilter", "", "GET",
-            MediaType.APPLICATION_JSON.getType());
-    noResultForAfterFilterClient = WebTestClient.bindToRouterFunction(
-        RestMappingBuilder.getInstance().getRouters().get(testNoResultForAfterFilterMapping)
-    ).build();
-
-    RequestMapping applicationFormUrlencodedMapping = new RequestMapping("/applicationFormUrlencoded", "", "POST",
-            MediaType.APPLICATION_FORM_URLENCODED.getType());
-    applicationFormUrlencodedClient = WebTestClient.bindToRouterFunction(
-            RestMappingBuilder.getInstance().getRouters().get(applicationFormUrlencodedMapping)
-    ).build();
   }
 
 
   @AfterClass
   public static void destroy() {
     celesta.close();
+    Spark.stop();
   }
 
   @Test
   public void testRestServiceGetJson() {
-    fooClient.get().uri("/foo").exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"foo\":1,\"bar\":2}");
+    TestResponse res = get("/foo");
+
+    assertEquals(200, res.status);
+    assertEquals("{\"foo\": 1, \"bar\": 2}", res.body);
   }
+
+  @Test
+  public void testFluteParam() throws InterruptedException, EFluteCritical {
+    String sourceId = taskSource.getTask().getSourceId();
+    assertFalse(sourceId.isEmpty());
+
+    TestResponse res = get("/fluteparam");
+
+    assertEquals(200, res.status);
+    assertEquals(sourceId, res.body);
+  }
+
 
   @Test
   public void testRestServiceGetCustomResponseSuccess() {
-    paramsClient.get().uri("/params?sort=desc&id=5&category=task").exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("/params?sort=desc&id=5&category=task");
+    TestResponse res = get("/params?sort=desc&id=5&category=task");
+
+    assertEquals(200, res.status);
+    assertEquals("/params?sort=desc&id=5&category=task", res.body);
   }
+
 
   @Test
   public void testRestServiceGetCustomResponseWithoutParams() {
-    paramsClient.get().uri("/params").exchange()
-        .expectStatus().is4xxClientError()
-        .expectBody(String.class)
-        .isEqualTo("there are no params received");
+    TestResponse res = get("/params");
+
+    assertEquals(422, res.status);
+    assertEquals("there are no params received", res.body);
   }
 
 
   @Test
-  public void testJsonPost() {
-    jsonPostClient.post().uri("/jsonPost")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromObject("{\"numb\":1}"))
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"numb\":2}");
-  }
-  
-  
-  @Test
-  public void testFluteParam() throws InterruptedException, EFluteCritical {
-	String sourceId = taskSource.getTask().getSourceId();
-	assertFalse(sourceId.isEmpty());
-	  
-	fluteParamClient.get().uri("/fluteparam")
-    .exchange()
-    .expectStatus().is2xxSuccessful()
-    .expectBody(String.class)
-    .isEqualTo(sourceId);
-    
+  public void testJsonPost() throws Exception {
+      TestResponse res = post("/jsonPost", new StringEntity("{\"numb\":1}"));
+
+      assertEquals(200, res.status);
+      assertEquals("{\"numb\": 2}", res.body);
   }
 
   @Test
   public void testBeforeFilter() {
-    beforeFilterClient.get().uri("/beforeTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"foo\":2}");
+      TestResponse res = get("/beforeTest");
+
+      assertEquals(200, res.status);
+      assertEquals("{\"foo\": 2}", res.body);
   }
+
 
   @Test
   public void testDoubleBeforeFilter() {
-    doubleBeforeFilterClient.get().uri("/doubleBeforeTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("[1,2,3]");
+      TestResponse res = get("/double/before/test");
+
+      assertEquals(200, res.status);
+      assertEquals("[1, 2, 3]", res.body);
   }
 
   @Test
   public void testAfterFilter() {
-    afterFilterClient.get().uri("/afterTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"foo\":2}");
+      TestResponse res = get("/afterTest");
+
+      assertEquals(200, res.status);
+      assertEquals("{\"foo\": 2}", res.body);
   }
 
   @Test
   public void testDoubleAfterFilter() {
-    doubleAfterFilterClient.get().uri("/doubleAfterTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("[1,2,3]");
+      TestResponse res = get("/double/after/test");
+
+      assertEquals(200, res.status);
+      assertEquals("[1, 2, 3]", res.body);
   }
 
   @Test
   public void testAfterAndBeforeTestFilter() {
-    afterAndBeforeFilterClient.get().uri("/afterAndBeforeTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("[1,2,3]");
+      TestResponse res = get("/afterAndBeforeTest");
+
+      assertEquals(200, res.status);
+      assertEquals("[1, 2, 3]", res.body);
   }
 
   @Test
   public void testGlobalCelestaUserId() {
-    globalCelestaUserIdClient.get().uri("/globalCelestaUserIdTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"userId\":\"" + GLOBAL_USER_ID +"\"}");
+      TestResponse res = get("/globalCelestaUserIdTest");
+      assertEquals(200, res.status);
+      assertEquals("{\"userId\": \"" + GLOBAL_USER_ID +"\"}", res.body);
   }
 
   @Test
   public void testCustomCelestaUserId() {
-    customCelestaUserIdClient.get().uri("/customCelestaUserIdTest")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"userId\":\"testUser\"}");
+      TestResponse res = get("/customCelestaUserIdTest");
+      assertEquals(200, res.status);
+      assertEquals("{\"userId\": \"testUser\"}", res.body);
   }
-
 
   @Test
   public void testReturnFromBeforeFilter() {
-    returnFromBeforeFilterClient.get().uri("/testReturnFromBefore")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"foo\":1}");
+      TestResponse res = get("/testReturnFromBefore");
+      assertEquals(200, res.status);
+      assertEquals("{\"foo\": 1}", res.body);
   }
+
 
   @Test
   public void testReturnFromHandler() {
-    returnFromHandlerClient.get().uri("/testReturnFromHandler")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"foo\":1}");
+      TestResponse res = get("/testReturnFromHandler");
+      assertEquals(200, res.status);
+      assertEquals("{\"foo\": 1}", res.body);
   }
 
   @Test
   public void testReturnFromAfterFilter() {
-    returnFromAfterFilterClient.get().uri("/testReturnFromAfter")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("{\"foo\":1}");
+      TestResponse res = get("/testReturnFromAfter");
+      assertEquals(200, res.status);
+      assertEquals("{\"foo\": 1}", res.body);
   }
 
   @Test
   public void testNoResultForHandler() {
-    noResultForHandlerClient.get().uri("/testNoResultForHandler")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("");
+      TestResponse res = get("/testNoResultForHandler");
+      assertEquals(200, res.status);
+      assertEquals("", res.body);
   }
+
 
   @Test
   public void testNoResultForAfterFilter() {
-    noResultForAfterFilterClient.get().uri("/testNoResultForAfterFilter")
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBody(String.class)
-        .isEqualTo("");
+      TestResponse res = get("/testNoResultForAfterFilter");
+      assertEquals(200, res.status);
+      assertEquals("", res.body);
   }
 
   @Test
   public void testFormUrlencodedSupport() {
-    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+      List<NameValuePair> formData = new ArrayList<>();
 
-    List<String> param1Values = Arrays.asList("val1", "1");
-    formData.put("param1", param1Values);
+      formData.add(new BasicNameValuePair("param1", "val1"));
+      formData.add(new BasicNameValuePair("param1", "1"));
 
-    List<String> param2Values = Arrays.asList("val2");
-    formData.put("param2", param2Values);
+      formData.add(new BasicNameValuePair("param2", "val2"));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData, Consts.UTF_8);
 
-    applicationFormUrlencodedClient.post().uri("/applicationFormUrlencoded")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(fromFormData(formData))
-            .exchange()
-            .expectBody(String.class)
-            .isEqualTo("param1=val1,1,param2=val2,");
+      TestResponse res = post("/applicationFormUrlencoded", entity);
+
+
+      assertEquals(200, res.status);
+      assertEquals("param1=val1,1,param2=val2,", res.body);
+  }
+
+  @Test
+  public void testCountFromDb() {
+      TestResponse res = get("/count");
+      assertEquals(200, res.status);
+      assertEquals("{\"count\": 0}", res.body);
+  }
+
+  private TestResponse get(String path) {
+      try {
+          HttpGet request = new HttpGet("http://localhost:" + Spark.port() + path);
+          HttpResponse response = HttpClientBuilder.create().build().execute(request);
+
+          return new TestResponse(response.getStatusLine().getStatusCode(), EntityUtils.toString(response.getEntity()));
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
+  }
+
+  private TestResponse post(String path, HttpEntity entity) {
+      try {
+      HttpPost request = new HttpPost("http://localhost:" + Spark.port() + path);
+      if (entity != null)
+          request.setEntity(entity);
+      HttpResponse response = HttpClientBuilder.create().build().execute(request);
+          return new TestResponse(response.getStatusLine().getStatusCode(), EntityUtils.toString(response.getEntity()));
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
+  }
+
+  private static class TestResponse {
+
+    public final String body;
+    public final int status;
+
+    public TestResponse(int status, String body) {
+      this.status = status;
+      this.body = body;
+    }
+
+    public Map<String,String> json() {
+      return new Gson().fromJson(body, HashMap.class);
+    }
   }
 }
 

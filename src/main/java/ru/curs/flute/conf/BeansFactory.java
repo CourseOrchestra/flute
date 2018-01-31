@@ -2,16 +2,11 @@ package ru.curs.flute.conf;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-import org.springframework.web.reactive.function.server.*;
-import reactor.ipc.netty.http.server.HttpServer;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
@@ -21,6 +16,9 @@ import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.rest.RestMappingBuilder;
 import ru.curs.flute.source.RestTaskSource;
+import spark.Spark;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 public class BeansFactory {
@@ -79,21 +77,21 @@ public class BeansFactory {
                 try {
                     properties = getCelesta().getSetupProperties();
 
-                    switch (new AppSettings(properties).getDBType()) {
-                        case MSSQL:
-                            return DBType.MSSQLServer;
-                        case ORACLE:
-                            return DBType.Oracle;
-                        case H2:
-                            return DBType.H2;
-                        case POSTGRES:
-                        default:
-                            return DBType.PostgreSQL;
-                    }
-                } catch (EFluteCritical | CelestaException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+          switch (new AppSettings(properties).getDBType()) {
+            case MSSQL:
+              return DBType.MSSQLServer;
+            case ORACLE:
+              return DBType.Oracle;
+              case H2:
+                return DBType.H2;
+                case POSTGRESQL:
+                  default:
+                    return DBType.PostgreSQL;
+          }
+        } catch (EFluteCritical |CelestaException e) {
+          throw new RuntimeException(e);
+        }
+      }
 
         };
     }
@@ -141,30 +139,19 @@ public class BeansFactory {
         }
     }
 
-    @Bean
-    public HttpServer httpServer() {
-        return params.getRestPort().map(i -> HttpServer.create(params.getRestHost(), i)).orElse(null);
-    }
+  @PostConstruct
+  public void init(@Autowired Celesta celesta, @Autowired RestTaskSource taskSource) {
+    if (params.getRestPort() == null)
+      return;
 
-    @Bean
-    public ReactorHttpHandlerAdapter httpHandlerAdapter(@Autowired RestTaskSource taskSource) throws Exception {
-        ReactorHttpHandlerAdapter adapter = null;
 
-        if (params.getRestPort() != null) {
-            RestMappingBuilder.getInstance().initRouters(getCelesta(), taskSource, getGlobalParams().getFluteUserId());
-            if (!RestMappingBuilder.getInstance().getRouters().isEmpty()) {
-                Collection<RouterFunction> routers = RestMappingBuilder.getInstance()
-                        .getRouters()
-                        .values();
+    params.getRestPort().ifPresent(port -> {
+        Spark.port(port);
+        Spark.ipAddress(params.getRestHost());
+        RestMappingBuilder.getInstance().initRouters(celesta, taskSource, getGlobalParams().getFluteUserId());
+    });
 
-                RouterFunction router = routers.stream().reduce((r, r2) -> r == null ? r : r.and(r2)).get();
-                HttpHandler httpHandler = RouterFunctions.toHttpHandler(router);
-
-                adapter = new ReactorHttpHandlerAdapter(httpHandler);
-            }
-        }
-        return adapter;
-    }
+  }
 
     /**
      * A pool of RedisConnections.
