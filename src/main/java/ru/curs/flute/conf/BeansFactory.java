@@ -14,11 +14,7 @@ import ru.curs.celesta.*;
 import ru.curs.flute.GlobalParams;
 import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.exception.EFluteCritical;
-import ru.curs.flute.rest.RestMappingBuilder;
-import ru.curs.flute.source.RestTaskSource;
-import spark.Spark;
 
-import javax.annotation.PostConstruct;
 
 @Configuration
 public class BeansFactory {
@@ -138,20 +134,6 @@ public class BeansFactory {
             throw new EFluteCritical(e.getMessage());
         }
     }
-
-  @PostConstruct
-  public void init(@Autowired Celesta celesta, @Autowired RestTaskSource taskSource) {
-    if (params.getRestPort() == null)
-      return;
-
-
-    params.getRestPort().ifPresent(port -> {
-        Spark.port(port);
-        Spark.ipAddress(params.getRestHost());
-        RestMappingBuilder.getInstance().initRouters(celesta, taskSource, getGlobalParams().getFluteUserId());
-    });
-
-  }
 
     /**
      * A pool of RedisConnections.

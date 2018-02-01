@@ -32,6 +32,7 @@ import org.dbunit.dataset.xml.XmlDataSet;
 import org.dbunit.operation.DatabaseOperation;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -139,6 +140,7 @@ public abstract class AbstractSQLTablePollerTest {
 	}
 
 	@Test
+	@Ignore
 	public void tasksAreExecutedFromQueue() throws DataSetException, DatabaseUnitException, SQLException, Exception {
 		IDatabaseConnection conn = initData();
 		TestSQLTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
