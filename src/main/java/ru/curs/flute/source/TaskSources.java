@@ -66,7 +66,7 @@ public class TaskSources extends XMLParamsParser {
             textActions.put("params", ((LoopTaskSupplier) currentSource)::setParams);
             textActions.put("count",
                     s -> {
-                        processInt(s, "pollingperiod", true, ((LoopTaskSupplier) currentSource)::setCount);
+                        processInt(s, "count", true, ((LoopTaskSupplier) currentSource)::setCount);
                     });
             textActions.put("waitonsuccess", s -> {
                 processInt(s, "waitonsuccess", true, ((LoopTaskSupplier) currentSource)::setWaitOnSuccess);
