@@ -7,3 +7,5 @@ The tool to convert Celesta routines to RESTful services, queue processors, sche
 https://habrahabr.ru/post/335966/
 
 https://corchestra.ru/wiki/index.php?title=Flute
+
+<img src="flute_duke.png" width="200px">

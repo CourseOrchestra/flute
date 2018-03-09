@@ -35,7 +35,7 @@ public class BeansFactory {
         ConnectionPoolConfiguration cpConf = new ConnectionPoolConfiguration();
         String jdbcConnectionUrl = params.getConnString();
         cpConf.setJdbcConnectionUrl(jdbcConnectionUrl);
-        cpConf.setDriverClassName(AppSettings.resolveDbType(jdbcConnectionUrl).getDriverClassName());
+        cpConf.setDriverClassName(DBType.resolveByJdbcUrl(jdbcConnectionUrl).getDriverClassName());
         cpConf.setLogin(params.getDBUser());
         cpConf.setPassword(params.getDBPassword());
 
