@@ -17,7 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.curs.celesta.*;
-import ru.curs.celesta.syscursors.UserRolesCursor;
+import ru.curs.celesta.syscursors.UserrolesCursor;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
 import spark.Spark;
@@ -55,10 +55,10 @@ public class RestServiceTest {
     }
 
 
-    SessionContext sc = new SessionContext("super", "celesta_init");
+      PySessionContext sc = new PySessionContext("super", "celesta_init");
 
     try (CallContext context = celesta.callContext(sc)) {
-      UserRolesCursor urCursor = new UserRolesCursor(context);
+      UserrolesCursor urCursor = new UserrolesCursor(context);
       urCursor.setUserid("testUser");
       urCursor.setRoleid("editor");
       urCursor.insert();
