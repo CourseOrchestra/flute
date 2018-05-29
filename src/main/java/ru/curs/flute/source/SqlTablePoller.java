@@ -8,6 +8,7 @@ import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.task.QueueTask;
+import ru.curs.flute.task.TaskUnit;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,13 +38,13 @@ public class SqlTablePoller extends QueueSource {
   private String getSelectNextStmt() {
     switch (pool.getDBType()) {
       case MSSQLServer:
-        return "SELECT TOP 1 \"id\", \"script\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\"";
+        return "SELECT TOP 1 \"id\", \"script\", \"type\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\"";
       case Oracle:
-        return "SELECT * FROM (SELECT \"id\", \"script\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\") WHERE ROWNUM <=1";
+        return "SELECT * FROM (SELECT \"id\", \"script\", \"type\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\") WHERE ROWNUM <=1";
       case PostgreSQL:
       case H2:
       default:
-        return "SELECT \"id\", \"script\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\" LIMIT 1";
+        return "SELECT \"id\", \"script\", \"type\", \"parameters\" FROM %s WHERE \"status\" = 0 ORDER BY \"id\" LIMIT 1";
     }
   }
 
@@ -93,11 +94,12 @@ public class SqlTablePoller extends QueueSource {
       try (ResultSet rs = selectNextStmt.executeQuery()) {
         if (rs.next()) {
           int id = rs.getInt(1);
-          String script = rs.getString(2);
-          String params = rs.getString(3);
+          String qualifier = rs.getString(2);
+          String type = rs.getString(3);
+          String params = rs.getString(4);
           markNextStmt.setInt(1, id);
           markNextStmt.executeUpdate();
-          return new QueueTask(this, id, script, params);
+          return new QueueTask(this, id, new TaskUnit(qualifier, TaskUnit.Type.valueOf(type)), params);
         }
       } catch (SQLException e) {
         throw new EFluteCritical("Error during getting the next task data: " + e.getMessage());

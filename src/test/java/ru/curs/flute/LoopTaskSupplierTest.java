@@ -12,38 +12,35 @@ import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.LoopTaskSupplier;
 import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.SingleTask;
+import ru.curs.flute.task.TaskUnit;
 
 public class LoopTaskSupplierTest {
 	@Test
 	public void singleTaskSuppliedEachTime() throws InterruptedException {
 		LoopTaskSupplier s = new LoopTaskSupplier();
-		s.setScript("foobar");
+		s.setTaskUnit(new TaskUnit("foobar", TaskUnit.Type.SCRIPT));
 		s.setParams("barfoo");
 
 		assertEquals(1000, s.getWaitOnFailure());
 		assertEquals(1000, s.getWaitOnSuccess());
 
 		SingleTask t1 = s.getTask();
-		assertEquals("foobar", t1.getScript());
+		assertEquals("foobar", t1.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.SCRIPT, t1.getTaskUnit().getType());
 		assertEquals("barfoo", t1.getParams());
 
 		SingleTask t2 = s.getTask();
-		assertEquals("foobar", t2.getScript());
+		assertEquals("foobar", t2.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.SCRIPT, t2.getTaskUnit().getType());
 		assertEquals("barfoo", t2.getParams());
 
 		assertNotSame(t1, t2);
-
-		s.setScript("foofoo");
-		t1 = s.getTask();
-		assertEquals("foofoo", t1.getScript());
-		assertEquals("barfoo", t1.getParams());
-
 	}
 
 	@Test
 	public void taskIsExecutedInLoop() throws InterruptedException {
 		TestLoopTaskSupplier s = new TestLoopTaskSupplier();
-		s.setScript("foobar");
+		s.setTaskUnit(new TaskUnit("foobar", TaskUnit.Type.SCRIPT));
 		s.setParams("barfoo");
 		s.setWaitOnSuccess(10);
 		ExecutorService es = Executors.newSingleThreadExecutor();
@@ -60,7 +57,7 @@ public class LoopTaskSupplierTest {
 	@Test
 	public void failedTaskIsExecutedInLoop() throws InterruptedException {
 		TestLoopTaskSupplier s = new TestLoopTaskSupplier();
-		s.setScript("foobar");
+		s.setTaskUnit(new TaskUnit("foobar", TaskUnit.Type.SCRIPT));
 		s.setParams("FAIL");
 		s.setWaitOnFailure(10);
 		ExecutorService es = Executors.newSingleThreadExecutor();

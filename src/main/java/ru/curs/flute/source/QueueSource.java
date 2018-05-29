@@ -8,6 +8,7 @@ import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.FluteTaskState;
 import ru.curs.flute.task.QueueTask;
+import ru.curs.flute.task.TaskUnit;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -79,7 +80,8 @@ public abstract class QueueSource extends TaskSource {
 
   public static String toJSON(QueueTask t) {
     JsonObject o = new JsonObject();
-    o.addProperty("script", t.getScript());
+    TaskUnit taskUnit = t.getTaskUnit();
+    o.addProperty(taskUnit.getType().toString().toLowerCase(), taskUnit.getQualifier());
     o.addProperty("params", t.getParams());
     return o.toString();
   }
@@ -93,9 +95,13 @@ public abstract class QueueSource extends TaskSource {
       throw new EFluteNonCritical("Message parsing error: " + e.getMessage());
     }
 
-    JsonElement script = o.get("script");
-    if (script == null)
-      throw new EFluteNonCritical(String.format("No script value found in message '%s'", string));
+    final TaskUnit taskUnit;
+    try {
+      taskUnit = TaskUnit.fromJson(o);
+    } catch (Exception e) {
+      throw new EFluteNonCritical(String.format("Error of the message processing '%s'", string));
+    }
+
 
     JsonElement params = o.get("params");
 
@@ -120,7 +126,7 @@ public abstract class QueueSource extends TaskSource {
       } else {
         taskParams = params.toString();
       }
-      QueueTask result = new QueueTask(this, id, script.getAsString(), taskParams);
+      QueueTask result = new QueueTask(this, id, taskUnit, taskParams);
       return result;
     } catch (RuntimeException e) {
       throw new EFluteNonCritical(String.format("Message parse error: script and params should be strings."));

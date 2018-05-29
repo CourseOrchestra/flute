@@ -10,7 +10,11 @@ import org.springframework.context.annotation.*;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
-import ru.curs.celesta.*;
+import ru.curs.celesta.CelestaException;
+import ru.curs.celesta.ConnectionPool;
+import ru.curs.celesta.ConnectionPoolConfiguration;
+import ru.curs.celesta.DBType;
+import ru.curs.celesta.vintage.Celesta;
 import ru.curs.celesta.vintage.VintageAppSettings;
 import ru.curs.flute.GlobalParams;
 import ru.curs.flute.JDBCConnectionPool;
@@ -95,8 +99,6 @@ public class BeansFactory {
 
     /**
      * The Celesta singleton instance.
-     *
-     * @throws CelestaException Celesta configuration exception.
      */
     @Bean
     public Celesta getCelesta() throws EFluteCritical {

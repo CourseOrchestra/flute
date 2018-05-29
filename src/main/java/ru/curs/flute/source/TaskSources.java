@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +20,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.XMLParamsParser;
+import ru.curs.flute.task.TaskUnit;
 
 @Component
 @Import({
@@ -25,6 +28,9 @@ import ru.curs.flute.XMLParamsParser;
         ScheduledTaskSupplier.class, LoopTaskSupplier.class
 })
 public class TaskSources extends XMLParamsParser {
+    private static final Pattern SCRIPT_PATTERN = Pattern.compile("([A-Za-z][A-Za-z0-9]*)(\\.[A-Za-z_]\\w*)+");
+    private static final Pattern PROC_PATTERN = Pattern.compile("([A-Za-z]\\w*)(\\.[A-Za-z]\\w*)+(\\$[A-Za-z]\\w*)*#([A-Za-z]\\w*)");
+
     private final List<TaskSource> tsList = new ArrayList<>();
     private final Map<String, Runnable> startActions = new HashMap<>();
     private final Map<String, Consumer<String>> textActions = new HashMap<>();
@@ -55,19 +61,33 @@ public class TaskSources extends XMLParamsParser {
             tsList.add(currentSource);
             initTextActions();
             textActions.put("schedule", ((ScheduledTaskSupplier) currentSource)::setSchedule);
-            textActions.put("script", ((ScheduledTaskSupplier) currentSource)::setScript);
+            textActions.put("script", script -> {
+                TaskUnit taskUnit = new TaskUnit(script, TaskUnit.Type.SCRIPT);
+                ((ScheduledTaskSupplier) currentSource).setTaskUnit(taskUnit);
+            });
+            textActions.put("proc", script -> {
+                TaskUnit taskUnit = new TaskUnit(script, TaskUnit.Type.PROC);
+                ((ScheduledTaskSupplier) currentSource).setTaskUnit(taskUnit);
+            });
             textActions.put("params", ((ScheduledTaskSupplier) currentSource)::setParams);
         });
         startActions.put("looptask", () -> {
             currentSource = ctx.getBean(LoopTaskSupplier.class);
             tsList.add(currentSource);
             initTextActions();
-            textActions.put("script", ((LoopTaskSupplier) currentSource)::setScript);
+            textActions.put("script", script -> {
+                TaskUnit taskUnit = new TaskUnit(script, TaskUnit.Type.SCRIPT);
+                ((LoopTaskSupplier) currentSource).setTaskUnit(taskUnit);
+            });
+            textActions.put("proc", script -> {
+                TaskUnit taskUnit = new TaskUnit(script, TaskUnit.Type.PROC);
+                ((LoopTaskSupplier) currentSource).setTaskUnit(taskUnit);
+            });
             textActions.put("params", ((LoopTaskSupplier) currentSource)::setParams);
             textActions.put("count",
-                    s -> {
-                        processInt(s, "count", true, ((LoopTaskSupplier) currentSource)::setCount);
-                    });
+                    s ->
+                        processInt(s, "count", true, ((LoopTaskSupplier) currentSource)::setCount)
+                    );
             textActions.put("waitonsuccess", s -> {
                 processInt(s, "waitonsuccess", true, ((LoopTaskSupplier) currentSource)::setWaitOnSuccess);
             });
@@ -88,7 +108,31 @@ public class TaskSources extends XMLParamsParser {
         textActions.put("terminationtimeout", s -> {
             processInt(s, "terminationtimeout", true, ((QueueSource) currentSource)::setTerminationTimeout);
         });
-        textActions.put("finalizer", currentSource::setFinalizer);
+
+
+        textActions.put("finalizer", finalizer -> {
+            Matcher scriptMatcher = SCRIPT_PATTERN.matcher(finalizer);
+            Matcher procMatcher = PROC_PATTERN.matcher(finalizer);
+
+            final TaskUnit.Type type;
+
+            if (scriptMatcher.matches())
+                type = TaskUnit.Type.SCRIPT;
+            else if (procMatcher.matches())
+                type = TaskUnit.Type.PROC;
+            else
+                throw new RuntimeException(String.format("Finalizer format isn't supported: ", finalizer));
+
+            if (currentSource instanceof HasTaskUnit) {
+                TaskUnit currentTaskUnit = ((HasTaskUnit) currentSource).getTaskUnit();
+                if (!type.equals(currentTaskUnit.getType())) {
+                    throw new RuntimeException("Finalizer must have the same type as the task unit");
+                }
+            }
+
+            TaskUnit taskUnit = new TaskUnit(finalizer, type);
+            currentSource.setFinalizer(taskUnit);
+        });
     }
 
     public List<TaskSource> getSources() {
@@ -115,7 +159,7 @@ public class TaskSources extends XMLParamsParser {
                 LoopTaskSupplier prev = (LoopTaskSupplier) currentSource;
                 for (int i = 1; i < prev.getCount(); i++) {
                     LoopTaskSupplier current = ctx.getBean(LoopTaskSupplier.class);
-                    current.setScript(prev.getScript());
+                    current.setTaskUnit(prev.getTaskUnit());
                     current.setParams(prev.getParams());
                     current.setCount(prev.getCount());
                     current.setWaitOnFailure(prev.getWaitOnFailure());

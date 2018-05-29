@@ -3,26 +3,27 @@ package ru.curs.flute.source;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import ru.curs.flute.task.SingleTask;
+import ru.curs.flute.task.TaskUnit;
 
 /**
  * Created by ioann on 02.08.2017.
  */
 @Component
 @Scope("prototype")
-public class LoopTaskSupplier extends TaskSource {
+public class LoopTaskSupplier extends TaskSource implements HasTaskUnit {
   public static final int DEFAULT_WAIT_ON_SUCCESS = 1000;
   public static final int DEFAULT_WAIT_ON_FAILURE = 1000;
 
   private int waitOnSuccess = DEFAULT_WAIT_ON_SUCCESS;
   private int waitOnFailure = DEFAULT_WAIT_ON_FAILURE;
 
-  private String script;
+  private TaskUnit taskUnit;
   private String params;
   private int count = 1;
 
   @Override
   public SingleTask getTask() throws InterruptedException {
-    return new SingleTask(this, 0, script, params);
+    return new SingleTask(this, 0, taskUnit, params);
   }
 
   @Override
@@ -64,17 +65,19 @@ public class LoopTaskSupplier extends TaskSource {
     this.waitOnFailure = waitOnFailure;
   }
 
+  public TaskUnit getTaskUnit() {
+    return taskUnit;
+  }
 
-  public void setScript(String script) {
-    this.script = script;
+  public void setTaskUnit(TaskUnit taskUnit) {
+    if (this.taskUnit == null)
+      this.taskUnit = taskUnit;
+    else
+      throw new RuntimeException("TaskUnit already exists");
   }
 
   public void setParams(String params) {
     this.params = params;
-  }
-
-  public String getScript() {
-    return script;
   }
 
   public String getParams() {

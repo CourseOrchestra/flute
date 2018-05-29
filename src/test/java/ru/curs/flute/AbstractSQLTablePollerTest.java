@@ -3,7 +3,6 @@ package ru.curs.flute;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -42,12 +41,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import ru.curs.celesta.Celesta;
+import ru.curs.celesta.vintage.Celesta;
 import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.SqlTablePoller;
 import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.FluteTaskState;
 import ru.curs.flute.task.QueueTask;
+import ru.curs.flute.task.TaskUnit;
 
 public abstract class AbstractSQLTablePollerTest {
 
@@ -73,12 +73,14 @@ public abstract class AbstractSQLTablePollerTest {
 		QueueTask t = poller.getTask();
 		assertNotNull(t);
 		assertEquals(1, t.getId());
-		assertEquals("hello", t.getScript());
+		assertEquals("hello", t.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.SCRIPT, t.getTaskUnit().getType());
 		assertEquals("param1", t.getParams());
 
 		t = poller.getTask();
 		assertEquals(2, t.getId());
-		assertEquals("hello", t.getScript());
+		assertEquals("hello", t.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.SCRIPT, t.getTaskUnit().getType());
 		assertEquals("param2", t.getParams());
 
 		IDataSet actual = conn.createDataSet();
@@ -89,8 +91,15 @@ public abstract class AbstractSQLTablePollerTest {
 
 		t = poller.getTask();
 		assertEquals(3, t.getId());
-		assertEquals("hello", t.getScript());
+		assertEquals("hello", t.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.SCRIPT, t.getTaskUnit().getType());
 		assertEquals("param3", t.getParams());
+
+		t = poller.getTask();
+		assertEquals(4, t.getId());
+		assertEquals("ru.curs.Hello#hello", t.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.PROC, t.getTaskUnit().getType());
+		assertEquals("param4", t.getParams());
 
 		CompletableFuture<QueueTask> f = CompletableFuture.supplyAsync(() -> {
 			try {
@@ -105,15 +114,22 @@ public abstract class AbstractSQLTablePollerTest {
 		IDataSet dataSet = new XmlDataSet(AbstractSQLTablePollerTest.class.getResourceAsStream("newTaskDataSet.xml"));
 		DatabaseOperation.INSERT.execute(conn, dataSet);
 		t = f.get();
-		assertEquals(4, t.getId());
-		assertEquals("foo", t.getScript());
-		assertEquals("task4", t.getParams());
+		assertEquals(5, t.getId());
+		assertEquals("foo", t.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.SCRIPT, t.getTaskUnit().getType());
+		assertEquals("task5", t.getParams());
+
+		t = poller.getTask();
+		assertEquals(6, t.getId());
+		assertEquals("ru.curs.Foo#foo", t.getTaskUnit().getQualifier());
+		assertEquals(TaskUnit.Type.PROC, t.getTaskUnit().getType());
+		assertEquals("task6", t.getParams());
 
 		conn.close();
 	}
 
 	@Test
-	public void taskStateIsStoredInDB() throws DataSetException, DatabaseUnitException, SQLException, Exception {
+	public void taskStateIsStoredInDB() throws Exception {
 		IDatabaseConnection conn = initData();
 		SqlTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
 		poller.setTableName("\"tasks\"");
@@ -130,6 +146,11 @@ public abstract class AbstractSQLTablePollerTest {
 		t3.setMessage("error message");
 		t3.setState(FluteTaskState.FAIL);
 
+		QueueTask t4 = poller.getTask();
+		t4.setMessage("foo");
+		t4.setState(FluteTaskState.SUCCESS);
+
+
 		IDataSet actual = conn.createDataSet();
 		InputStream is = AbstractSQLTablePollerTest.class.getResourceAsStream("expectedTasksDataset2.xml");
 		IDataSet expected = new XmlDataSet(is);
@@ -141,14 +162,14 @@ public abstract class AbstractSQLTablePollerTest {
 
 	@Test
 	@Ignore
-	public void tasksAreExecutedFromQueue() throws DataSetException, DatabaseUnitException, SQLException, Exception {
+	public void tasksAreExecutedFromQueue() throws Exception {
 		IDatabaseConnection conn = initData();
 		TestSQLTablePoller poller = ctx.getBean(TestSQLTablePoller.class);
 
 		poller.setMaxThreads(2);
 		poller.setTableName("\"tasks\"");
 		final Set<String> expected = Collections
-				.synchronizedSet(new HashSet<String>(Arrays.asList("param1", "param2", "param3")));
+				.synchronizedSet(new HashSet<>(Arrays.asList("param1", "param2", "param3")));
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		poller.log = s -> {
 			expected.remove(s);

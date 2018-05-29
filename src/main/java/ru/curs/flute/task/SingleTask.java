@@ -7,8 +7,8 @@ import ru.curs.flute.source.LoopTaskSupplier;
  */
 public class SingleTask extends FluteTask {
 
-  public SingleTask(LoopTaskSupplier ts, int id, String script, String params) {
-    super(ts, id, script, params);
+  public SingleTask(LoopTaskSupplier ts, int id, TaskUnit taskUnit, String params) {
+    super(ts, id, taskUnit, params);
   }
 
 }
