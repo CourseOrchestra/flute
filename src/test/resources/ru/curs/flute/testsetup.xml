@@ -34,6 +34,11 @@
 		<script>foo.module.script</script>
 		<params>234</params>
 	</scheduledtask>
+	<scheduledtask>
+		<schedule>5 * * * *</schedule>
+		<proc>ru.curs.flute.Foo#foo</proc>
+		<params>234</params>
+	</scheduledtask>
 
 	<looptask>
 		<script>foo.hello.run</script>
@@ -41,5 +46,12 @@
 		<waitonfailure>30000</waitonfailure>
 		<count>2</count>
         <finalizer>foo.hello.stop</finalizer>
+	</looptask>
+	<looptask>
+		<proc>ru.curs.flute.Hello#run</proc>
+		<waitonsuccess>1000</waitonsuccess>
+		<waitonfailure>30000</waitonfailure>
+		<count>3</count>
+		<finalizer>ru.curs.flute.Hello#stop</finalizer>
 	</looptask>
 </config>

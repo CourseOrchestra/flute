@@ -10,7 +10,12 @@ import org.springframework.context.annotation.*;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
-import ru.curs.celesta.*;
+import ru.curs.celesta.CelestaException;
+import ru.curs.celesta.ConnectionPool;
+import ru.curs.celesta.ConnectionPoolConfiguration;
+import ru.curs.celesta.DBType;
+import ru.curs.celesta.vintage.Celesta;
+import ru.curs.celesta.vintage.VintageAppSettings;
 import ru.curs.flute.GlobalParams;
 import ru.curs.flute.JDBCConnectionPool;
 import ru.curs.flute.exception.EFluteCritical;
@@ -73,7 +78,7 @@ public class BeansFactory {
                 try {
                     properties = getCelesta().getSetupProperties();
 
-          switch (new AppSettings(properties).getDBType()) {
+          switch (new VintageAppSettings(properties).getDBType()) {
             case MSSQL:
               return DBType.MSSQLServer;
             case ORACLE:
@@ -94,8 +99,6 @@ public class BeansFactory {
 
     /**
      * The Celesta singleton instance.
-     *
-     * @throws CelestaException Celesta configuration exception.
      */
     @Bean
     public Celesta getCelesta() throws EFluteCritical {
@@ -125,9 +128,8 @@ public class BeansFactory {
         p.setProperty("force.dbinitialize", Boolean.toString(params.isForceDBInitialize()));
 
         Properties additionalProps = params.getSetupProperties();
-        additionalProps.stringPropertyNames().forEach((s) -> {
-            p.setProperty(s, additionalProps.getProperty(s));
-        });
+        additionalProps.stringPropertyNames()
+                .forEach(s -> p.setProperty(s, additionalProps.getProperty(s)));
         try {
             return Celesta.createInstance(p);
         } catch (CelestaException e) {

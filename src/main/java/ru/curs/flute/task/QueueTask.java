@@ -9,8 +9,8 @@ public class QueueTask extends FluteTask {
 
   private final QueueSource ts;
   
-  public QueueTask(QueueSource ts, int id, String script, String params) {
-    super(ts, id, script, params);
+  public QueueTask(QueueSource ts, int id, TaskUnit taskUnit, String params) {
+    super(ts, id, taskUnit, params);
     this.ts = ts;
   }
 

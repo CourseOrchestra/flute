@@ -6,4 +6,8 @@ public class EFluteNonCritical extends Exception {
 	public EFluteNonCritical(String message) {
 		super(message);
 	}
+
+	public EFluteNonCritical(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

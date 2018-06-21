@@ -1,8 +1,9 @@
-CREATE GRAIN flute VERSION '1.30';
+CREATE GRAIN flute VERSION '1.40';
 
 CREATE TABLE tasks(
     id INT NOT NULL IDENTITY PRIMARY KEY,
     script VARCHAR(250) NOT NULL,
+    type VARCHAR(6) NOT NULL DEFAULT 'SCRIPT',
     parameters TEXT,
     status INT NOT NULL DEFAULT 0,
     result BLOB,

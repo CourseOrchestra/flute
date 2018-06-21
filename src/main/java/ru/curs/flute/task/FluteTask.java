@@ -16,7 +16,7 @@ public class FluteTask implements Runnable {
   //TODO::Runnable вынести во вложенный класс TaskRunner
 
   private final TaskSource ts;
-  private final String script;
+  private final TaskUnit taskUnit;
   private final String params;
   private final int id;
 
@@ -26,10 +26,10 @@ public class FluteTask implements Runnable {
 
   private final BLOB blob = new BLOB();
 
-  public FluteTask(TaskSource ts, int id, String script, String params) {
+  public FluteTask(TaskSource ts, int id, TaskUnit taskUnit, String params) {
     this.ts = ts;
     this.id = id;
-    this.script = script;
+    this.taskUnit = taskUnit;
     this.params = params;
   }
 
@@ -57,8 +57,8 @@ public class FluteTask implements Runnable {
     this.message = message;
   }
 
-  public String getScript() {
-    return script;
+  public TaskUnit getTaskUnit() {
+    return this.taskUnit;
   }
 
   public String getParams() {

@@ -14,6 +14,7 @@ import ru.curs.flute.exception.EFluteNonCritical;
 import ru.curs.flute.source.ScheduledTaskSupplier;
 import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.QueueTask;
+import ru.curs.flute.task.TaskUnit;
 
 public class ScheduledTaskSupplierTest {
 	@Test
@@ -39,7 +40,7 @@ public class ScheduledTaskSupplierTest {
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		es.submit(sts);
 		t.forEach(s -> {
-			QueueTask ft = new QueueTask(sts, 0, "ss", s);
+			QueueTask ft = new QueueTask(sts, 0, new TaskUnit("ss", TaskUnit.Type.SCRIPT), s);
 			try {
 				sts.internalAdd(ft);
 			} catch (Exception e) {

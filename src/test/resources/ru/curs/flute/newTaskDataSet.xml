@@ -3,14 +3,22 @@
 	<table name="tasks">
 		<column>id</column>
 		<column>script</column>
+		<column>type</column>
 		<column>parameters</column>
 		<column>status</column>
 		<row>
-			<value>4</value>
+			<value>5</value>
 			<value>foo</value>
-			<value>task4</value>
+			<value>SCRIPT</value>
+			<value>task5</value>
 			<value>0</value>
 		</row>
-
+		<row>
+			<value>6</value>
+			<value>ru.curs.Foo#foo</value>
+			<value>PROC</value>
+			<value>task6</value>
+			<value>0</value>
+		</row>
 	</table>
 </dataset>

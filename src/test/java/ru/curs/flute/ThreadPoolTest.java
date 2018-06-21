@@ -15,10 +15,11 @@ import ru.curs.flute.source.QueueSource;
 import ru.curs.flute.task.FluteTask;
 import ru.curs.flute.task.FluteTaskState;
 import ru.curs.flute.task.QueueTask;
+import ru.curs.flute.task.TaskUnit;
 
 class DummyFluteTask extends QueueTask {
 	public DummyFluteTask(QueueSource ts1) {
-		super(ts1, 0, "", "");
+		super(ts1, 0, new TaskUnit("", TaskUnit.Type.SCRIPT), "");
 	}
 
 	@Override
@@ -29,7 +30,7 @@ class DummyFluteTask extends QueueTask {
 
 class DummyFluteTask2 extends QueueTask {
 	public DummyFluteTask2(QueueSource ts1) {
-		super(ts1, 0, "", "");
+		super(ts1, 0, new TaskUnit("", TaskUnit.Type.SCRIPT), "");
 	}
 
 	@Override
