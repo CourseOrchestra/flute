@@ -152,7 +152,7 @@ public class Main {
    * @param arguments параметры (в нашем случае игнорируются).
    */
   public void init(String[] arguments) {
-
+      //do nothing
   }
 
   /**
@@ -180,7 +180,7 @@ public class Main {
    * init().
    */
   public void destroy() {
-
+    //do nothing
   }
 
 }

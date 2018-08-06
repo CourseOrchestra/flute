@@ -3,7 +3,7 @@ package ru.curs.flute.rest;
 import org.eclipse.jetty.http.HttpMethod;
 import org.python.core.Py;
 import org.python.core.PyObject;
-import ru.curs.celesta.Celesta;
+import ru.curs.celesta.vintage.Celesta;
 import ru.curs.flute.source.RestTaskSource;
 import spark.*;
 

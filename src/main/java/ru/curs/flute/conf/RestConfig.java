@@ -2,7 +2,7 @@ package ru.curs.flute.conf;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import ru.curs.celesta.Celesta;
+import ru.curs.celesta.vintage.Celesta;
 import ru.curs.flute.GlobalParams;
 import ru.curs.flute.rest.RestMappingBuilder;
 import ru.curs.flute.source.RestTaskSource;

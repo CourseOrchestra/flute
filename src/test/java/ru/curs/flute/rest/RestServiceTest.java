@@ -15,18 +15,21 @@ import org.apache.http.util.EntityUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import ru.curs.celesta.*;
+import ru.curs.celesta.CallContext;
+import ru.curs.celesta.CelestaException;
+import ru.curs.celesta.PySessionContext;
 import ru.curs.celesta.syscursors.UserrolesCursor;
+import ru.curs.celesta.vintage.Celesta;
 import ru.curs.flute.exception.EFluteCritical;
 import ru.curs.flute.source.RestTaskSource;
 import spark.Spark;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by ioann on 01.08.2017.
