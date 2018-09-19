@@ -294,6 +294,12 @@
             <artifactId>dbunit</artifactId>
             <version>2.5.3</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi-ooxml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.saxon</groupId>
@@ -316,11 +322,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20171018</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.curs</groupId>
-            <artifactId>xylophone</artifactId>
-            <version>6.0</version>
         </dependency>
         <dependency>
             <groupId>it.sauronsoftware.cron4j</groupId>
