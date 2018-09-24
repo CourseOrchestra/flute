@@ -32,6 +32,7 @@ node {
 
     try{
         stage ('Exec Maven') {
+            sh 'rm -f lib/*'
             rtMaven.run pom: 'pom.xml', goals: 'clean install', buildInfo: buildInfo
         }
     } finally {
