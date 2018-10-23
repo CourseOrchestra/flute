@@ -46,9 +46,10 @@ public class TaskSources extends XMLParamsParser {
             tsList.add(currentSource);
             initTextActions();
             textActions.put("tablename", ((SqlTablePoller) currentSource)::setTableName);
-            textActions.put("pollingperiod", s -> {
-                processInt(s, "pollingperiod", true, ((SqlTablePoller) currentSource)::setQueryPeriod);
-            });
+            textActions.put("pollingperiod", s -> processInt(s, "pollingperiod", true,
+                    ((SqlTablePoller) currentSource)::setQueryPeriod));
+            textActions.put("maxerrorlength", s -> processInt(s, "maxerrorlength", false,
+                    ((SqlTablePoller) currentSource)::setErrorTextMaxLength));
         });
         startActions.put("redisqueue", () -> {
             currentSource = ctx.getBean(RedisQueue.class);
@@ -86,8 +87,8 @@ public class TaskSources extends XMLParamsParser {
             textActions.put("params", ((LoopTaskSupplier) currentSource)::setParams);
             textActions.put("count",
                     s ->
-                        processInt(s, "count", true, ((LoopTaskSupplier) currentSource)::setCount)
-                    );
+                            processInt(s, "count", true, ((LoopTaskSupplier) currentSource)::setCount)
+            );
             textActions.put("waitonsuccess", s -> {
                 processInt(s, "waitonsuccess", true, ((LoopTaskSupplier) currentSource)::setWaitOnSuccess);
             });
